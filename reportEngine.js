@@ -106,4 +106,10 @@ async function buildReportData() {
         };
   }
 
-module.exports = { buildReportData: buildReportData };
+async function buildActualToDateRevenue() {
+      const TAB_GIDS = config.TAB_GIDS;
+      const revCurr = await loadRevenueTab(TAB_GIDS.revenueCurrMonth);
+      return { total: revCurr.total, dayCount: revCurr.dayCount };
+}
+
+module.exports = { buildReportData: buildReportData, buildActualToDateRevenue: buildActualToDateRevenue };
