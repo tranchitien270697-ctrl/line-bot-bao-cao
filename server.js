@@ -37,10 +37,10 @@ const lineConfig = {
                                         if (isActualRequest) {
                                                 const actual = await reportEngine.buildActualToDateRevenue();
                                                 const formatted = new Intl.NumberFormat('vi-VN').format(Math.round(actual.total)) + ' d';
-                                                return client.replyMessage(event.replyToken, {
-                                                          type: 'text',
-                                                          text: 'Doanh thu thuc te tu dau thang den nay (' + actual.dayCount + ' ngay): ' + formatted,
-                                                });
+return client.replyMessage(event.replyToken, {
+          type: 'text',
+          text: 'Doanh thu ngay ' + actual.date + ': ' + formatted,
+});
                                         }
                                         const data = await reportEngine.buildReportData();
                                         const flexMessage = flexBuilder.buildReportFlexMessage(data);
