@@ -29,20 +29,30 @@ const lineConfig = {
                               async function handleEvent(event) {
                                 if (event.type !== 'message' || event.message.type !== 'text') return null;
                                   const text = (event.message.text || '').toLowerCase();
-                                    if (!text.includes(config.TRIGGER_KEYWORD.toLowerCase())) return null;
+                                    const isActualRequest = text.includes(config.ACTUAL_KEYWORD.toLowerCase());
+                                  const isReportRequest = text.includes(config.TRIGGER_KEYWORD.toLowerCase());
+                                  if (!isActualRequest && !isReportRequest) return null;
 
-                                      try {
-                                          const data = await reportEngine.buildReportData();
-                                              const flexMessage = flexBuilder.buildReportFlexMessage(data);
-                                                  return client.replyMessage(event.replyToken, flexMessage);
-                                                    } catch (err) {
-                                                        console.error('Loi khi tao bao cao:', err);
-                                                            return client.replyMessage(event.replyToken, {
-                                                                  type: 'text',
-                                                                        text: 'Xin loi, hien chua lay duoc du lieu tu Google Sheet. Kiem tra lai quyen chia se Sheet hoac ket noi mang cua server.',
-                                                                            });
-                                                                              }
-                                                                              }
+                                  try {
+                                        if (isActualRequest) {
+                                                const actual = await reportEngine.buildActualToDateRevenue();
+                                                const formatted = new Intl.NumberFormat('vi-VN').format(Math.round(actual.total)) + ' d';
+                                                return client.replyMessage(event.replyToken, {
+                                                          type: 'text',
+                                                          text: 'Doanh thu thuc te tu dau thang den nay (' + actual.dayCount + ' ngay): ' + formatted,
+                                                });
+                                        }
+                                        const data = await reportEngine.buildReportData();
+                                        const flexMessage = flexBuilder.buildReportFlexMessage(data);
+                                        return client.replyMessage(event.replyToken, flexMessage);
+                                  } catch (err) {
+                                        console.error('Loi khi tao bao cao:', err);
+                                        return client.replyMessage(event.replyToken, {
+                                                type: 'text',
+                                                text: 'Xin loi, hien chua lay duoc du lieu tu Google Sheet.',
+                                        });
+                                  }
+                              }
 
                                                                               const PORT = process.env.PORT || 3000;
                                                                               app.listen(PORT, () => console.log('Server listening on port ' + PORT));
