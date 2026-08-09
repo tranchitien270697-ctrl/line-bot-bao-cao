@@ -34,6 +34,7 @@ const lineConfig = {
                                   if (!isActualRequest && !isReportRequest) return null;
 
                                   try {
+                                        if (isActualRequest) {
                                         const actual = await reportEngine.buildActualToDateRevenue();
                                           const todayFlexMessage = flexBuilder.buildTodayRevenueFlexMessage(actual);
                                           return client.replyMessage(event.replyToken, todayFlexMessage);
