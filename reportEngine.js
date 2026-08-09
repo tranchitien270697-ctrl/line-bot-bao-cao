@@ -59,39 +59,43 @@ function pctChange(curr, prev) {
 
 
 async function buildReportData() {
-      const TAB_GIDS = config.TAB_GIDS, FRESH_INDUSTRIES = config.FRESH_INDUSTRIES, DAYS_IN_TARGET_MONTH = config.DAYS_IN_TARGET_MONTH;
-      const freshSet = new Set(FRESH_INDUSTRIES);
-      const revPrev = await loadRevenueTab(TAB_GIDS.revenuePrevMonth);
-      const revCurr = await loadRevenueTab(TAB_GIDS.revenueCurrMonth);
-      const volPrev = await loadVolumeTab(TAB_GIDS.volumePrevMonth);
-      const volCurr = await loadVolumeTab(TAB_GIDS.volumeCurrMonth);
-      const revPrevTotal = revPrev.total;
-      const revCurrProjected = project(revCurr.total, revCurr.dayCount, DAYS_IN_TARGET_MONTH);
-      const revTotalDelta = revCurrProjected - revPrevTotal;
-      const revTotalPct = pctChange(revCurrProjected, revPrevTotal);
-      const allIndustries = new Set(Object.keys(revPrev.byIndustry).concat(Object.keys(revCurr.byIndustry)));
-      const fmcgList = [];
-      const freshList = [];
-      allIndustries.forEach((industry) => {
-              const prevVal = revPrev.byIndustry[industry] || 0;
-                      const currValProjected = project(revCurr.byIndustry[industry] || 0, revCurr.dayCount, DAYS_IN_TARGET_MONTH);
-              const delta = currValProjected - prevVal;
-              const pct = pctChange(currValProjected, prevVal);
-              const entry = { industry: industry, delta: delta, pct: pct };
-              if (freshSet.has(industry)) { freshList.push(entry); } else { fmcgList.push(entry); }
-      });
-      fmcgList.sort((a, b) => b.delta - a.delta);
-      freshList.sort((a, b) => b.delta - a.delta);
-      const volPrevTotal = volPrev.total;
-      const volCurrProjected = project(volCurr.total, volCurr.dayCount, DAYS_IN_TARGET_MONTH);
-      const volDelta = volCurrProjected - volPrevTotal;
-      const volPct = pctChange(volCurrProjected, volPrevTotal);
-      return {
-              revenue: { prevTotal: revPrevTotal, currProjectedTotal: revCurrProjected, delta: revTotalDelta, pct: revTotalPct },
-              revenueByIndustry: { fmcg: fmcgList, fresh: freshList },
-              volume: { prevTotal: volPrevTotal, currProjectedTotal: volCurrProjected, delta: volDelta, pct: volPct },
-              meta: { revCurrDayCount: revCurr.dayCount, volCurrDayCount: volCurr.dayCount, daysInTargetMonth: DAYS_IN_TARGET_MONTH },
-      };
+        const TAB_GIDS = config.TAB_GIDS, FRESH_INDUSTRIES = config.FRESH_INDUSTRIES, DAYS_IN_TARGET_MONTH = config.DAYS_IN_TARGET_MONTH;
+        const freshSet = new Set(FRESH_INDUSTRIES);
+        const revPrev = await loadRevenueTab(TAB_GIDS.revenuePrevMonth);
+        const revCurr = await loadRevenueTab(TAB_GIDS.revenueCurrMonth);
+        const volPrev = await loadVolumeTab(TAB_GIDS.volumePrevMonth);
+        const volCurr = await loadVolumeTab(TAB_GIDS.volumeCurrMonth);
+        const revPrevTotal = revPrev.total;
+        const revCurrProjected = project(revCurr.total, revCurr.dayCount, DAYS_IN_TARGET_MONTH);
+        const revTotalDelta = revCurrProjected - revPrevTotal;
+        const revTotalPct = pctChange(revCurrProjected, revPrevTotal);
+        const allIndustries = new Set(Object.keys(revPrev.byIndustry).concat(Object.keys(revCurr.byIndustry)));
+        let fmcgPrevSum = 0, fmcgCurrSum = 0, freshPrevSum = 0, freshCurrSum = 0;
+        allIndustries.forEach((industry) => {
+                  const prevVal = revPrev.byIndustry[industry] || 0;
+                  const currValProjected = project(revCurr.byIndustry[industry] || 0, revCurr.dayCount, DAYS_IN_TARGET_MONTH);
+                  if (freshSet.has(industry)) {
+                              freshPrevSum += prevVal;
+                              freshCurrSum += currValProjected;
+                  } else {
+                              fmcgPrevSum += prevVal;
+                              fmcgCurrSum += currValProjected;
+                  }
+        });
+        const fmcgDelta = fmcgCurrSum - fmcgPrevSum;
+        const fmcgPct = pctChange(fmcgCurrSum, fmcgPrevSum);
+        const freshDelta = freshCurrSum - freshPrevSum;
+        const freshPct = pctChange(freshCurrSum, freshPrevSum);
+        const volPrevTotal = volPrev.total;
+        const volCurrProjected = project(volCurr.total, volCurr.dayCount, DAYS_IN_TARGET_MONTH);
+        const volDelta = volCurrProjected - volPrevTotal;
+        const volPct = pctChange(volCurrProjected, volPrevTotal);
+        return {
+                  revenue: { prevTotal: revPrevTotal, currProjectedTotal: revCurrProjected, delta: revTotalDelta, pct: revTotalPct },
+    revenueByGroup: { fmcg: { delta: fmcgDelta, pct: fmcgPct }, fresh: { delta: freshDelta, pct: freshPct } },
+    volume: { prevTotal: volPrevTotal, currProjectedTotal: volCurrProjected, delta: volDelta, pct: volPct },
+    meta: { revCurrDayCount: revCurr.dayCount, volCurrDayCount: volCurr.dayCount, daysInTargetMonth: DAYS_IN_TARGET_MONTH },
+};
 }
 
 
