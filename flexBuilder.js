@@ -87,4 +87,37 @@ function buildReportCard(data) {
                         };
                     }
 
-module.exports = { buildReportFlexMessage: buildReportFlexMessage };
+function buildTodayRevenueCard(actual) {
+      const fmcgTotal = actual.fmcgTotal || 0;
+      const freshTotal = actual.freshTotal || 0;
+      return {
+              type: 'bubble', size: 'mega',
+              header: {
+                        type: 'box', layout: 'vertical', backgroundColor: GREEN, paddingAll: 'lg',
+                        contents: [
+                            { type: 'text', text: 'DOANH THU HIEN TAI', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+                            { type: 'text', text: 'Ngay ' + (actual.date || 'N/A'), color: '#FFFFFF', size: 'sm' },
+                                  ],
+              },
+              body: {
+                        type: 'box', layout: 'vertical', spacing: 'md',
+                        contents: [
+                                    kvRow('Tong doanh thu', formatVND(actual.total), { weight: 'bold', size: 'md', color: GREEN }),
+                            { type: 'separator', margin: 'lg' },
+                            { type: 'text', text: 'THEO NGANH HANG', weight: 'bold', size: 'sm', color: GREEN, margin: 'lg' },
+                                    kvRow('FMCG', formatVND(fmcgTotal), { weight: 'bold' }),
+                                    kvRow('FRESH', formatVND(freshTotal), { weight: 'bold' }),
+                                  ],
+              },
+      };
+}
+
+                  function buildTodayRevenueFlexMessage(actual) {
+                        return {
+                                type: 'flex',
+                                altText: 'Doanh thu ngay ' + (actual.date || '') + ': ' + formatVND(actual.total),
+                                contents: buildTodayRevenueCard(actual),
+                        };
+                  }
+
+module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage };
