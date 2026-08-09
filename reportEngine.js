@@ -110,6 +110,26 @@ async function buildActualToDateRevenue() {
       const TAB_GIDS = config.TAB_GIDS;
       const revCurr = await loadRevenueTab(TAB_GIDS.revenueCurrMonth);
       return { total: revCurr.total, dayCount: revCurr.dayCount };
+async function buildActualToDateRevenue() {
+      const TAB_GIDS = config.TAB_GIDS;
+      const rows = await sheetsClient.fetchSheetRows(TAB_GIDS.revenueCurrMonth);
+      const byDate = {};
+
+      for (const row of rows) {
+              if (!row || row.length < 6) continue;
+              const date = row[0];
+              const revenue = sheetsClient.parseVNNumber(row[5]);
+              if (!date || revenue == null) continue;
+              const normDate = normalizeDate(date);
+              byDate[normDate] = (byDate[normDate] || 0) + revenue;
+      }
+
+      const dates = Object.keys(byDate).sort();
+      if (dates.length === 0) {
+              return { date: null, total: 0 };
+      }
+      const latestDate = dates[dates.length - 1];
+      return { date: latestDate, total: byDate[latestDate] };
 }
 
 module.exports = { buildReportData: buildReportData, buildActualToDateRevenue: buildActualToDateRevenue };
