@@ -88,36 +88,54 @@ function buildReportCard(data) {
                     }
 
 function buildTodayRevenueCard(actual) {
-      const fmcgTotal = actual.fmcgTotal || 0;
-      const freshTotal = actual.freshTotal || 0;
+      const offlineVAT = actual.offlineVAT || 0;
+      const onlineVAT = actual.onlineVAT || 0;
+      const OFFLINE_COLOR = '#3E5CFF';
+      const ONLINE_COLOR = '#FF8A00';
+      const now = new Date();
+      const timeStr = now.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false });
       return {
               type: 'bubble', size: 'mega',
               header: {
                         type: 'box', layout: 'vertical', backgroundColor: GREEN, paddingAll: 'lg',
                         contents: [
-                            { type: 'text', text: 'DOANH THU HIEN TAI', color: '#FFFFFF', weight: 'bold', size: 'lg' },
-                            { type: 'text', text: 'Ngay ' + (actual.date || 'N/A'), color: '#FFFFFF', size: 'sm' },
+                            { type: 'text', text: 'DOANH THU HIỆN TẠI', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+                            { type: 'text', text: 'Ngày ' + (actual.date || 'Không xác định'), color: '#FFFFFF', size: 'sm' },
                                   ],
               },
               body: {
                         type: 'box', layout: 'vertical', spacing: 'md',
                         contents: [
-                                    kvRow('Tong doanh thu', formatVND(actual.total), { weight: 'bold', size: 'md', color: GREEN }),
+                                    kvRow('Tổng doanh thu', formatVND(actual.total), { weight: 'bold', size: 'md', color: GREEN }),
                             { type: 'separator', margin: 'lg' },
-                            { type: 'text', text: 'THEO NGANH HANG', weight: 'bold', size: 'sm', color: GREEN, margin: 'lg' },
-                                    kvRow('FMCG', formatVND(fmcgTotal), { weight: 'bold' }),
-                                    kvRow('FRESH', formatVND(freshTotal), { weight: 'bold' }),
+                            { type: 'text', text: 'DOANH THU THEO KÊNH BÁN (đã VAT)', weight: 'bold', size: 'sm', color: GREEN, margin: 'lg', wrap: true },
+                            {
+                                          type: 'box', layout: 'vertical', margin: 'md',
+                                          contents: [
+                                              { type: 'text', text: 'Doanh thu Offline', size: 'sm', color: DARK, weight: 'bold' },
+                                              { type: 'text', text: formatVND(offlineVAT), size: 'md', color: OFFLINE_COLOR, weight: 'bold' },
+                                                        ],
+                            },
+                            {
+                                          type: 'box', layout: 'vertical', margin: 'md',
+                                          contents: [
+                                              { type: 'text', text: 'Doanh thu Online', size: 'sm', color: DARK, weight: 'bold' },
+                                              { type: 'text', text: formatVND(onlineVAT), size: 'md', color: ONLINE_COLOR, weight: 'bold' },
+                                                        ],
+                            },
+                            { type: 'separator', margin: 'lg' },
+                            { type: 'text', margin: 'lg', size: 'xxs', color: GREY, wrap: true, text: 'Thời gian tạo báo cáo: ' + timeStr },
                                   ],
               },
       };
 }
 
-                  function buildTodayRevenueFlexMessage(actual) {
-                        return {
-                                type: 'flex',
-                                altText: 'Doanh thu ngay ' + (actual.date || '') + ': ' + formatVND(actual.total),
-                                contents: buildTodayRevenueCard(actual),
-                        };
-                  }
+function buildTodayRevenueFlexMessage(actual) {
+      return {
+              type: 'flex',
+              altText: 'Doanh thu ngày ' + (actual.date || '') + ': ' + formatVND(actual.total),
+              contents: buildTodayRevenueCard(actual),
+      };
+}
 
 module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage };
