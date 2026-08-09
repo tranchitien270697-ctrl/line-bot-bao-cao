@@ -101,39 +101,37 @@ async function buildReportData() {
 
 async function buildActualToDateRevenue() {
         const TAB_GIDS = config.TAB_GIDS;
-        const FRESH_INDUSTRIES = config.FRESH_INDUSTRIES;
-        const freshSet = new Set(FRESH_INDUSTRIES);
         const rows = await sheetsClient.fetchSheetRows(TAB_GIDS.revenueCurrMonth);
         const byDate = {};
-        const byDateIndustry = {};
+        const byDateOffline = {};
+        const byDateOnline = {};
         for (const row of rows) {
                   if (!row || row.length < 6) continue;
                   const date = row[0];
-                  const industry = row[4];
                   const revenue = sheetsClient.parseVNNumber(row[5]);
                   if (!date || revenue == null) continue;
                   const normDate = normalizeDate(date);
                   byDate[normDate] = (byDate[normDate] || 0) + revenue;
-                  if (industry) {
-                              byDateIndustry[normDate] = byDateIndustry[normDate] || {};
-                              byDateIndustry[normDate][industry] = (byDateIndustry[normDate][industry] || 0) + revenue;
+                  const offlineVAT = sheetsClient.parseVNNumber(row[6]);
+                  const onlineVAT = sheetsClient.parseVNNumber(row[8]);
+                  if (offlineVAT != null) {
+                              byDateOffline[normDate] = (byDateOffline[normDate] || 0) + offlineVAT;
+                  }
+                  if (onlineVAT != null) {
+                              byDateOnline[normDate] = (byDateOnline[normDate] || 0) + onlineVAT;
                   }
         }
         const dates = Object.keys(byDate).sort();
         if (dates.length === 0) {
-                  return { date: null, total: 0, fmcgTotal: 0, freshTotal: 0 };
+                  return { date: null, total: 0, offlineVAT: 0, onlineVAT: 0 };
         }
         const latestDate = dates[dates.length - 1];
-        const industryMap = byDateIndustry[latestDate] || {};
-        let fmcgTotal = 0, freshTotal = 0;
-        Object.keys(industryMap).forEach((industry) => {
-                  if (freshSet.has(industry)) {
-                              freshTotal += industryMap[industry];
-                  } else {
-                              fmcgTotal += industryMap[industry];
-                  }
-        });
-        return { date: latestDate, total: byDate[latestDate], fmcgTotal: fmcgTotal, freshTotal: freshTotal };
+        return {
+                  date: latestDate,
+                  total: byDate[latestDate],
+                  offlineVAT: byDateOffline[latestDate] || 0,
+                  onlineVAT: byDateOnline[latestDate] || 0,
+        };
 }
 
 module.exports = { buildReportData: buildReportData, buildActualToDateRevenue: buildActualToDateRevenue };
