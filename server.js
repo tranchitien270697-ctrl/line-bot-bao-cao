@@ -34,14 +34,10 @@ const lineConfig = {
                                   if (!isActualRequest && !isReportRequest) return null;
 
                                   try {
-                                        if (isActualRequest) {
-                                                const actual = await reportEngine.buildActualToDateRevenue();
-                                                const formatted = new Intl.NumberFormat('vi-VN').format(Math.round(actual.total)) + ' d';
-return client.replyMessage(event.replyToken, {
-          type: 'text',
-          text: 'Doanh thu ngay ' + actual.date + ': ' + formatted,
-});
-                                        }
+                                        const actual = await reportEngine.buildActualToDateRevenue();
+                                          const todayFlexMessage = flexBuilder.buildTodayRevenueFlexMessage(actual);
+                                          return client.replyMessage(event.replyToken, todayFlexMessage);
+                                  }
                                         const data = await reportEngine.buildReportData();
                                         const flexMessage = flexBuilder.buildReportFlexMessage(data);
                                         return client.replyMessage(event.replyToken, flexMessage);
