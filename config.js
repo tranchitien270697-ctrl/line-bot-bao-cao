@@ -1,6 +1,7 @@
 // config.js
 module.exports = {
   TRIGGER_KEYWORD: 'báo cáo',
+    ACTUAL_KEYWORD: 'chot doanh thu',
 
       FRESH_INDUSTRIES: ['Rau Củ Quả CL', 'Cá (Hải sản)', 'Thịt', 'Trứng', 'Trái cây'],
 
