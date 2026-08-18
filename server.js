@@ -27,6 +27,7 @@ app.post('/webhook', lineBotSdk.middleware(lineConfig), async (req, res) => {
 });
 
 async function handleEvent(event) {
+      console.log('DEBUG source:', JSON.stringify(event.source));
     if (event.type !== 'message' || event.message.type !== 'text') return null;
     const text = (event.message.text || '').toLowerCase();
     const isActualRequest = text.includes(config.ACTUAL_KEYWORD.toLowerCase());
