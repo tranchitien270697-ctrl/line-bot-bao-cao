@@ -38,10 +38,10 @@ module.exports = {
       CLEANING_SCHEDULE: {
               0: ['Xuyên'],
               1: ['Biển'],
-              2: ['Mai', 'Thi (Vệ sinh kho)', 'Vui/Ngọc'],
+    2: ['Mai', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
               3: ['Thư'],
-              4: ['Tiên', 'Thi (Vệ sinh kho)', 'Vui/Ngọc'],
+    4: ['Tiên', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
               5: ['Oanh'],
-              6: ['Trường', 'Thi (Vệ sinh kho)', 'Vui/Ngọc'],
+    6: ['Trường', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
       },
 };
