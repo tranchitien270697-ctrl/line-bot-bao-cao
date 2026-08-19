@@ -171,4 +171,35 @@ function buildCleaningFlexMessage(dayLabel, people) {
       };
 }
 
-module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage };
+function buildReminderCard(text) {
+      return {
+              type: 'bubble', size: 'mega',
+              header: {
+                        type: 'box', layout: 'vertical', backgroundColor: '#66BB6A', paddingAll: 'lg',
+                        contents: [
+                            { type: 'text', text: '🔔 THÔNG BÁO CÔNG VIỆC', color: '#FFFFFF', weight: 'bold', size: 'lg', wrap: true },
+                                  ],
+              },
+              body: {
+                        type: 'box', layout: 'vertical', backgroundColor: '#E8F5E9', paddingAll: 'lg',
+                        contents: [
+                            {
+                                          type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'lg',
+                                          contents: [
+                                              { type: 'text', text: text, size: 'md', color: '#2E7D32', weight: 'bold', wrap: true },
+                                                        ],
+                            },
+                                  ],
+              },
+      };
+}
+
+function buildReminderFlexMessage(text) {
+      return {
+              type: 'flex',
+              altText: text.length > 95 ? text.substring(0, 95) + '...' : text,
+              contents: buildReminderCard(text),
+      };
+}
+
+module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage };
