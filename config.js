@@ -31,6 +31,17 @@ module.exports = {
           '7': 'Mình có công việc báo cáo Fresh vào lúc 16h, Anh Chị nhớ hoàn tất nhé !',
           '8': 'Mình có các công việc cuối ngày: Báo cáo trưng bày hàng hóa các Kv phụ trách-Kiểm tra lại Tool công việc siêu thị ! GO GO chuẩn bị về với Gia Đình thoi nào !!!!!',
           '9': 'Chúc Anh Chị Ngủ Ngon! Nghĩ ngơi sớm nhé !',
-            '10': 'Lịch Vệ Sinh:\nTiên: Thứ 5\nTrường: Thứ 7\nBiển: Thứ 2\nThi: Vệ sinh kho T3/T7\nXuyên: CN\nMai: Thứ 3\nThư: Thứ 4\nOanh: Thứ 6\nVui/Ngọc: Thứ 3/5/7',
     },
+
+      DAY_LABELS: ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'],
+
+      CLEANING_SCHEDULE: {
+              0: ['Xuyên'],
+              1: ['Biển'],
+              2: ['Mai', 'Thi (Vệ sinh kho)', 'Vui/Ngọc'],
+              3: ['Thư'],
+              4: ['Tiên', 'Thi (Vệ sinh kho)', 'Vui/Ngọc'],
+              5: ['Oanh'],
+              6: ['Trường', 'Thi (Vệ sinh kho)', 'Vui/Ngọc'],
+      },
 };
