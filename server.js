@@ -4,6 +4,7 @@ const lineBotSdk = require('@line/bot-sdk');
 const config = require('./config');
 const reportEngine = require('./reportEngine');
 const flexBuilder = require('./flexBuilder');
+const lunarCalendar = require('./lunarCalendar');
 
 const lineConfig = {
     channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -32,6 +33,21 @@ app.get('/cron/:id', async (req, res) => {
                         const cleaningMsg = flexBuilder.buildCleaningFlexMessage(dayLabel, people);
                         await client.pushMessage(config.TARGET_GROUP_ID, cleaningMsg);
                         return res.send('Sent cleaning reminder for ' + dayLabel);
+              }
+
+              if (req.params.id === 'daily') {
+                        let weatherText = 'Không lấy được dữ liệu thời tiết';
+                        try {
+                                    const wRes = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&lang=vi');
+                                    weatherText = (await wRes.text()).trim();
+                        } catch (weatherErr) {
+                                    console.error('Weather fetch error:', weatherErr);
+                        }
+                        const lunarText = lunarCalendar.getTodayLunarText();
+                        const quote = config.LIFE_QUOTES[Math.floor(Math.random() * config.LIFE_QUOTES.length)];
+                        const dailyMsg = flexBuilder.buildDailyFlexMessage(weatherText, lunarText, quote);
+                        await client.pushMessage(config.TARGET_GROUP_ID, dailyMsg);
+                        return res.send('Sent daily card');
               }
               const text = config.SCHEDULED_MESSAGES[req.params.id];
               if (!text) {
