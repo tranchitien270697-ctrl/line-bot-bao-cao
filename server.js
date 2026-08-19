@@ -38,7 +38,7 @@ app.get('/cron/:id', async (req, res) => {
               if (req.params.id === 'daily') {
                         let weatherText = 'Không lấy được dữ liệu thời tiết';
                         try {
-                                    const wRes = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&lang=vi');
+                                            const wRes = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&m&lang=vi');
                                     weatherText = (await wRes.text()).trim();
                         } catch (weatherErr) {
                                     console.error('Weather fetch error:', weatherErr);
