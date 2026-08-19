@@ -202,4 +202,50 @@ function buildReminderFlexMessage(text) {
       };
 }
 
-module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage };
+function buildDailyCard(weatherText, lunarText, quote) {
+      return {
+              type: 'bubble', size: 'mega',
+              header: {
+                        type: 'box', layout: 'vertical', backgroundColor: '#42A5F5', paddingAll: 'lg',
+                        contents: [
+                            { type: 'text', text: '☀️ CHÀO BUỔI SÁNG!', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+                                  ],
+              },
+              body: {
+                        type: 'box', layout: 'vertical', backgroundColor: '#E3F2FD', paddingAll: 'lg', spacing: 'md',
+                        contents: [
+                            {
+                                          type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
+                                          contents: [
+                                              { type: 'text', text: '🌤️ Thời tiết hôm nay', size: 'sm', color: '#1565C0', weight: 'bold' },
+                                              { type: 'text', text: weatherText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+                                                        ],
+                            },
+                            {
+                                          type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
+                                          contents: [
+                                              { type: 'text', text: '🌙 Âm lịch', size: 'sm', color: '#1565C0', weight: 'bold' },
+                                              { type: 'text', text: lunarText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+                                                        ],
+                            },
+                            {
+                                          type: 'box', layout: 'vertical', backgroundColor: '#FFF9C4', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
+                                          contents: [
+                                              { type: 'text', text: '💬 Châm ngôn hôm nay', size: 'sm', color: '#F57F17', weight: 'bold' },
+                                              { type: 'text', text: quote, size: 'sm', color: '#5D4037', wrap: true, margin: 'sm', style: 'italic' },
+                                                        ],
+                            },
+                                  ],
+              },
+      };
+}
+
+function buildDailyFlexMessage(weatherText, lunarText, quote) {
+      return {
+              type: 'flex',
+              altText: 'Chào buổi sáng! ' + weatherText,
+              contents: buildDailyCard(weatherText, lunarText, quote),
+      };
+}
+
+module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage };ctrl:End
