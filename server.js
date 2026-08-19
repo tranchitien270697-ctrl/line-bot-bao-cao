@@ -37,7 +37,8 @@ app.get('/cron/:id', async (req, res) => {
               if (!text) {
                         return res.status(404).send('No message for id ' + req.params.id);
               }
-              await client.pushMessage(config.TARGET_GROUP_ID, { type: 'text', text: text });
+            const reminderMsg = flexBuilder.buildReminderFlexMessage(text);
+                      await client.pushMessage(config.TARGET_GROUP_ID, reminderMsg);
               res.send('Sent message ' + req.params.id);
       } catch (err) {
               console.error('Cron error:', err);
