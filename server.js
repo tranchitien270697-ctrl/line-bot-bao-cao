@@ -20,6 +20,19 @@ app.get('/cron/:id', async (req, res) => {
               if (req.query.key !== config.CRON_SECRET) {
                         return res.status(403).send('Forbidden');
               }
+
+              if (req.params.id === 'cleaning') {
+                        const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+                        const dow = now.getDay();
+                        const people = config.CLEANING_SCHEDULE[dow] || [];
+                        const dayLabel = config.DAY_LABELS[dow];
+                        if (people.length === 0) {
+                                    return res.send('No cleaning duty today (' + dayLabel + ')');
+                        }
+                        const cleaningMsg = flexBuilder.buildCleaningFlexMessage(dayLabel, people);
+                        await client.pushMessage(config.TARGET_GROUP_ID, cleaningMsg);
+                        return res.send('Sent cleaning reminder for ' + dayLabel);
+              }
               const text = config.SCHEDULED_MESSAGES[req.params.id];
               if (!text) {
                         return res.status(404).send('No message for id ' + req.params.id);
