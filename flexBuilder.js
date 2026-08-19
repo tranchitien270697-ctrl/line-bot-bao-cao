@@ -138,4 +138,37 @@ function buildTodayRevenueFlexMessage(actual) {
       };
 }
 
-module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage };
+function buildCleaningCard(dayLabel, people) {
+      const PALETTE = ['#FF6B6B', '#FFA94D', '#51CF66', '#339AF0', '#CC5DE8'];
+      const rows = people.map((p, i) => ({
+              type: 'box', layout: 'horizontal', backgroundColor: PALETTE[i % PALETTE.length], cornerRadius: 'lg', paddingAll: 'md', margin: i === 0 ? 'none' : 'md',
+              contents: [
+                  { type: 'text', text: '🧹', flex: 0, size: 'lg' },
+                  { type: 'text', text: p, color: '#FFFFFF', weight: 'bold', size: 'md', margin: 'md', gravity: 'center', wrap: true },
+                      ],
+      }));
+      return {
+              type: 'bubble', size: 'mega',
+              header: {
+                        type: 'box', layout: 'vertical', backgroundColor: '#7B61FF', paddingAll: 'lg',
+                        contents: [
+                            { type: 'text', text: 'LỊCH VỆ SINH HÔM NAY', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+                            { type: 'text', text: dayLabel, color: '#FFFFFF', size: 'md' },
+                                  ],
+              },
+              body: {
+                        type: 'box', layout: 'vertical', backgroundColor: '#F5F3FF', paddingAll: 'lg',
+                        contents: rows,
+              },
+      };
+}
+
+function buildCleaningFlexMessage(dayLabel, people) {
+      return {
+              type: 'flex',
+              altText: 'Lịch vệ sinh ' + dayLabel + ': ' + people.join(', '),
+              contents: buildCleaningCard(dayLabel, people),
+      };
+}
+
+module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage };
