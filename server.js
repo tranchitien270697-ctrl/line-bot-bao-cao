@@ -15,6 +15,23 @@ const client = new lineBotSdk.Client(lineConfig);
 
 app.get('/', (req, res) => res.send('LINE report bot is running'));
 
+app.get('/cron/:id', async (req, res) => {
+      try {
+              if (req.query.key !== config.CRON_SECRET) {
+                        return res.status(403).send('Forbidden');
+              }
+              const text = config.SCHEDULED_MESSAGES[req.params.id];
+              if (!text) {
+                        return res.status(404).send('No message for id ' + req.params.id);
+              }
+              await client.pushMessage(config.TARGET_GROUP_ID, { type: 'text', text: text });
+              res.send('Sent message ' + req.params.id);
+      } catch (err) {
+              console.error('Cron error:', err);
+              res.status(500).send('Error sending message');
+      }
+});
+
 app.post('/webhook', lineBotSdk.middleware(lineConfig), async (req, res) => {
     try {
           const events = req.body.events || [];
