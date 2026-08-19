@@ -44,4 +44,20 @@ module.exports = {
               5: ['Oanh'],
     6: ['Trường', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
       },
+
+      WEATHER_LOCATION: 'Soc+Trang',
+
+      LIFE_QUOTES: [
+              'Hãy sống mỗi ngày như thể đó là ngày cuối cùng, và học hỏi như thể sẽ sống mãi mãi.',
+              'Cuộc sống không phải là chờ đợi cơn bão đi qua, mà là học cách nhảy múa dưới mưa.',
+              'Hạnh phúc không phải là đích đến, mà là cách chúng ta đi trên hành trình đó.',
+              'Mỗi buổi sáng là một cơ hội mới để bắt đầu lại và làm tốt hơn hôm qua.',
+              'Nụ cười của bạn hôm nay có thể là ánh sáng dẫn đường cho ai đó.',
+              'Đừng đếm những ngày trôi qua, hãy làm cho những ngày đó trở nên đáng giá.',
+              'Thành công không phải là điểm cuối, thất bại không phải là kết thúc, quan trọng là sự dũng cảm để tiếp tục.',
+              'Cuộc sống tươi đẹp hơn khi ta biết ơn những điều nhỏ bé quanh mình.',
+              'Làm việc chăm chỉ hôm nay, để ngày mai được mỉm cười.',
+              'Yêu thương những gì mình làm, mọi việc sẽ trở nên nhẹ nhàng hơn.',
+            ],
+      
 };
