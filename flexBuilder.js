@@ -202,7 +202,7 @@ function buildReminderFlexMessage(text) {
       };
 }
 
-function buildDailyCard(weatherText, solarText, lunarText, quote) {
+function buildDailyCard(weatherText, solarText, lunarText, quote, holidayText) {
       return {
               type: 'bubble', size: 'mega',
               header: {
@@ -235,6 +235,13 @@ function buildDailyCard(weatherText, solarText, lunarText, quote) {
                                               { type: 'text', text: lunarText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
                                                         ],
                             },
+                                    ...(holidayText ? [{
+                                                  type: 'box', layout: 'vertical', backgroundColor: '#FFEBEE', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
+                                                  contents: [
+                                                      { type: 'text', text: '🎉 Ngày lễ hôm nay', size: 'sm', color: '#C62828', weight: 'bold' },
+                                                      { type: 'text', text: holidayText, size: 'sm', color: '#B71C1C', weight: 'bold', wrap: true, margin: 'sm' },
+                                                                ],
+                                    }] : []),
                             {
                                           type: 'box', layout: 'vertical', backgroundColor: '#FFF9C4', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
                                           contents: [
@@ -247,75 +254,11 @@ function buildDailyCard(weatherText, solarText, lunarText, quote) {
       };
 }
 
-function buildDailyFlexMessage(weatherText, solarText, lunarText, quote) {
+function buildDailyFlexMessage(weatherText, solarText, lunarText, quote, holidayText) {
       return {
               type: 'flex',
               altText: 'Chào buổi sáng! ' + weatherText,
-              contents: buildDailyCard(weatherText, solarText, lunarText, quote),
-      };
-}
-
-function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries) {
-      const BLUE = '#1565C0';
-      const totalDelta = todayTotal - yesterdayTotal;
-      const totalPct = yesterdayTotal ? (totalDelta / yesterdayTotal) * 100 : null;
-      const now = new Date();
-      const timeStr = now.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false });
-
-      const sorted = industries.slice().sort((a, b) => Math.max(b.t, b.y) - Math.max(a.t, a.y));
-      const top = sorted.slice(0, 6);
-      const restCount = sorted.length - top.length;
-
-      const industryRows = top.map((it, i) => {
-              const delta = it.t - it.y;
-              const pct = it.y ? (delta / it.y) * 100 : null;
-              return {
-                        type: 'box', layout: 'horizontal', margin: i === 0 ? 'none' : 'sm',
-                        contents: [
-                            { type: 'text', text: it.n, size: 'xs', color: DARK, flex: 5, wrap: true },
-                            { type: 'text', text: formatVND(it.t), size: 'xs', color: BLUE, weight: 'bold', flex: 3, align: 'end' },
-                            { type: 'text', text: arrow(delta) + formatPct(pct), size: 'xxs', color: deltaColor(delta), flex: 2, align: 'end', gravity: 'center' },
-                                  ],
-              };
-      });
-      if (restCount > 0) {
-              industryRows.push({ type: 'text', text: 'và ' + restCount + ' ngành hàng khác', size: 'xxs', color: GREY, margin: 'md', align: 'center' });
-      }
-
-      return {
-              type: 'bubble', size: 'mega',
-              header: {
-                        type: 'box', layout: 'vertical', backgroundColor: BLUE, paddingAll: 'lg', spacing: 'xs',
-                        contents: [
-                            { type: 'text', text: storeLabel, color: '#FFFFFF', weight: 'bold', size: 'md' },
-                            { type: 'text', text: 'Doanh thu hôm nay', color: '#BBDEFB', size: 'xs' },
-                                  ],
-              },
-              body: {
-                        type: 'box', layout: 'vertical', paddingAll: 'lg', spacing: 'md',
-                        contents: [
-                            { type: 'text', text: formatVND(todayTotal), size: 'xxl', color: BLUE, weight: 'bold' },
-                            {
-                                          type: 'box', layout: 'horizontal',
-                                          contents: [
-                                              { type: 'text', text: 'Hôm qua ' + formatVND(yesterdayTotal), size: 'xs', color: GREY, flex: 3 },
-                                              { type: 'text', text: arrow(totalDelta) + ' ' + formatPct(totalPct), size: 'sm', weight: 'bold', color: deltaColor(totalDelta), flex: 2, align: 'end' },
-                                                        ],
-                            },
-                            { type: 'separator', margin: 'md' },
-                            { type: 'text', text: 'NGÀNH HÀNG NỔI BẬT', size: 'xxs', color: GREY, weight: 'bold', margin: 'md' },
-                            { type: 'box', layout: 'vertical', margin: 'sm', contents: industryRows },
-                            { type: 'text', margin: 'md', size: 'xxs', color: GREY, text: timeStr },
-                                  ],
-              },
-      };
-}
-
-function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries) {
-      return {
-              type: 'flex',
-              altText: 'Doanh thu hôm nay - ' + storeLabel + ': ' + formatVND(todayTotal),
-              contents: buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries),
+              contents: buildDailyCard(weatherText, solarText, lunarText, quote, holidayText),
       };
 }
 
