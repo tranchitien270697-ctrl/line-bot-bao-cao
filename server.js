@@ -98,6 +98,7 @@ app.post('/webhook', lineBotSdk.middleware(lineConfig), async (req, res) => {
 
 async function handleEvent(event) {
       console.log('DEBUG source:', JSON.stringify(event.source));
+        return null; // Da tat lenh "bao cao" va "doanh thu hien tai" (Google Sheet cu)
       if (event.type !== 'message' || event.message.type !== 'text') return null;
       const text = (event.message.text || '').toLowerCase();
       const isActualRequest = text.includes(config.ACTUAL_KEYWORD.toLowerCase());
