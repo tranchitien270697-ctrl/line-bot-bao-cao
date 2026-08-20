@@ -319,4 +319,51 @@ function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, i
       };
 }
 
-module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage };
+function buildGoodnightCard(weatherText, tip) {
+      const DARKBLUE = '#0D2B5C';
+      return {
+              type: 'bubble', size: 'mega',
+              header: {
+                        type: 'box', layout: 'vertical', backgroundColor: DARKBLUE, paddingAll: 'lg',
+                        contents: [
+                            { type: 'text', text: '🌙 CHÚC NGỦ NGON', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+                            { type: 'text', text: 'Nghỉ ngơi sớm nhé, Anh Chị!', color: '#B0C4DE', size: 'xs' },
+                                  ],
+              },
+              body: {
+                        type: 'box', layout: 'vertical', backgroundColor: '#E8EAF6', paddingAll: 'lg', spacing: 'md',
+                        contents: [
+                            {
+                                          type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
+                                          contents: [
+                                              { type: 'text', text: '🌤️ Thời tiết', size: 'sm', color: DARKBLUE, weight: 'bold' },
+                                              { type: 'text', text: weatherText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+                                                        ],
+                            },
+                            {
+                                          type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
+                                          contents: [
+                                              { type: 'text', text: '💤 Lời khuyên trước khi ngủ', size: 'sm', color: DARKBLUE, weight: 'bold' },
+                                              { type: 'text', text: tip, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+                                                        ],
+                            },
+                            {
+                                          type: 'box', layout: 'vertical', backgroundColor: DARKBLUE, cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
+                                          contents: [
+                                              { type: 'text', text: 'Chúc Anh Chị Ngủ Ngon! Nghỉ ngơi sớm nhé !', color: '#FFFFFF', weight: 'bold', size: 'sm', wrap: true, align: 'center' },
+                                                        ],
+                            },
+                                  ],
+              },
+      };
+}
+
+function buildGoodnightFlexMessage(weatherText, tip) {
+      return {
+              type: 'flex',
+              altText: 'Chúc Anh Chị Ngủ Ngon! ' + weatherText,
+              contents: buildGoodnightCard(weatherText, tip),
+      };
+}
+
+module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage };
