@@ -99,4 +99,22 @@ module.exports = {
               'Sự kiên nhẫn là chìa khóa để biến những điều không thể thành có thể.',
               'Một tập thể đoàn kết có thể vượt qua mọi thử thách khó khăn nhất.',
             ],
+
+              HEALTH_TIPS: [
+                        'Hạn chế dùng điện thoại ít nhất 30 phút trước khi ngủ để mắt và não được nghỉ ngơi.',
+                        'Uống một ly nước ấm trước khi ngủ giúp cơ thể thư giãn và dễ đi vào giấc ngủ hơn.',
+                        'Tránh ăn quá no hoặc uống cà phê, trà đặc vào buổi tối để có giấc ngủ ngon.',
+                        'Giữ phòng ngủ thoáng mát, tối và yên tĩnh sẽ giúp bạn ngủ sâu giấc hơn.',
+                        'Dành 5-10 phút hít thở sâu hoặc thiền nhẹ trước khi ngủ giúp giảm căng thẳng.',
+                        'Ngủ đủ 7-8 tiếng mỗi đêm giúp cơ thể phục hồi và làm việc hiệu quả hơn vào hôm sau.',
+                        'Tránh vận động mạnh sát giờ ngủ, thay vào đó hãy giãn cơ nhẹ nhàng.',
+                        'Đi ngủ và thức dậy đúng giờ mỗi ngày giúp đồng hồ sinh học ổn định hơn.',
+                        'Tắt bớt đèn sáng và ánh sáng xanh trước khi ngủ để cơ thể sản sinh melatonin tốt hơn.',
+                        'Một tách trà thảo mộc ấm (không chứa caffeine) có thể giúp bạn thư giãn trước khi ngủ.',
+                        'Viết ra những điều khiến bạn lo lắng trước khi ngủ để đầu óc nhẹ nhàng hơn.',
+                        'Giữ tinh thần thoải mái, buông bỏ muộn phiền trong ngày trước khi lên giường.',
+                        'Nệm và gối phù hợp giúp cột sống được nâng đỡ tốt, ngủ ngon hơn.',
+                        'Tránh xem tin tức hoặc nội dung gây căng thẳng ngay trước giờ ngủ.',
+                        'Massage nhẹ vùng vai gáy giúp thư giãn cơ bắp sau một ngày làm việc.',
+                      ],
 };
