@@ -248,4 +248,60 @@ function buildDailyFlexMessage(weatherText, lunarText, quote) {
       };
 }
 
-module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage };
+function buildRevenueCompareCard(storeLabel, todayOffline, yesterdayOffline, todayOnline, yesterdayOnline) {
+      const BLUE = '#1565C0';
+      const LIGHT_BLUE = '#E3F2FD';
+      const offlineDelta = todayOffline - yesterdayOffline;
+      const offlinePct = yesterdayOffline ? (offlineDelta / yesterdayOffline) * 100 : null;
+      const onlineDelta = todayOnline - yesterdayOnline;
+      const onlinePct = yesterdayOnline ? (onlineDelta / yesterdayOnline) * 100 : null;
+      const now = new Date();
+      const timeStr = now.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false });
+
+  function channelBox(label, todayVal, yesterdayVal, delta, pct, isFirst) {
+          return {
+                    type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'lg', margin: isFirst ? 'none' : 'md',
+                    contents: [
+                        { type: 'text', text: label, size: 'sm', color: GREY, weight: 'bold' },
+                        { type: 'text', text: formatVND(todayVal), size: 'xxl', color: BLUE, weight: 'bold', margin: 'sm' },
+                        {
+                                      type: 'box', layout: 'horizontal', margin: 'md',
+                                      contents: [
+                                          { type: 'text', text: 'Hôm qua: ' + formatVND(yesterdayVal), size: 'xs', color: GREY, flex: 3 },
+                                          { type: 'text', text: arrow(delta) + ' ' + formatPct(pct), size: 'sm', color: deltaColor(delta), weight: 'bold', flex: 2, align: 'end' },
+                                                    ],
+                        },
+                              ],
+          };
+  }
+
+  return {
+          type: 'bubble', size: 'mega',
+          header: {
+                    type: 'box', layout: 'vertical', backgroundColor: BLUE, paddingAll: 'lg',
+                    contents: [
+                        { type: 'text', text: '📊 DOANH THU HÔM NAY', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+                        { type: 'text', text: storeLabel, color: '#FFFFFF', size: 'sm' },
+                              ],
+          },
+          body: {
+                    type: 'box', layout: 'vertical', backgroundColor: LIGHT_BLUE, paddingAll: 'lg',
+                    contents: [
+                                channelBox('Doanh thu Offline', todayOffline, yesterdayOffline, offlineDelta, offlinePct, true),
+                                channelBox('Doanh thu Online', todayOnline, yesterdayOnline, onlineDelta, onlinePct, false),
+                        { type: 'separator', margin: 'lg' },
+                        { type: 'text', margin: 'lg', size: 'xxs', color: GREY, wrap: true, text: 'Cập nhật lúc: ' + timeStr },
+                              ],
+          },
+  };
+}
+
+function buildRevenueCompareFlexMessage(storeLabel, todayOffline, yesterdayOffline, todayOnline, yesterdayOnline) {
+      return {
+              type: 'flex',
+              altText: 'Doanh thu hôm nay - ' + storeLabel,
+              contents: buildRevenueCompareCard(storeLabel, todayOffline, yesterdayOffline, todayOnline, yesterdayOnline),
+      };
+}
+
+module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueCompareFlexMessage: buildRevenueCompareFlexMessage };
