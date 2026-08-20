@@ -117,4 +117,14 @@ module.exports = {
                         'Tránh xem tin tức hoặc nội dung gây căng thẳng ngay trước giờ ngủ.',
                         'Massage nhẹ vùng vai gáy giúp thư giãn cơ bắp sau một ngày làm việc.',
                       ],
+
+        IMOU_APP_ID: 'lcb191950b44ba4663',
+        IMOU_APP_SECRET: '5d9507d2aa7e41a2b615268361d5cb',
+        IMOU_DATA_CENTER: 'or',
+        IMOU_CAMERAS: {
+                  'fresh': '32770CAPBVB6A5B',
+                  'thu ngan': 'C1141CAPBV8CF20',
+                  'thu ngân': 'C1141CAPBV8CF20',
+                  'fmcg': 'B69B7BJPSFB5BFC',
+        },
 };
