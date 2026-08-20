@@ -137,4 +137,46 @@ function getTodayLunarText() {
     return text;
 }
 
-module.exports = { convertSolar2Lunar: convertSolar2Lunar, getTodayLunarText: getTodayLunarText };
+var SOLAR_HOLIDAYS = {
+      '1-1': 'Tết Dương lịch',
+      '3-2': 'Ngày thành lập Đảng Cộng sản Việt Nam',
+      '8-3': 'Ngày Quốc tế Phụ nữ',
+      '26-3': 'Ngày thành lập Đoàn TNCS Hồ Chí Minh',
+      '30-4': 'Ngày Giải phóng miền Nam, thống nhất đất nước',
+      '1-5': 'Ngày Quốc tế Lao động',
+      '19-5': 'Ngày sinh Chủ tịch Hồ Chí Minh',
+      '1-6': 'Ngày Quốc tế Thiếu nhi',
+      '27-7': 'Ngày Thương binh Liệt sĩ',
+      '2-9': 'Ngày Quốc khánh nước CHXHCN Việt Nam',
+      '20-10': 'Ngày Phụ nữ Việt Nam',
+      '20-11': 'Ngày Nhà giáo Việt Nam',
+      '22-12': 'Ngày thành lập Quân đội Nhân dân Việt Nam',
+      '24-12': 'Lễ Giáng sinh',
+};
+
+var LUNAR_HOLIDAYS = {
+      '1-1': 'Tết Nguyên Đán',
+      '15-1': 'Rằm tháng Giêng',
+      '10-3': 'Giỗ Tổ Hùng Vương',
+      '15-4': 'Lễ Phật Đản',
+      '5-5': 'Tết Đoan Ngọ',
+      '15-7': 'Lễ Vu Lan',
+      '15-8': 'Tết Trung Thu',
+      '23-12': 'Ông Công, Ông Táo về trời',
+};
+
+function getTodayHoliday() {
+      var now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+      var solarKey = now.getDate() + '-' + (now.getMonth() + 1);
+      if (SOLAR_HOLIDAYS[solarKey]) {
+              return SOLAR_HOLIDAYS[solarKey];
+      }
+      var lunar = convertSolar2Lunar(now.getDate(), now.getMonth() + 1, now.getFullYear(), 7);
+      var lunarKey = lunar.day + '-' + lunar.month;
+      if (LUNAR_HOLIDAYS[lunarKey]) {
+              return LUNAR_HOLIDAYS[lunarKey];
+      }
+      return null;
+}
+
+module.exports = { convertSolar2Lunar: convertSolar2Lunar, getTodayLunarText: getTodayLunarText, getTodayHoliday: getTodayHoliday };
