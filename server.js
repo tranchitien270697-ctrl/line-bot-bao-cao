@@ -74,6 +74,20 @@ app.get('/cron/:id', async (req, res) => {
                   await client.pushMessage(config.TARGET_GROUP_ID, dailyMsg);
                   return res.send('Sent daily card');
         }
+
+                if (req.params.id === '9') {
+                            let weatherText9 = 'Không lấy được dữ liệu thời tiết';
+                            try {
+                                          const wRes9 = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&m&lang=vi');
+                                          weatherText9 = (await wRes9.text()).trim();
+                            } catch (weatherErr9) {
+                                          console.error('Weather fetch error:', weatherErr9);
+                            }
+                            const tip = config.HEALTH_TIPS[Math.floor(Math.random() * config.HEALTH_TIPS.length)];
+                            const goodnightMsg = flexBuilder.buildGoodnightFlexMessage(weatherText9, tip);
+                            await client.pushMessage(config.TARGET_GROUP_ID, goodnightMsg);
+                            return res.send('Sent goodnight card');
+                }
               const text = config.SCHEDULED_MESSAGES[req.params.id];
               if (!text) {
                         return res.status(404).send('No message for id ' + req.params.id);
