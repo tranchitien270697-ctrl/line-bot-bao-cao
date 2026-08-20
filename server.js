@@ -7,8 +7,8 @@ const flexBuilder = require('./flexBuilder');
 const lunarCalendar = require('./lunarCalendar');
 
 const lineConfig = {
-    channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-    channelSecret: process.env.LINE_CHANNEL_SECRET,
+      channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+      channelSecret: process.env.LINE_CHANNEL_SECRET,
 };
 
 const app = express();
@@ -22,13 +22,17 @@ app.get('/push/revenue', async (req, res) => {
                         return res.status(403).send('Forbidden');
               }
               const storeLabel = req.query.store || '5152-Kế Sách';
-              const offlineToday = parseFloat(req.query.offlineToday) || 0;
-              const offlineYesterday = parseFloat(req.query.offlineYesterday) || 0;
-              const onlineToday = parseFloat(req.query.onlineToday) || 0;
-              const onlineYesterday = parseFloat(req.query.onlineYesterday) || 0;
-              const revenueMsg = flexBuilder.buildRevenueCompareFlexMessage(storeLabel, offlineToday, offlineYesterday, onlineToday, onlineYesterday);
+              const todayTotal = parseFloat(req.query.todayTotal) || 0;
+              const yesterdayTotal = parseFloat(req.query.yesterdayTotal) || 0;
+              let industries = [];
+              try {
+                        industries = JSON.parse(req.query.industries || '[]');
+              } catch (parseErr) {
+                        console.error('Industries parse error:', parseErr);
+              }
+              const revenueMsg = flexBuilder.buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries);
               await client.pushMessage(config.TARGET_GROUP_ID, revenueMsg);
-              res.send('Sent revenue compare card');
+              res.send('Sent revenue detail card');
       } catch (err) {
               console.error('Push revenue error:', err);
               res.status(500).send('Error sending revenue card');
@@ -41,39 +45,39 @@ app.get('/cron/:id', async (req, res) => {
                         return res.status(403).send('Forbidden');
               }
 
-              if (req.params.id === 'cleaning') {
-                        const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
-                        const dow = now.getDay();
-                        const people = config.CLEANING_SCHEDULE[dow] || [];
-                        const dayLabel = config.DAY_LABELS[dow];
-                        if (people.length === 0) {
-                                    return res.send('No cleaning duty today (' + dayLabel + ')');
-                        }
-                        const cleaningMsg = flexBuilder.buildCleaningFlexMessage(dayLabel, people);
-                        await client.pushMessage(config.TARGET_GROUP_ID, cleaningMsg);
-                        return res.send('Sent cleaning reminder for ' + dayLabel);
-              }
+        if (req.params.id === 'cleaning') {
+                  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+                  const dow = now.getDay();
+                  const people = config.CLEANING_SCHEDULE[dow] || [];
+                  const dayLabel = config.DAY_LABELS[dow];
+                  if (people.length === 0) {
+                              return res.send('No cleaning duty today (' + dayLabel + ')');
+                  }
+                  const cleaningMsg = flexBuilder.buildCleaningFlexMessage(dayLabel, people);
+                  await client.pushMessage(config.TARGET_GROUP_ID, cleaningMsg);
+                  return res.send('Sent cleaning reminder for ' + dayLabel);
+        }
 
-              if (req.params.id === 'daily') {
-                        let weatherText = 'Không lấy được dữ liệu thời tiết';
-                        try {
-                                            const wRes = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&m&lang=vi');
-                                    weatherText = (await wRes.text()).trim();
-                        } catch (weatherErr) {
-                                    console.error('Weather fetch error:', weatherErr);
-                        }
-                        const lunarText = lunarCalendar.getTodayLunarText();
-                        const quote = config.LIFE_QUOTES[Math.floor(Math.random() * config.LIFE_QUOTES.length)];
-                        const dailyMsg = flexBuilder.buildDailyFlexMessage(weatherText, lunarText, quote);
-                        await client.pushMessage(config.TARGET_GROUP_ID, dailyMsg);
-                        return res.send('Sent daily card');
-              }
+        if (req.params.id === 'daily') {
+                  let weatherText = 'Không lấy được dữ liệu thời tiết';
+                  try {
+                              const wRes = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&m&lang=vi');
+                              weatherText = (await wRes.text()).trim();
+                  } catch (weatherErr) {
+                              console.error('Weather fetch error:', weatherErr);
+                  }
+                  const lunarText = lunarCalendar.getTodayLunarText();
+                  const quote = config.LIFE_QUOTES[Math.floor(Math.random() * config.LIFE_QUOTES.length)];
+                  const dailyMsg = flexBuilder.buildDailyFlexMessage(weatherText, lunarText, quote);
+                  await client.pushMessage(config.TARGET_GROUP_ID, dailyMsg);
+                  return res.send('Sent daily card');
+        }
               const text = config.SCHEDULED_MESSAGES[req.params.id];
               if (!text) {
                         return res.status(404).send('No message for id ' + req.params.id);
               }
-            const reminderMsg = flexBuilder.buildReminderFlexMessage(text);
-                      await client.pushMessage(config.TARGET_GROUP_ID, reminderMsg);
+              const reminderMsg = flexBuilder.buildReminderFlexMessage(text);
+              await client.pushMessage(config.TARGET_GROUP_ID, reminderMsg);
               res.send('Sent message ' + req.params.id);
       } catch (err) {
               console.error('Cron error:', err);
@@ -82,39 +86,39 @@ app.get('/cron/:id', async (req, res) => {
 });
 
 app.post('/webhook', lineBotSdk.middleware(lineConfig), async (req, res) => {
-    try {
-          const events = req.body.events || [];
-          await Promise.all(events.map(handleEvent));
-          res.status(200).end();
-    } catch (err) {
-          console.error('Webhook error:', err);
-          res.status(500).end();
-    }
+      try {
+              const events = req.body.events || [];
+              await Promise.all(events.map(handleEvent));
+              res.status(200).end();
+      } catch (err) {
+              console.error('Webhook error:', err);
+              res.status(500).end();
+      }
 });
 
 async function handleEvent(event) {
       console.log('DEBUG source:', JSON.stringify(event.source));
-    if (event.type !== 'message' || event.message.type !== 'text') return null;
-    const text = (event.message.text || '').toLowerCase();
-    const isActualRequest = text.includes(config.ACTUAL_KEYWORD.toLowerCase());
-    const isReportRequest = text.includes(config.TRIGGER_KEYWORD.toLowerCase());
-    if (!isActualRequest && !isReportRequest) return null;
+      if (event.type !== 'message' || event.message.type !== 'text') return null;
+      const text = (event.message.text || '').toLowerCase();
+      const isActualRequest = text.includes(config.ACTUAL_KEYWORD.toLowerCase());
+      const isReportRequest = text.includes(config.TRIGGER_KEYWORD.toLowerCase());
+      if (!isActualRequest && !isReportRequest) return null;
 
   try {
-        if (isActualRequest) {
-                const actual = await reportEngine.buildActualToDateRevenue();
-                const todayFlexMessage = flexBuilder.buildTodayRevenueFlexMessage(actual);
-                return client.replyMessage(event.replyToken, todayFlexMessage);
-        }
-        const data = await reportEngine.buildReportData();
-        const flexMessage = flexBuilder.buildReportFlexMessage(data);
-        return client.replyMessage(event.replyToken, flexMessage);
+          if (isActualRequest) {
+                    const actual = await reportEngine.buildActualToDateRevenue();
+                    const todayFlexMessage = flexBuilder.buildTodayRevenueFlexMessage(actual);
+                    return client.replyMessage(event.replyToken, todayFlexMessage);
+          }
+          const data = await reportEngine.buildReportData();
+          const flexMessage = flexBuilder.buildReportFlexMessage(data);
+          return client.replyMessage(event.replyToken, flexMessage);
   } catch (err) {
-        console.error('Loi khi tao bao cao:', err);
-        return client.replyMessage(event.replyToken, {
-                type: 'text',
-                text: 'Xin loi, hien chua lay duoc du lieu tu Google Sheet.',
-        });
+          console.error('Loi khi tao bao cao:', err);
+          return client.replyMessage(event.replyToken, {
+                    type: 'text',
+                    text: 'Xin loi, hien chua lay duoc du lieu tu Google Sheet.',
+          });
   }
 }
 
