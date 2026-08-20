@@ -250,67 +250,58 @@ function buildDailyFlexMessage(weatherText, lunarText, quote) {
 
 function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries) {
       const BLUE = '#1565C0';
-      const LIGHT_BLUE = '#E3F2FD';
       const totalDelta = todayTotal - yesterdayTotal;
       const totalPct = yesterdayTotal ? (totalDelta / yesterdayTotal) * 100 : null;
       const now = new Date();
       const timeStr = now.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false });
 
-  const industryRows = industries.map((it, i) => {
-          const delta = it.t - it.y;
-          const pct = it.y ? (delta / it.y) * 100 : null;
-          return {
-                    type: 'box', layout: 'vertical', margin: i === 0 ? 'none' : 'md',
-                    contents: [
-                        { type: 'text', text: it.n, size: 'xs', color: DARK, weight: 'bold', wrap: true },
-                        {
-                                      type: 'box', layout: 'horizontal', margin: 'xs',
-                                      contents: [
-                                          { type: 'text', text: formatVND(it.t), size: 'xs', color: BLUE, weight: 'bold', flex: 3 },
-                                          { type: 'text', text: arrow(delta) + ' ' + formatPct(pct), size: 'xs', color: deltaColor(delta), weight: 'bold', flex: 2, align: 'end' },
-                                                    ],
-                        },
-                              ],
-          };
-  });
+      const sorted = industries.slice().sort((a, b) => Math.max(b.t, b.y) - Math.max(a.t, a.y));
+      const top = sorted.slice(0, 6);
+      const restCount = sorted.length - top.length;
 
-  return {
-          type: 'bubble', size: 'mega',
-          header: {
-                    type: 'box', layout: 'vertical', backgroundColor: BLUE, paddingAll: 'lg',
-                    contents: [
-                        { type: 'text', text: '📊 DOANH THU HÔM NAY', color: '#FFFFFF', weight: 'bold', size: 'lg' },
-                        { type: 'text', text: storeLabel, color: '#FFFFFF', size: 'sm' },
-                              ],
-          },
-          body: {
-                    type: 'box', layout: 'vertical', backgroundColor: LIGHT_BLUE, paddingAll: 'lg',
-                    contents: [
-                        {
-                                      type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'lg',
-                                      contents: [
-                                          { type: 'text', text: 'Tổng doanh thu', size: 'sm', color: GREY, weight: 'bold' },
-                                          { type: 'text', text: formatVND(todayTotal), size: 'xxl', color: BLUE, weight: 'bold', margin: 'sm' },
-                                          {
-                                                            type: 'box', layout: 'horizontal', margin: 'md',
-                                                            contents: [
-                                                                { type: 'text', text: 'Hôm qua: ' + formatVND(yesterdayTotal), size: 'xs', color: GREY, flex: 3 },
-                                                                { type: 'text', text: arrow(totalDelta) + ' ' + formatPct(totalPct), size: 'sm', color: deltaColor(totalDelta), weight: 'bold', flex: 2, align: 'end' },
-                                                                              ],
-                                          },
-                                                    ],
-                        },
-                        { type: 'separator', margin: 'lg' },
-                        { type: 'text', text: 'THEO NGÀNH HÀNG', weight: 'bold', size: 'sm', color: BLUE, margin: 'lg' },
-                        {
-                                      type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'lg', margin: 'md',
-                                      contents: industryRows,
-                        },
-                        { type: 'separator', margin: 'lg' },
-                        { type: 'text', margin: 'lg', size: 'xxs', color: GREY, wrap: true, text: 'Cập nhật lúc: ' + timeStr },
-                              ],
-          },
-  };
+      const industryRows = top.map((it, i) => {
+              const delta = it.t - it.y;
+              const pct = it.y ? (delta / it.y) * 100 : null;
+              return {
+                        type: 'box', layout: 'horizontal', margin: i === 0 ? 'none' : 'sm',
+                        contents: [
+                            { type: 'text', text: it.n, size: 'xs', color: DARK, flex: 5, wrap: true },
+                            { type: 'text', text: formatVND(it.t), size: 'xs', color: BLUE, weight: 'bold', flex: 3, align: 'end' },
+                            { type: 'text', text: arrow(delta) + formatPct(pct), size: 'xxs', color: deltaColor(delta), flex: 2, align: 'end', gravity: 'center' },
+                                  ],
+              };
+      });
+      if (restCount > 0) {
+              industryRows.push({ type: 'text', text: 'và ' + restCount + ' ngành hàng khác', size: 'xxs', color: GREY, margin: 'md', align: 'center' });
+      }
+
+      return {
+              type: 'bubble', size: 'mega',
+              header: {
+                        type: 'box', layout: 'vertical', backgroundColor: BLUE, paddingAll: 'lg', spacing: 'xs',
+                        contents: [
+                            { type: 'text', text: storeLabel, color: '#FFFFFF', weight: 'bold', size: 'md' },
+                            { type: 'text', text: 'Doanh thu hôm nay', color: '#BBDEFB', size: 'xs' },
+                                  ],
+              },
+              body: {
+                        type: 'box', layout: 'vertical', paddingAll: 'lg', spacing: 'md',
+                        contents: [
+                            { type: 'text', text: formatVND(todayTotal), size: 'xxl', color: BLUE, weight: 'bold' },
+                            {
+                                          type: 'box', layout: 'horizontal',
+                                          contents: [
+                                              { type: 'text', text: 'Hôm qua ' + formatVND(yesterdayTotal), size: 'xs', color: GREY, flex: 3 },
+                                              { type: 'text', text: arrow(totalDelta) + ' ' + formatPct(totalPct), size: 'sm', weight: 'bold', color: deltaColor(totalDelta), flex: 2, align: 'end' },
+                                                        ],
+                            },
+                            { type: 'separator', margin: 'md' },
+                            { type: 'text', text: 'NGÀNH HÀNG NỔI BẬT', size: 'xxs', color: GREY, weight: 'bold', margin: 'md' },
+                            { type: 'box', layout: 'vertical', margin: 'sm', contents: industryRows },
+                            { type: 'text', margin: 'md', size: 'xxs', color: GREY, text: timeStr },
+                                  ],
+              },
+      };
 }
 
 function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries) {
