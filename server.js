@@ -67,8 +67,10 @@ app.get('/cron/:id', async (req, res) => {
                               console.error('Weather fetch error:', weatherErr);
                   }
                   const lunarText = lunarCalendar.getTodayLunarText();
+                    const solarNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+                    const solarText = config.DAY_LABELS[solarNow.getDay()] + ', ngày ' + solarNow.getDate() + ' tháng ' + (solarNow.getMonth() + 1) + ' năm ' + solarNow.getFullYear();
                   const quote = config.LIFE_QUOTES[Math.floor(Math.random() * config.LIFE_QUOTES.length)];
-                  const dailyMsg = flexBuilder.buildDailyFlexMessage(weatherText, lunarText, quote);
+                  const dailyMsg = flexBuilder.buildDailyFlexMessage(weatherText, solarText, lunarText, quote);
                   await client.pushMessage(config.TARGET_GROUP_ID, dailyMsg);
                   return res.send('Sent daily card');
         }
