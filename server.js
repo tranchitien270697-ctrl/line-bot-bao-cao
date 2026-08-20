@@ -16,6 +16,25 @@ const client = new lineBotSdk.Client(lineConfig);
 
 app.get('/', (req, res) => res.send('LINE report bot is running'));
 
+app.get('/push/revenue', async (req, res) => {
+      try {
+              if (req.query.key !== config.CRON_SECRET) {
+                        return res.status(403).send('Forbidden');
+              }
+              const storeLabel = req.query.store || '5152-Kế Sách';
+              const offlineToday = parseFloat(req.query.offlineToday) || 0;
+              const offlineYesterday = parseFloat(req.query.offlineYesterday) || 0;
+              const onlineToday = parseFloat(req.query.onlineToday) || 0;
+              const onlineYesterday = parseFloat(req.query.onlineYesterday) || 0;
+              const revenueMsg = flexBuilder.buildRevenueCompareFlexMessage(storeLabel, offlineToday, offlineYesterday, onlineToday, onlineYesterday);
+              await client.pushMessage(config.TARGET_GROUP_ID, revenueMsg);
+              res.send('Sent revenue compare card');
+      } catch (err) {
+              console.error('Push revenue error:', err);
+              res.status(500).send('Error sending revenue card');
+      }
+});
+
 app.get('/cron/:id', async (req, res) => {
       try {
               if (req.query.key !== config.CRON_SECRET) {
