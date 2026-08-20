@@ -248,32 +248,31 @@ function buildDailyFlexMessage(weatherText, lunarText, quote) {
       };
 }
 
-function buildRevenueCompareCard(storeLabel, todayOffline, yesterdayOffline, todayOnline, yesterdayOnline) {
+function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries) {
       const BLUE = '#1565C0';
       const LIGHT_BLUE = '#E3F2FD';
-      const offlineDelta = todayOffline - yesterdayOffline;
-      const offlinePct = yesterdayOffline ? (offlineDelta / yesterdayOffline) * 100 : null;
-      const onlineDelta = todayOnline - yesterdayOnline;
-      const onlinePct = yesterdayOnline ? (onlineDelta / yesterdayOnline) * 100 : null;
+      const totalDelta = todayTotal - yesterdayTotal;
+      const totalPct = yesterdayTotal ? (totalDelta / yesterdayTotal) * 100 : null;
       const now = new Date();
       const timeStr = now.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false });
 
-  function channelBox(label, todayVal, yesterdayVal, delta, pct, isFirst) {
+  const industryRows = industries.map((it, i) => {
+          const delta = it.t - it.y;
+          const pct = it.y ? (delta / it.y) * 100 : null;
           return {
-                    type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'lg', margin: isFirst ? 'none' : 'md',
+                    type: 'box', layout: 'vertical', margin: i === 0 ? 'none' : 'md',
                     contents: [
-                        { type: 'text', text: label, size: 'sm', color: GREY, weight: 'bold' },
-                        { type: 'text', text: formatVND(todayVal), size: 'xxl', color: BLUE, weight: 'bold', margin: 'sm' },
+                        { type: 'text', text: it.n, size: 'xs', color: DARK, weight: 'bold', wrap: true },
                         {
-                                      type: 'box', layout: 'horizontal', margin: 'md',
+                                      type: 'box', layout: 'horizontal', margin: 'xs',
                                       contents: [
-                                          { type: 'text', text: 'Hôm qua: ' + formatVND(yesterdayVal), size: 'xs', color: GREY, flex: 3 },
-                                          { type: 'text', text: arrow(delta) + ' ' + formatPct(pct), size: 'sm', color: deltaColor(delta), weight: 'bold', flex: 2, align: 'end' },
+                                          { type: 'text', text: formatVND(it.t), size: 'xs', color: BLUE, weight: 'bold', flex: 3 },
+                                          { type: 'text', text: arrow(delta) + ' ' + formatPct(pct), size: 'xs', color: deltaColor(delta), weight: 'bold', flex: 2, align: 'end' },
                                                     ],
                         },
                               ],
           };
-  }
+  });
 
   return {
           type: 'bubble', size: 'mega',
@@ -287,8 +286,26 @@ function buildRevenueCompareCard(storeLabel, todayOffline, yesterdayOffline, tod
           body: {
                     type: 'box', layout: 'vertical', backgroundColor: LIGHT_BLUE, paddingAll: 'lg',
                     contents: [
-                                channelBox('Doanh thu Offline', todayOffline, yesterdayOffline, offlineDelta, offlinePct, true),
-                                channelBox('Doanh thu Online', todayOnline, yesterdayOnline, onlineDelta, onlinePct, false),
+                        {
+                                      type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'lg',
+                                      contents: [
+                                          { type: 'text', text: 'Tổng doanh thu', size: 'sm', color: GREY, weight: 'bold' },
+                                          { type: 'text', text: formatVND(todayTotal), size: 'xxl', color: BLUE, weight: 'bold', margin: 'sm' },
+                                          {
+                                                            type: 'box', layout: 'horizontal', margin: 'md',
+                                                            contents: [
+                                                                { type: 'text', text: 'Hôm qua: ' + formatVND(yesterdayTotal), size: 'xs', color: GREY, flex: 3 },
+                                                                { type: 'text', text: arrow(totalDelta) + ' ' + formatPct(totalPct), size: 'sm', color: deltaColor(totalDelta), weight: 'bold', flex: 2, align: 'end' },
+                                                                              ],
+                                          },
+                                                    ],
+                        },
+                        { type: 'separator', margin: 'lg' },
+                        { type: 'text', text: 'THEO NGÀNH HÀNG', weight: 'bold', size: 'sm', color: BLUE, margin: 'lg' },
+                        {
+                                      type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'lg', margin: 'md',
+                                      contents: industryRows,
+                        },
                         { type: 'separator', margin: 'lg' },
                         { type: 'text', margin: 'lg', size: 'xxs', color: GREY, wrap: true, text: 'Cập nhật lúc: ' + timeStr },
                               ],
@@ -296,12 +313,12 @@ function buildRevenueCompareCard(storeLabel, todayOffline, yesterdayOffline, tod
   };
 }
 
-function buildRevenueCompareFlexMessage(storeLabel, todayOffline, yesterdayOffline, todayOnline, yesterdayOnline) {
+function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries) {
       return {
               type: 'flex',
-              altText: 'Doanh thu hôm nay - ' + storeLabel,
-              contents: buildRevenueCompareCard(storeLabel, todayOffline, yesterdayOffline, todayOnline, yesterdayOnline),
+              altText: 'Doanh thu hôm nay - ' + storeLabel + ': ' + formatVND(todayTotal),
+              contents: buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries),
       };
 }
 
-module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueCompareFlexMessage: buildRevenueCompareFlexMessage };
+module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage };
