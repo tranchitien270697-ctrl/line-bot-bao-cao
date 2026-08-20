@@ -202,7 +202,7 @@ function buildReminderFlexMessage(text) {
       };
 }
 
-function buildDailyCard(weatherText, lunarText, quote) {
+function buildDailyCard(weatherText, solarText, lunarText, quote) {
       return {
               type: 'bubble', size: 'mega',
               header: {
@@ -224,6 +224,13 @@ function buildDailyCard(weatherText, lunarText, quote) {
                             {
                                           type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
                                           contents: [
+                                              { type: 'text', text: '📅 Ngày dương lịch', size: 'sm', color: '#1565C0', weight: 'bold' },
+                                { type: 'text', text: solarText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+                                                        ],
+                            },
+                            {
+                                          type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
+                                          contents: [
                                               { type: 'text', text: '🌙 Âm lịch', size: 'sm', color: '#1565C0', weight: 'bold' },
                                               { type: 'text', text: lunarText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
                                                         ],
@@ -240,11 +247,11 @@ function buildDailyCard(weatherText, lunarText, quote) {
       };
 }
 
-function buildDailyFlexMessage(weatherText, lunarText, quote) {
+function buildDailyFlexMessage(weatherText, solarText, lunarText, quote) {
       return {
               type: 'flex',
               altText: 'Chào buổi sáng! ' + weatherText,
-              contents: buildDailyCard(weatherText, lunarText, quote),
+              contents: buildDailyCard(weatherText, solarText, lunarText, quote),
       };
 }
 
