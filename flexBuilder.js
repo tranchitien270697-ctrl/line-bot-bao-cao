@@ -286,7 +286,7 @@ function buildGoodnightCard(weatherText, tip) {
                             {
                                           type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
                                           contents: [
-                                              { type: 'text', text: '💤 Lời khuyên trước khi ngủ', size: 'sm', color: DARKBLUE, weight: 'bold' },
+                                              { type: 'text', text: '🙏 Châm ngôn nhà Phật', size: 'sm', color: DARKBLUE, weight: 'bold' },
                                               { type: 'text', text: tip, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
                                                         ],
                             },
