@@ -1,5 +1,3 @@
-const config = require('./config');
-
 const GREEN = '#06C755';
 const RED = '#FF334B';
 const GREY = '#8C8C8C';
@@ -41,102 +39,6 @@ function groupRow(name, delta, pct) {
     };
 }
 
-
-function buildReportCard(data) {
-    const revenue = data.revenue, group = data.revenueByGroup, volume = data.volume, meta = data.meta;
-    return {
-          type: 'bubble', size: 'mega',
-          header: {
-                  type: 'box', layout: 'vertical', backgroundColor: GREEN, paddingAll: 'lg',
-                  contents: [
-    { type: 'text', text: 'BAO CAO KINH DOANH', color: '#FFFFFF', weight: 'bold', size: 'lg' },
-                    { type: 'text', text: 'Du kien ' + config.LABEL_CURR_MONTH + ' so voi ' + config.LABEL_PREV_MONTH, color: '#FFFFFF', size: 'sm' },
-                          ],
-          },
-                body: {
-                        type: 'box', layout: 'vertical', spacing: 'md',
-                        contents: [
-                          { type: 'text', text: 'TONG DOANH THU', weight: 'bold', size: 'sm', color: GREEN },
-                                  kvRow(config.LABEL_CURR_MONTH + ' (du kien)', formatVND(revenue.currProjectedTotal), { weight: 'bold', size: 'md' }),
-                                  kvRow(config.LABEL_PREV_MONTH + ' (thuc te)', formatVND(revenue.prevTotal)),
-                                  kvRow('Chenh lech', arrow(revenue.delta) + ' ' + formatVND(Math.abs(revenue.delta)) + '  ' + formatPct(revenue.pct), { color: deltaColor(revenue.delta), weight: 'bold' }),
-                     { type: 'separator', margin: 'lg' },
-                          { type: 'text', text: 'DOANH THU THEO NGANH HANG (chenh lech)', weight: 'bold', size: 'sm', color: GREEN, margin: 'lg', wrap: true },
-                                  groupRow('FMCG', group.fmcg.delta, group.fmcg.pct),
-                                  groupRow('FRESH', group.fresh.delta, group.fresh.pct),
-                          { type: 'separator', margin: 'lg' },
-                          { type: 'text', text: 'SAN LUONG BAN', weight: 'bold', size: 'sm', color: GREEN, margin: 'lg' },
-                                  kvRow(config.LABEL_CURR_MONTH + ' (du kien)', formatNumber(volume.currProjectedTotal, 1), { weight: 'bold', size: 'md' }),
-                                  kvRow(config.LABEL_PREV_MONTH + ' (thuc te)', formatNumber(volume.prevTotal, 1)),
-                                  kvRow('Chenh lech', arrow(volume.delta) + ' ' + formatNumber(Math.abs(volume.delta), 1) + '  ' + formatPct(volume.pct), { color: deltaColor(volume.delta), weight: 'bold' }),
-                          { type: 'separator', margin: 'lg' },
-                          { type: 'text', margin: 'lg', size: 'xxs', color: GREY, wrap: true, text: 'Du lieu ' + config.LABEL_CURR_MONTH + ': ' + meta.revCurrDayCount + '/' + meta.daysInTargetMonth + ' ngay' },
-                                ],
-                },
-    };
-}
-
-
-
-                    function buildReportFlexMessage(data) {
-                        const bubble = buildReportCard(data);
-                        return {
-                              type: 'flex',
-                              altText: 'Bao cao kinh doanh du kien ' + (data.revenue.pct >= 0 ? 'tang' : 'giam') + ' ' + Math.abs(data.revenue.pct).toFixed(1) + '%',
-                              contents: bubble,
-                        };
-                    }
-
-function buildTodayRevenueCard(actual) {
-      const offlineVAT = actual.offlineVAT || 0;
-      const onlineVAT = actual.onlineVAT || 0;
-      const OFFLINE_COLOR = '#3E5CFF';
-      const ONLINE_COLOR = '#FF8A00';
-      const now = new Date();
-      const timeStr = now.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false });
-      return {
-              type: 'bubble', size: 'mega',
-              header: {
-                        type: 'box', layout: 'vertical', backgroundColor: GREEN, paddingAll: 'lg',
-                        contents: [
-                            { type: 'text', text: 'DOANH THU HIỆN TẠI', color: '#FFFFFF', weight: 'bold', size: 'lg' },
-                            { type: 'text', text: 'Ngày ' + (actual.date || 'Không xác định'), color: '#FFFFFF', size: 'sm' },
-                                  ],
-              },
-              body: {
-                        type: 'box', layout: 'vertical', spacing: 'md',
-                        contents: [
-                                    kvRow('Tổng doanh thu', formatVND(actual.total), { weight: 'bold', size: 'md', color: GREEN }),
-                            { type: 'separator', margin: 'lg' },
-                            { type: 'text', text: 'DOANH THU THEO KÊNH BÁN (đã VAT)', weight: 'bold', size: 'sm', color: GREEN, margin: 'lg', wrap: true },
-                            {
-                                          type: 'box', layout: 'vertical', margin: 'md',
-                                          contents: [
-                                              { type: 'text', text: 'Doanh thu Offline', size: 'sm', color: DARK, weight: 'bold' },
-                                              { type: 'text', text: formatVND(offlineVAT), size: 'md', color: OFFLINE_COLOR, weight: 'bold' },
-                                                        ],
-                            },
-                            {
-                                          type: 'box', layout: 'vertical', margin: 'md',
-                                          contents: [
-                                              { type: 'text', text: 'Doanh thu Online', size: 'sm', color: DARK, weight: 'bold' },
-                                              { type: 'text', text: formatVND(onlineVAT), size: 'md', color: ONLINE_COLOR, weight: 'bold' },
-                                                        ],
-                            },
-                            { type: 'separator', margin: 'lg' },
-                            { type: 'text', margin: 'lg', size: 'xxs', color: GREY, wrap: true, text: 'Thời gian tạo báo cáo: ' + timeStr },
-                                  ],
-              },
-      };
-}
-
-function buildTodayRevenueFlexMessage(actual) {
-      return {
-              type: 'flex',
-              altText: 'Doanh thu ngày ' + (actual.date || '') + ': ' + formatVND(actual.total),
-              contents: buildTodayRevenueCard(actual),
-      };
-}
 
 function buildCleaningCard(dayLabel, people) {
       const PALETTE = ['#FF6B6B', '#FFA94D', '#51CF66', '#339AF0', '#CC5DE8'];
@@ -373,4 +275,4 @@ function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, i
       };
 }
 
-module.exports = { buildReportFlexMessage: buildReportFlexMessage, buildTodayRevenueFlexMessage: buildTodayRevenueFlexMessage, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage };
+module.exports = { buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage };
