@@ -1,24 +1,5 @@
 // config.js
 module.exports = {
-  TRIGGER_KEYWORD: 'báo cáo',
-  ACTUAL_KEYWORD: 'doanh thu hiện tại',
-
-  FRESH_INDUSTRIES: ['Rau Củ Quả CL', 'Cá (Hải sản)', 'Thịt', 'Trứng', 'Trái cây'],
-
-  DAYS_IN_TARGET_MONTH: 31,
-
-  LABEL_PREV_MONTH: 'Tháng 7',
-  LABEL_CURR_MONTH: 'Tháng 8 (dự kiến)',
-
-  GOOGLE_SHEET_ID: '1wQlsrIsXTAwWByZwmfOs3f4Hsuh9TmLdWHg_1ECMttE',
-
-  TAB_GIDS: {
-    revenuePrevMonth: '0',
-    revenueCurrMonth: '1560618412',
-    volumePrevMonth: '1085666896',
-    volumeCurrMonth: '594018980',
-  },
-
   TARGET_GROUP_ID: 'Cf36a100a627b9eafdd7c5e87fe3a88a6',
   CRON_SECRET: 'kesach2026secret',
   SCHEDULED_MESSAGES: {
@@ -352,24 +333,6 @@ module.exports = {
     'Hãy giữ cho mình niềm tin rằng mọi nỗ lực đều không vô ích.',
     'Người biết yêu thương công việc của mình sẽ luôn làm việc với niềm vui.',
     'Sự bền bỉ theo thời gian sẽ biến những giấc mơ nhỏ thành hiện thực lớn.',
-  ],
-
-  HEALTH_TIPS: [
-    'Hạn chế dùng điện thoại ít nhất 30 phút trước khi ngủ để mắt và não được nghỉ ngơi.',
-    'Uống một ly nước ấm trước khi ngủ giúp cơ thể thư giãn và dễ đi vào giấc ngủ hơn.',
-    'Tránh ăn quá no hoặc uống cà phê, trà đặc vào buổi tối để có giấc ngủ ngon.',
-    'Giữ phòng ngủ thoáng mát, tối và yên tĩnh sẽ giúp bạn ngủ sâu giấc hơn.',
-    'Dành 5-10 phút hít thở sâu hoặc thiền nhẹ trước khi ngủ giúp giảm căng thẳng.',
-    'Ngủ đủ 7-8 tiếng mỗi đêm giúp cơ thể phục hồi và làm việc hiệu quả hơn vào hôm sau.',
-    'Tránh vận động mạnh sát giờ ngủ, thay vào đó hãy giãn cơ nhẹ nhàng.',
-    'Đi ngủ và thức dậy đúng giờ mỗi ngày giúp đồng hồ sinh học ổn định hơn.',
-    'Tắt bớt đèn sáng và ánh sáng xanh trước khi ngủ để cơ thể sản sinh melatonin tốt hơn.',
-    'Một tách trà thảo mộc ấm (không chứa caffeine) có thể giúp bạn thư giãn trước khi ngủ.',
-    'Viết ra những điều khiến bạn lo lắng trước khi ngủ để đầu óc nhẹ nhàng hơn.',
-    'Giữ tinh thần thoải mái, buông bỏ muộn phiền trong ngày trước khi lên giường.',
-    'Nệm và gối phù hợp giúp cột sống được nâng đỡ tốt, ngủ ngon hơn.',
-    'Tránh xem tin tức hoặc nội dung gây căng thẳng ngay trước giờ ngủ.',
-    'Massage nhẹ vùng vai gáy giúp thư giãn cơ bắp sau một ngày làm việc.',
   ],
 
   BUDDHIST_QUOTES: [
