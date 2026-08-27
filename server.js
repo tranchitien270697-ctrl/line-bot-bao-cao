@@ -12,6 +12,10 @@ const lineConfig = {
 };
 
 const app = express();
+const fs = require('fs');
+const path = require('path');
+app.use(express.json({ limit: '15mb' }));
+app.use('/tmp', express.static(path.join(__dirname, 'public', 'tmp')));
 const client = new lineBotSdk.Client(lineConfig);
 
 app.get('/', (req, res) => res.send('LINE report bot is running'));
@@ -37,6 +41,30 @@ app.get('/push/revenue', async (req, res) => {
                   console.error('Push revenue error:', err);
                   res.status(500).send('Error sending revenue card');
         }
+});
+
+app.post('/push/image', async (req, res) => {
+try {
+if (req.query.key !== config.CRON_SECRET) {
+return res.status(403).send('Forbidden');
+}
+const imageBase64 = req.body.imageBase64;
+const filename = 'report_' + Date.now() + '.png';
+if (!imageBase64) {
+return res.status(400).send('Missing imageBase64');
+}
+const dir = path.join(__dirname, 'public', 'tmp');
+fs.mkdirSync(dir, { recursive: true });
+const filePath = path.join(dir, filename);
+fs.writeFileSync(filePath, Buffer.from(imageBase64, 'base64'));
+const publicUrl = 'https://' + req.get('host') + '/tmp/' + filename;
+const imageMsg = { type: 'image', originalContentUrl: publicUrl, previewImageUrl: publicUrl };
+await client.pushMessage(config.TARGET_GROUP_ID, imageMsg);
+res.send('Sent image: ' + publicUrl);
+} catch (err) {
+console.error('Push image error:', err);
+res.status(500).send('Error sending image: ' + err.message);
+}
 });
 
 app.get('/camera/:name', async (req, res) => {
