@@ -105,7 +105,7 @@ app.get('/cron/:id', async (req, res) => {
                       } catch (weatherErr9) {
                                     console.error('Weather fetch error:', weatherErr9);
                       }
-                      const tip = config.HEALTH_TIPS[Math.floor(Math.random() * config.HEALTH_TIPS.length)];
+                      const tip = config.BUDDHIST_QUOTES[Math.floor(Math.random() * config.BUDDHIST_QUOTES.length)];
                       const goodnightMsg = flexBuilder.buildGoodnightFlexMessage(weatherText9, tip);
                       await client.pushMessage(config.TARGET_GROUP_ID, goodnightMsg);
                       return res.send('Sent goodnight card');
