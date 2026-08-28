@@ -93,38 +93,43 @@ app.get('/cron/:id', async (req, res) => {
                               return res.status(403).send('Forbidden');
                   }
 
-          if (req.params.id === 'cleaning') {
-                      const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
-                      const dow = now.getDay();
-                      const people = config.CLEANING_SCHEDULE[dow] || [];
-                      const dayLabel = config.DAY_LABELS[dow];
-                      if (people.length === 0) {
-                                    return res.send('No cleaning duty today (' + dayLabel + ')');
-                      }
-                      const cleaningMsg = flexBuilder.buildCleaningFlexMessage(dayLabel, people);
-                      await client.pushMessage(config.TARGET_GROUP_ID, cleaningMsg);
-                      return res.send('Sent cleaning reminder for ' + dayLabel);
-          }
+          if (req.params.id === 'morning') {
+const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+const dow = now.getDay();
+const people = config.CLEANING_SCHEDULE[dow] || [];
+const dayLabel = config.DAY_LABELS[dow];
+let weatherText = 'Khong lay duoc du lieu thoi tiet';
+try {
+const wRes = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&m&lang=vi');
+weatherText = (await wRes.text()).trim();
+} catch (weatherErr) {
+console.error('Weather fetch error:', weatherErr);
+}
+const lunarText = lunarCalendar.getTodayLunarText();
+const solarText = dayLabel + ', ngay ' + now.getDate() + ' thang ' + (now.getMonth() + 1) + ' nam ' + now.getFullYear();
+const quote = config.LIFE_QUOTES[Math.floor(Math.random() * config.LIFE_QUOTES.length)];
+const holidayText = lunarCalendar.getTodayHoliday();
+const greetingText = config.SCHEDULED_MESSAGES['1'];
+const morningMsg = flexBuilder.buildMorningCombinedFlexMessage(greetingText, weatherText, solarText, lunarText, quote, holidayText, dayLabel, people);
+await client.pushMessage(config.TARGET_GROUP_ID, morningMsg);
+return res.send('Sent morning combined card');
+}
 
-          if (req.params.id === 'daily') {
-                      let weatherText = 'Không lấy được dữ liệu thời tiết';
-                      try {
-                                    const wRes = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&m&lang=vi');
-                                    weatherText = (await wRes.text()).trim();
-                      } catch (weatherErr) {
-                                    console.error('Weather fetch error:', weatherErr);
-                      }
-                      const lunarText = lunarCalendar.getTodayLunarText();
-                      const solarNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
-                      const solarText = config.DAY_LABELS[solarNow.getDay()] + ', ngày ' + solarNow.getDate() + ' tháng ' + (solarNow.getMonth() + 1) + ' năm ' + solarNow.getFullYear();
-                      const quote = config.LIFE_QUOTES[Math.floor(Math.random() * config.LIFE_QUOTES.length)];
-                      const holidayText = lunarCalendar.getTodayHoliday();
-                      const dailyMsg = flexBuilder.buildDailyFlexMessage(weatherText, solarText, lunarText, quote, holidayText);
-                      await client.pushMessage(config.TARGET_GROUP_ID, dailyMsg);
-                      return res.send('Sent daily card');
-          }
+if (req.params.id === 'morning2') {
+const text2 = config.SCHEDULED_MESSAGES['2'] + '\n\n' + config.SCHEDULED_MESSAGES['3'];
+const msg2 = flexBuilder.buildReminderFlexMessage(text2);
+await client.pushMessage(config.TARGET_GROUP_ID, msg2);
+return res.send('Sent morning2 combined message');
+}
 
-          if (req.params.id === '9') {
+if (req.params.id === 'midday') {
+const text45 = config.SCHEDULED_MESSAGES['4'] + '\n\n' + config.SCHEDULED_MESSAGES['5'];
+const msg45 = flexBuilder.buildReminderFlexMessage(text45);
+await client.pushMessage(config.TARGET_GROUP_ID, msg45);
+return res.send('Sent midday combined message');
+}
+
+if (req.params.id === '9') {
                       let weatherText9 = 'Không lấy được dữ liệu thời tiết';
                       try {
                                     const wRes9 = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&m&lang=vi');
