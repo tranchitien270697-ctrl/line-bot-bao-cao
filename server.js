@@ -142,7 +142,18 @@ if (req.params.id === '9') {
                       await client.pushMessage(config.TARGET_GROUP_ID, goodnightMsg);
                       return res.send('Sent goodnight card');
           }
-                  const text = config.SCHEDULED_MESSAGES[req.params.id];
+                  if (req.params.id === '6') {
+const now6 = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+const dow6 = now6.getDay();
+const people6 = config.CLEANING_SCHEDULE[dow6] || [];
+const dayLabel6 = config.DAY_LABELS[dow6];
+const text6 = config.SCHEDULED_MESSAGES['6'];
+const msg6 = flexBuilder.buildReminderWithCleaningFlexMessage(text6, dayLabel6, people6);
+await client.pushMessage(config.TARGET_GROUP_ID, msg6);
+return res.send('Sent id 6 with cleaning reminder');
+}
+
+const text = config.SCHEDULED_MESSAGES[req.params.id];
                   if (!text) {
                               return res.status(404).send('No message for id ' + req.params.id);
                   }
