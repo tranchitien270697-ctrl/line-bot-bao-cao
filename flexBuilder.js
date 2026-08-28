@@ -275,4 +275,87 @@ function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, i
       };
 }
 
-module.exports = { buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage };
+function buildMorningCombinedCard(greetingText, weatherText, solarText, lunarText, quote, holidayText, cleaningDayLabel, cleaningPeople) {
+const PALETTE = ['#FF6B6B', '#FFA94D', '#51CF66', '#339AF0', '#CC5DE8'];
+const cleaningRows = (cleaningPeople || []).map((p, i) => ({
+type: 'box', layout: 'horizontal', backgroundColor: PALETTE[i % PALETTE.length], cornerRadius: 'md', paddingAll: 'sm', margin: i === 0 ? 'sm' : 'xs',
+contents: [
+{ type: 'text', text: '\uD83E\uDDF9', flex: 0, size: 'sm' },
+{ type: 'text', text: p, color: '#FFFFFF', weight: 'bold', size: 'sm', margin: 'sm', gravity: 'center', wrap: true },
+],
+}));
+const cleaningBox = cleaningRows.length > 0 ? [{
+type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
+contents: [
+{ type: 'text', text: '\uD83E\uDDF9 Lich ve sinh - ' + cleaningDayLabel, size: 'sm', color: '#1565C0', weight: 'bold' },
+...cleaningRows,
+],
+}] : [];
+return {
+type: 'bubble', size: 'mega',
+header: {
+type: 'box', layout: 'vertical', backgroundColor: '#42A5F5', paddingAll: 'lg',
+contents: [
+{ type: 'text', text: '\u2600\uFE0F CHAO BUOI SANG!', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+],
+},
+body: {
+type: 'box', layout: 'vertical', backgroundColor: '#E3F2FD', paddingAll: 'lg', spacing: 'md',
+contents: [
+{
+type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
+contents: [
+{ type: 'text', text: '\uD83D\uDC4B Chao ngay moi', size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: greetingText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+],
+},
+{
+type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
+contents: [
+{ type: 'text', text: '\uD83C\uDF24\uFE0F Thoi tiet hom nay', size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: weatherText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+],
+},
+{
+type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
+contents: [
+{ type: 'text', text: '\uD83D\uDCC5 Ngay duong lich', size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: solarText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+],
+},
+{
+type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
+contents: [
+{ type: 'text', text: '\uD83C\uDF19 Am lich', size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: lunarText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
+],
+},
+...(holidayText ? [{
+type: 'box', layout: 'vertical', backgroundColor: '#FFEBEE', cornerRadius: 'lg', paddingAll: 'md',
+contents: [
+{ type: 'text', text: '\uD83C\uDF89 Ngay le hom nay', size: 'sm', color: '#C62828', weight: 'bold' },
+{ type: 'text', text: holidayText, size: 'sm', color: '#B71C1C', weight: 'bold', wrap: true, margin: 'sm' },
+],
+}] : []),
+...cleaningBox,
+{
+type: 'box', layout: 'vertical', backgroundColor: '#FFF9C4', cornerRadius: 'lg', paddingAll: 'md',
+contents: [
+{ type: 'text', text: '\uD83D\uDCAC Cham ngon hom nay', size: 'sm', color: '#F57F17', weight: 'bold' },
+{ type: 'text', text: quote, size: 'sm', color: '#5D4037', wrap: true, margin: 'sm', style: 'italic' },
+],
+},
+],
+},
+};
+}
+
+function buildMorningCombinedFlexMessage(greetingText, weatherText, solarText, lunarText, quote, holidayText, cleaningDayLabel, cleaningPeople) {
+return {
+type: 'flex',
+altText: 'Chao buoi sang! ' + weatherText,
+contents: buildMorningCombinedCard(greetingText, weatherText, solarText, lunarText, quote, holidayText, cleaningDayLabel, cleaningPeople),
+};
+}
+
+module.exports = { buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage, buildMorningCombinedFlexMessage: buildMorningCombinedFlexMessage };
