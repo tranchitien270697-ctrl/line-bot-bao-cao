@@ -358,4 +358,44 @@ contents: buildMorningCombinedCard(greetingText, weatherText, solarText, lunarTe
 };
 }
 
-module.exports = { buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage, buildMorningCombinedFlexMessage: buildMorningCombinedFlexMessage };
+function buildReminderWithCleaningFlexMessage(reminderText, cleaningDayLabel, cleaningPeople) {
+const PALETTE = ['#FF6B6B', '#FFA94D', '#51CF66', '#339AF0', '#CC5DE8'];
+const cleaningRows = (cleaningPeople || []).map((p, i) => ({
+type: 'box', layout: 'horizontal', backgroundColor: PALETTE[i % PALETTE.length], cornerRadius: 'md', paddingAll: 'sm', margin: i === 0 ? 'sm' : 'xs',
+contents: [
+{ type: 'text', text: '\uD83E\uDDF9', flex: 0, size: 'sm' },
+{ type: 'text', text: p, color: '#FFFFFF', weight: 'bold', size: 'sm', margin: 'sm', gravity: 'center', wrap: true },
+],
+}));
+const cleaningBox = cleaningRows.length > 0 ? [{
+type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
+contents: [
+{ type: 'text', text: '\uD83E\uDDF9 Nhac lai lich ve sinh - ' + cleaningDayLabel, size: 'sm', color: '#1565C0', weight: 'bold' },
+...cleaningRows,
+],
+}] : [];
+const bubble = {
+type: 'bubble', size: 'mega',
+header: {
+type: 'box', layout: 'vertical', backgroundColor: GREEN, paddingAll: 'lg',
+contents: [
+{ type: 'text', text: '\uD83D\uDD14 NHAC VIEC', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+],
+},
+body: {
+type: 'box', layout: 'vertical', backgroundColor: '#F1F8E9', paddingAll: 'lg', spacing: 'md',
+contents: [
+{
+type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
+contents: [
+{ type: 'text', text: reminderText, size: 'sm', color: '#333333', wrap: true },
+],
+},
+...cleaningBox,
+],
+},
+};
+return { type: 'flex', altText: reminderText, contents: bubble };
+}
+
+module.exports = { buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage, buildMorningCombinedFlexMessage: buildMorningCombinedFlexMessage, buildReminderWithCleaningFlexMessage: buildReminderWithCleaningFlexMessage };
