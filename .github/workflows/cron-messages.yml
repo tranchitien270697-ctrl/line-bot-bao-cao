@@ -1,3 +1,39 @@
 name: LINE Scheduled Messages
-on: {schedule: [{cron: '10 20 * * *'}, {cron: '0 22 * * *'}, {cron: '30 0 * * *'}, {cron: '0 0 * * *'}, {cron: '30 2 * * *'}, {cron: '0 4 * * *'}, {cron: '30 4 * * *'}, {cron: '30 6 * * *'}, {cron: '0 11 * * *'}, {cron: '10 13 * * *'}, {cron: '0 10 * * *'}], workflow_dispatch: {inputs: {id: {description: 'Message id to send (1-9, cleaning, or daily)', required: false}}}}
-jobs: {send: {runs-on: ubuntu-latest, steps: [{name: 'Determine message ids', id: pick, run: 'IDS=""; case "${{ github.event.schedule }}" in "10 20 * * *") IDS="1" ;; "0 22 * * *") IDS="2 cleaning" ;; "30 0 * * *") IDS="3" ;; "0 0 * * *") IDS="daily" ;; "30 2 * * *") IDS="4" ;; "0 4 * * *") IDS="5" ;; "30 4 * * *") IDS="6" ;; "30 6 * * *") IDS="7" ;; "0 11 * * *") IDS="8" ;; "10 13 * * *") IDS="9" ;; "0 10 * * *") IDS="cleaning" ;; *) IDS="${{ github.event.inputs.id }}" ;; esac; echo "ids=$IDS" >> $GITHUB_OUTPUT'}, {name: 'Call endpoints', run: 'for id in ${{ steps.pick.outputs.ids }}; do curl -s "https://line-bot-bao-cao.onrender.com/cron/$id?key=kesach2026secret"; done'}]}}
+on:
+  schedule:
+    - cron: '0 0 * * *'
+    - cron: '0 22 * * *'
+    - cron: '30 2 * * *'
+    - cron: '30 4 * * *'
+    - cron: '30 6 * * *'
+    - cron: '0 11 * * *'
+    - cron: '10 13 * * *'
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'Message id to send (morning, morning2, midday, 6, 7, 8, 9)'
+        required: false
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine message ids
+        id: pick
+        run: |
+          IDS=""
+          case "${{ github.event.schedule }}" in
+            "0 0 * * *") IDS="morning" ;;
+            "0 22 * * *") IDS="morning2" ;;
+            "30 2 * * *") IDS="midday" ;;
+            "30 4 * * *") IDS="6" ;;
+            "30 6 * * *") IDS="7" ;;
+            "0 11 * * *") IDS="8" ;;
+            "10 13 * * *") IDS="9" ;;
+            *) IDS="${{ github.event.inputs.id }}" ;;
+          esac
+          echo "ids=$IDS" >> $GITHUB_OUTPUT
+      - name: Call endpoints
+        run: |
+          for id in ${{ steps.pick.outputs.ids }}; do
+            curl -s "https://line-bot-bao-cao.onrender.com/cron/$id?key=kesach2026secret"
+          done
