@@ -296,7 +296,7 @@ type: 'bubble', size: 'mega',
 header: {
 type: 'box', layout: 'vertical', backgroundColor: '#42A5F5', paddingAll: 'lg',
 contents: [
-{ type: 'text', text: '\u2600\uFE0F CHAO BUOI SANG!', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+{ type: 'text', text: '\u2600\uFE0F CHÀO BUỔI SÁNG!', color: '#FFFFFF', weight: 'bold', size: 'lg' },
 ],
 },
 body: {
