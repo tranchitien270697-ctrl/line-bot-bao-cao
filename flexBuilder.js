@@ -287,7 +287,7 @@ contents: [
 const cleaningBox = cleaningRows.length > 0 ? [{
 type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
 contents: [
-{ type: 'text', text: '\uD83E\uDDF9 Lich ve sinh - ' + cleaningDayLabel, size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: '\uD83E\uDDF9 Lịch vệ sinh - ' + cleaningDayLabel, size: 'sm', color: '#1565C0', weight: 'bold' },
 ...cleaningRows,
 ],
 }] : [];
@@ -305,35 +305,35 @@ contents: [
 {
 type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
 contents: [
-{ type: 'text', text: '\uD83D\uDC4B Chao ngay moi', size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: '\uD83D\uDC4B Chào ngày mới', size: 'sm', color: '#1565C0', weight: 'bold' },
 { type: 'text', text: greetingText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
 ],
 },
 {
 type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
 contents: [
-{ type: 'text', text: '\uD83C\uDF24\uFE0F Thoi tiet hom nay', size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: '\uD83C\uDF24\uFE0F Thời tiết hôm nay', size: 'sm', color: '#1565C0', weight: 'bold' },
 { type: 'text', text: weatherText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
 ],
 },
 {
 type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
 contents: [
-{ type: 'text', text: '\uD83D\uDCC5 Ngay duong lich', size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: '\uD83D\uDCC5 Ngày dương lịch', size: 'sm', color: '#1565C0', weight: 'bold' },
 { type: 'text', text: solarText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
 ],
 },
 {
 type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md',
 contents: [
-{ type: 'text', text: '\uD83C\uDF19 Am lich', size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: '\uD83C\uDF19 Âm lịch', size: 'sm', color: '#1565C0', weight: 'bold' },
 { type: 'text', text: lunarText, size: 'sm', color: '#333333', wrap: true, margin: 'sm' },
 ],
 },
 ...(holidayText ? [{
 type: 'box', layout: 'vertical', backgroundColor: '#FFEBEE', cornerRadius: 'lg', paddingAll: 'md',
 contents: [
-{ type: 'text', text: '\uD83C\uDF89 Ngay le hom nay', size: 'sm', color: '#C62828', weight: 'bold' },
+{ type: 'text', text: '\uD83C\uDF89 Ngày lễ hôm nay', size: 'sm', color: '#C62828', weight: 'bold' },
 { type: 'text', text: holidayText, size: 'sm', color: '#B71C1C', weight: 'bold', wrap: true, margin: 'sm' },
 ],
 }] : []),
@@ -341,7 +341,7 @@ contents: [
 {
 type: 'box', layout: 'vertical', backgroundColor: '#FFF9C4', cornerRadius: 'lg', paddingAll: 'md',
 contents: [
-{ type: 'text', text: '\uD83D\uDCAC Cham ngon hom nay', size: 'sm', color: '#F57F17', weight: 'bold' },
+{ type: 'text', text: '\uD83D\uDCAC Châm ngôn hôm nay', size: 'sm', color: '#F57F17', weight: 'bold' },
 { type: 'text', text: quote, size: 'sm', color: '#5D4037', wrap: true, margin: 'sm', style: 'italic' },
 ],
 },
@@ -370,7 +370,7 @@ contents: [
 const cleaningBox = cleaningRows.length > 0 ? [{
 type: 'box', layout: 'vertical', backgroundColor: '#FFFFFF', cornerRadius: 'lg', paddingAll: 'md', margin: 'md',
 contents: [
-{ type: 'text', text: '\uD83E\uDDF9 Nhac lai lich ve sinh - ' + cleaningDayLabel, size: 'sm', color: '#1565C0', weight: 'bold' },
+{ type: 'text', text: '\uD83E\uDDF9 Nhắc lại lịch vệ sinh - ' + cleaningDayLabel, size: 'sm', color: '#1565C0', weight: 'bold' },
 ...cleaningRows,
 ],
 }] : [];
