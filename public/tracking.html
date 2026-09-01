@@ -21,6 +21,8 @@
     --green-dim:#123028;
     --red:#FB6A5D;
     --red-dim:#3A1E1B;
+    --blue:#5B9BFF;
+    --blue-dim:#132038;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0; background:var(--bg); color:var(--text);}
@@ -40,7 +42,6 @@
   }
   .num{font-family:'Space Grotesk',sans-serif;}
 
-  /* top bar */
   .topbar{
     display:flex; align-items:center; justify-content:space-between;
     padding:18px 20px 14px 20px;
@@ -56,7 +57,6 @@
   }
   .icon-btn:active{background:var(--line);}
 
-  /* landing */
   .landing-hero{padding:8px 20px 28px 20px;}
   .landing-hero h1{
     font-family:'Space Grotesk',sans-serif; font-weight:700;
@@ -78,10 +78,10 @@
   }
   .role-card.driver .dot{background:var(--amber-dim); color:var(--amber);}
   .role-card.manager .dot{background:var(--green-dim); color:var(--green);}
+  .role-card.lookup .dot{background:var(--blue-dim); color:var(--blue);}
   .role-card .txt strong{display:block; font-size:16px; margin-bottom:2px;}
   .role-card .txt span{font-size:13px; color:var(--muted);}
 
-  /* generic screen */
   .screen{padding:0 20px; flex:1; display:flex; flex-direction:column;}
   .back-row{padding:14px 20px 0 20px; display:flex; align-items:center; gap:10px;}
   .back-btn{
@@ -90,7 +90,7 @@
   }
 
   label.field-label{font-size:13px; color:var(--muted); margin:18px 0 8px 0; display:block;}
-  input[type="text"], input[type="number"]{
+  input[type="text"], input[type="number"], input[type="tel"]{
     width:100%; background:var(--surface); border:1px solid var(--line); color:var(--text);
     padding:14px 16px; border-radius:12px; font-size:16px; font-family:'Inter',sans-serif;
   }
@@ -104,11 +104,11 @@
   .btn-primary{background:var(--amber); color:#1A1400;}
   .btn-primary:active{opacity:.85;}
   .btn-stop{background:var(--red); color:#2A0A06;}
+  .btn-blue{background:var(--blue); color:#081226;}
   .btn-outline{background:transparent; border:1px solid var(--line); color:var(--text);}
   .btn-outline:active{background:var(--surface);}
   .btn[disabled]{opacity:.5;}
 
-  /* driver status hero */
   .status-hero{
     margin-top:26px; padding:28px 20px; border-radius:20px;
     background:var(--surface); border:1px solid var(--line);
@@ -128,17 +128,15 @@
   }
   .status-hero.idle .pulse-dot{background:var(--muted2);}
   .status-hero.idle .pulse-ring{display:none;}
+  .status-hero.delivering .pulse-dot{background:var(--blue);}
+  .status-hero.delivering .pulse-ring{background:var(--blue);}
   .status-hero .headline{font-size:16px; font-weight:600;}
   .status-hero .detail{font-size:13px; color:var(--muted); line-height:1.5;}
-  .status-hero .self-dist{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:34px; margin-top:4px;}
-  .status-hero .self-dist small{font-size:14px; font-weight:500; color:var(--muted); margin-left:4px;}
 
   .field-block{margin-top:22px;}
   .btn-row{margin-top:22px; display:flex; flex-direction:column; gap:10px;}
 
-  /* manager list */
   .mgr-header{padding:16px 20px 4px 20px;}
-  .mgr-header h2{font-family:'Space Grotesk',sans-serif; font-size:20px; margin:0 0 4px 0;}
   .mgr-header p{font-size:13px; color:var(--muted); margin:0;}
 
   .vehicle-list{padding:16px 20px 0 20px; display:flex; flex-direction:column; gap:10px;}
@@ -168,7 +166,19 @@
 
   .settings-note{font-size:12px; color:var(--muted2); margin-top:10px; line-height:1.6;}
 
-  a.plain{color:var(--amber); text-decoration:none;}
+  .photo-input-wrap{
+    margin-top:14px; border:1px dashed var(--line); border-radius:14px; padding:22px;
+    text-align:center; color:var(--muted); font-size:13px; cursor:pointer;
+  }
+  .photo-preview{width:100%; border-radius:14px; margin-top:14px; display:block;}
+
+  .result-card{
+    margin-top:22px; background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  }
+  .result-card img{width:100%; display:block; max-height:220px; object-fit:cover;}
+  .result-card .rc-body{padding:16px;}
+  .result-card .rc-title{font-size:15px; font-weight:600; margin-bottom:4px;}
+  .result-card .rc-sub{font-size:13px; color:var(--muted); margin-bottom:14px;}
 
   ::-webkit-scrollbar{width:0; height:0;}
 </style>
@@ -180,31 +190,30 @@
 (function(){
   "use strict";
 
-  const API = ""; // same-origin
+  const API = "";
 
-  // ---------- API helpers ----------
   async function apiGet(path){
-    try{ const r = await fetch(API + path); if(!r.ok) return null; return await r.json(); }catch(e){ return null; }
+    try{ const r = await fetch(API + path); if(!r.ok) return {ok:false, status:r.status}; const j = await r.json(); return {ok:true, data:j}; }catch(e){ return {ok:false, status:0}; }
   }
   async function apiPost(path, body){
     try{
       const r = await fetch(API + path, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-      if(!r.ok) return null;
-      return await r.json();
-    }catch(e){ return null; }
+      const j = await r.json().catch(()=>null);
+      return {ok:r.ok, data:j};
+    }catch(e){ return {ok:false, data:null}; }
   }
   async function apiDelete(path){
     try{ await fetch(API + path, {method:'DELETE'}); }catch(e){}
   }
 
-  async function getLocal(key){ try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }catch(e){ return null; } }
-  async function setLocal(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+  function getLocal(key){ try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }catch(e){ return null; } }
+  function setLocal(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
 
-  // ---------- utils ----------
   function slugify(s){
     return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
       .replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'tai-xe';
   }
+  function normPhone(s){ return String(s||'').replace(/[^0-9]/g,''); }
   function haversineKm(lat1, lon1, lat2, lon2){
     const R = 6371;
     const dLat = (lat2-lat1) * Math.PI/180;
@@ -221,51 +230,60 @@
     return h + ' giờ trước';
   }
   function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function fileToBase64(file){
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = () => resolve(r.result.split(',')[1]);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
 
-  // ---------- state ----------
   let view = 'loading';
   let shareTimer = null;
   let refreshTimer = null;
   let driverName = '';
   let storeConfig = null;
+  let delivering = false;
+  let lastKnownPos = null;
 
   const app = document.getElementById('app');
   function render(html){ app.innerHTML = html; }
 
-  // ---------- LANDING ----------
   function screenLanding(){
     stopTimers();
     view = 'landing';
     render(`
       <div class="topbar">
-        <div class="brand">
-          <div class="name">Theo dõi xe giao hàng</div>
-          <div class="sub">5152 · Kế Sách</div>
-        </div>
+        <div class="brand"><div class="name">Theo dõi xe giao hàng</div><div class="sub">5152 · Kế Sách</div></div>
       </div>
       <div class="landing-hero">
         <h1>Xe đang ở đâu, còn bao lâu về tới?</h1>
-        <p>Tài xế bật chia sẻ vị trí trên điện thoại, quản lý xem danh sách xe và thời gian ước tính quay về siêu thị.</p>
+        <p>Tài xế bật chia sẻ vị trí và ghi lại điểm giao hàng, quản lý xem danh sách xe, ai cũng tra được vị trí nhà khách qua số điện thoại.</p>
       </div>
       <div class="role-list">
         <div class="role-card driver" id="go-driver">
           <div class="dot">🛵</div>
-          <div class="txt"><strong>Tôi là Tài xế</strong><span>Chia sẻ vị trí xe của tôi</span></div>
+          <div class="txt"><strong>Tôi là Tài xế</strong><span>Chia sẻ vị trí và giao hàng</span></div>
         </div>
         <div class="role-card manager" id="go-manager">
           <div class="dot">📍</div>
           <div class="txt"><strong>Tôi là Quản lý</strong><span>Xem danh sách xe đang giao</span></div>
         </div>
+        <div class="role-card lookup" id="go-lookup">
+          <div class="dot">🔍</div>
+          <div class="txt"><strong>Tra cứu khách hàng</strong><span>Tìm vị trí nhà khách theo SĐT</span></div>
+        </div>
       </div>
     `);
     document.getElementById('go-driver').onclick = () => screenDriverSetup();
     document.getElementById('go-manager').onclick = () => screenManagerInit();
+    document.getElementById('go-lookup').onclick = () => screenLookup();
   }
 
-  // ---------- DRIVER: name setup ----------
   async function screenDriverSetup(){
     view = 'driver-setup';
-    const saved = await getLocal('driver-name');
+    const saved = getLocal('driver-name');
     render(`
       <div class="back-row"><button class="back-btn" id="back">← Quay lại</button></div>
       <div class="screen">
@@ -281,16 +299,16 @@
       </div>
     `);
     document.getElementById('back').onclick = screenLanding;
-    document.getElementById('start').onclick = async () => {
+    document.getElementById('start').onclick = () => {
       const val = document.getElementById('dname').value.trim();
       if(!val){ document.getElementById('dname').focus(); return; }
       driverName = val;
-      await setLocal('driver-name', val);
+      setLocal('driver-name', val);
+      delivering = false;
       screenDriverActive();
     };
   }
 
-  // ---------- DRIVER: active sharing ----------
   function screenDriverActive(){
     view = 'driver-active';
     render(`
@@ -302,6 +320,7 @@
           <div class="detail" id="detail">${esc(driverName)}</div>
         </div>
         <div class="btn-row">
+          <button class="btn btn-blue" id="godeliver">Bắt đầu giao hàng</button>
           <button class="btn btn-stop" id="stop">Dừng chia sẻ</button>
         </div>
         <p class="settings-note">Giữ trang này mở trên điện thoại trong lúc giao hàng. Vị trí được cập nhật khoảng mỗi 12 giây.</p>
@@ -309,7 +328,30 @@
     `);
     document.getElementById('back').onclick = () => { stopSharing(); screenLanding(); };
     document.getElementById('stop').onclick = () => { stopSharing(); screenDriverSetup(); };
+    document.getElementById('godeliver').onclick = () => { delivering = true; screenDriverActive2(); };
     startSharing();
+  }
+
+  function screenDriverActive2(){
+    view = 'driver-delivering';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Quay lại</button></div>
+      <div class="screen">
+        <div class="status-hero delivering" id="hero">
+          <div class="pulse-wrap"><div class="pulse-ring"></div><div class="pulse-dot"></div></div>
+          <div class="headline" id="headline">Đang giao hàng</div>
+          <div class="detail" id="detail">${esc(driverName)}</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="arrive">Đã đến nơi — Hoàn tất</button>
+          <button class="btn btn-outline" id="cancel">Hủy chuyến giao này</button>
+        </div>
+        <p class="settings-note">Khi tới nhà khách, bấm "Đã đến nơi" để lưu vị trí và ảnh nhà khách cho lần giao sau.</p>
+      </div>
+    `);
+    document.getElementById('back').onclick = () => { stopSharing(); screenLanding(); };
+    document.getElementById('cancel').onclick = () => { delivering = false; screenDriverActive(); };
+    document.getElementById('arrive').onclick = () => screenArrive();
   }
 
   function startSharing(){
@@ -324,18 +366,19 @@
   function tickShare(){
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const {latitude, longitude} = pos.coords;
+      lastKnownPos = {lat: latitude, lng: longitude};
       await apiPost('/api/tracking/driver', {name: driverName, lat: latitude, lng: longitude});
       let distTxt = '';
-      if(!storeConfig) storeConfig = await apiGet('/api/tracking/store');
+      if(!storeConfig){ const r = await apiGet('/api/tracking/store'); if(r.ok) storeConfig = r.data; }
       if(storeConfig && storeConfig.lat){
         const d = haversineKm(latitude, longitude, storeConfig.lat, storeConfig.lng);
         distTxt = d < 0.3 ? 'Đã tới siêu thị' : d.toFixed(1) + ' km về siêu thị';
       }
-      setHero(true, 'Đang chia sẻ vị trí', distTxt || esc(driverName));
+      if(!delivering) setHero(true, 'Đang chia sẻ vị trí', distTxt || esc(driverName));
     }, (err) => {
       let msg = 'Không lấy được vị trí. Kiểm tra lại quyền truy cập vị trí.';
       if(err.code === 1) msg = 'Anh/chị chưa cho phép truy cập vị trí. Vào Cài đặt trình duyệt để bật.';
-      setHero(false, 'Chưa chia sẻ được vị trí', msg);
+      if(!delivering) setHero(false, 'Chưa chia sẻ được vị trí', msg);
     }, {enableHighAccuracy:true, timeout:10000, maximumAge:5000});
   }
 
@@ -343,8 +386,8 @@
     const hero = document.getElementById('hero');
     if(!hero) return;
     hero.classList.toggle('idle', !active);
-    document.getElementById('headline').textContent = headline;
-    document.getElementById('detail').textContent = detail;
+    const h = document.getElementById('headline'); if(h) h.textContent = headline;
+    const d = document.getElementById('detail'); if(d) d.textContent = detail;
   }
 
   function stopSharing(){
@@ -352,9 +395,103 @@
     if(driverName){ apiDelete('/api/tracking/driver/' + slugify(driverName)); }
   }
 
-  // ---------- MANAGER: init (check store config) ----------
+  // ---------- ARRIVE: nhap SDT khach, kiem tra trung, chup anh neu can ----------
+  function screenArrive(){
+    view = 'arrive';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Quay lại</button></div>
+      <div class="screen">
+        <div class="landing-hero" style="padding-left:0;padding-right:0;">
+          <h1>Xác nhận giao hàng</h1>
+          <p>Nhập số điện thoại khách để lưu vị trí nhà cho lần giao sau.</p>
+        </div>
+        <label class="field-label" for="phone">Số điện thoại khách</label>
+        <input type="tel" id="phone" placeholder="VD: 0909 123 456">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="check">Kiểm tra & Hoàn tất</button>
+        </div>
+        <p class="settings-note" id="status"></p>
+      </div>
+    `);
+    document.getElementById('back').onclick = screenDriverActive2;
+    document.getElementById('check').onclick = async () => {
+      const phone = normPhone(document.getElementById('phone').value);
+      const statusEl = document.getElementById('status');
+      if(!phone || phone.length < 8){ statusEl.textContent = 'Số điện thoại chưa hợp lệ.'; return; }
+      statusEl.textContent = 'Đang kiểm tra…';
+      const r = await apiGet('/api/tracking/customer/' + phone);
+      if(r.ok){
+        statusEl.textContent = 'Khách đã có sẵn trong hệ thống, không cần lưu lại.';
+        setTimeout(finishDelivery, 900);
+      } else {
+        screenCapturePhoto(phone);
+      }
+    };
+  }
+
+  function screenCapturePhoto(phone){
+    view = 'capture';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Quay lại</button></div>
+      <div class="screen">
+        <div class="landing-hero" style="padding-left:0;padding-right:0;">
+          <h1>Chụp ảnh nhà khách</h1>
+          <p>Khách chưa có trong hệ thống. Chụp ảnh mặt tiền nhà để lần sau tài xế khác dễ nhận ra.</p>
+        </div>
+        <label class="photo-input-wrap" id="picklabel">
+          📷 Bấm để mở camera
+          <input type="file" accept="image/*" capture="environment" id="photofile" style="display:none;">
+        </label>
+        <img id="preview" class="photo-preview" style="display:none;">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="save" disabled>Lưu và hoàn tất</button>
+        </div>
+        <p class="settings-note" id="status"></p>
+      </div>
+    `);
+    document.getElementById('back').onclick = () => screenArrive();
+    const fileInput = document.getElementById('photofile');
+    const preview = document.getElementById('preview');
+    const saveBtn = document.getElementById('save');
+    let chosenFile = null;
+    document.getElementById('picklabel').onclick = (e) => {};
+    fileInput.onchange = () => {
+      if(fileInput.files && fileInput.files[0]){
+        chosenFile = fileInput.files[0];
+        preview.src = URL.createObjectURL(chosenFile);
+        preview.style.display = 'block';
+        saveBtn.disabled = false;
+      }
+    };
+    saveBtn.onclick = async () => {
+      if(!chosenFile) return;
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'Đang lưu…';
+      saveBtn.disabled = true;
+      const b64 = await fileToBase64(chosenFile);
+      const pos = lastKnownPos || {lat:0, lng:0};
+      const r = await apiPost('/api/tracking/customer', {
+        phone, lat: pos.lat, lng: pos.lng, photoBase64: b64, savedBy: driverName
+      });
+      if(r.ok){
+        statusEl.textContent = 'Đã lưu thành công.';
+        setTimeout(finishDelivery, 700);
+      } else {
+        statusEl.textContent = 'Lưu thất bại, thử lại.';
+        saveBtn.disabled = false;
+      }
+    };
+  }
+
+  function finishDelivery(){
+    delivering = false;
+    screenDriverActive();
+  }
+
+  // ---------- MANAGER ----------
   async function screenManagerInit(){
-    storeConfig = await apiGet('/api/tracking/store');
+    const r = await apiGet('/api/tracking/store');
+    storeConfig = r.ok ? r.data : null;
     if(storeConfig && storeConfig.lat){
       screenManagerList();
     } else {
@@ -390,7 +527,6 @@
     };
   }
 
-  // ---------- MANAGER: list ----------
   async function screenManagerList(){
     view = 'manager-list';
     render(`
@@ -412,7 +548,8 @@
   async function refreshList(){
     const wrap = document.getElementById('listwrap');
     if(!wrap) return;
-    const drivers = (await apiGet('/api/tracking/drivers')) || [];
+    const r = await apiGet('/api/tracking/drivers');
+    const drivers = r.ok ? r.data : [];
     if(!drivers.length){
       wrap.innerHTML = `<div class="empty-state">Chưa có xe nào chia sẻ vị trí.<br>Nhờ tài xế mở trang này, chọn "Tôi là Tài xế" và bấm bắt đầu chia sẻ.</div>`;
       return;
@@ -434,14 +571,8 @@
         <div class="vehicle-row ${cls}" data-url="${mapsUrl}">
           <div class="bar"></div>
           <div class="body">
-            <div class="who">
-              <div class="nm">${esc(d.name)}</div>
-              <div class="upd">${updTxt}</div>
-            </div>
-            <div class="metrics">
-              <div class="d num">${distTxt}</div>
-              <div class="t">${timeTxt}</div>
-            </div>
+            <div class="who"><div class="nm">${esc(d.name)}</div><div class="upd">${updTxt}</div></div>
+            <div class="metrics"><div class="d num">${distTxt}</div><div class="t">${timeTxt}</div></div>
           </div>
         </div>`;
     }).join('');
@@ -481,6 +612,59 @@
       screenManagerList();
     };
     document.getElementById('reloc').onclick = screenStoreSetup;
+  }
+
+  // ---------- LOOKUP ----------
+  async function screenLookup(){
+    view = 'lookup';
+    if(!storeConfig){ const r = await apiGet('/api/tracking/store'); if(r.ok) storeConfig = r.data; }
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Quay lại</button></div>
+      <div class="screen">
+        <div class="landing-hero" style="padding-left:0;padding-right:0;">
+          <h1>Tra cứu khách hàng</h1>
+          <p>Nhập số điện thoại khách để xem vị trí nhà và chỉ đường từ siêu thị.</p>
+        </div>
+        <label class="field-label" for="phone">Số điện thoại khách</label>
+        <input type="tel" id="phone" placeholder="VD: 0909 123 456">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="search">Tìm khách hàng</button>
+        </div>
+        <div id="result"></div>
+      </div>
+    `);
+    document.getElementById('back').onclick = screenLanding;
+    document.getElementById('search').onclick = async () => {
+      const phone = normPhone(document.getElementById('phone').value);
+      const resultEl = document.getElementById('result');
+      if(!phone || phone.length < 8){ resultEl.innerHTML = '<p class="settings-note">Số điện thoại chưa hợp lệ.</p>'; return; }
+      resultEl.innerHTML = '<p class="settings-note">Đang tìm…</p>';
+      const r = await apiGet('/api/tracking/customer/' + phone);
+      if(!r.ok){
+        resultEl.innerHTML = '<p class="settings-note">Chưa có dữ liệu khách này. Tài xế giao lần đầu sẽ tự lưu lại.</p>';
+        return;
+      }
+      const c = r.data;
+      let distTxt = '';
+      if(storeConfig && storeConfig.lat){
+        const d = haversineKm(storeConfig.lat, storeConfig.lng, c.lat, c.lng);
+        distTxt = d.toFixed(1) + ' km từ siêu thị';
+      }
+      const mapsUrl = storeConfig && storeConfig.lat
+        ? 'https://www.google.com/maps/dir/?api=1&origin=' + storeConfig.lat + ',' + storeConfig.lng + '&destination=' + c.lat + ',' + c.lng
+        : 'https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng;
+      resultEl.innerHTML = `
+        <div class="result-card">
+          ${c.photoUrl ? `<img src="${esc(c.photoUrl)}">` : ''}
+          <div class="rc-body">
+            <div class="rc-title">Khách ${esc(c.phone)}</div>
+            <div class="rc-sub">${distTxt}${c.savedBy ? ' · Lưu bởi ' + esc(c.savedBy) : ''}</div>
+            <button class="btn btn-blue" id="directions">Chỉ đường từ siêu thị</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('directions').onclick = () => window.open(mapsUrl, '_blank');
+    };
   }
 
   function stopTimers(){
