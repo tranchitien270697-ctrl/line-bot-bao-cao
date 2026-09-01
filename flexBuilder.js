@@ -379,7 +379,7 @@ type: 'bubble', size: 'mega',
 header: {
 type: 'box', layout: 'vertical', backgroundColor: GREEN, paddingAll: 'lg',
 contents: [
-{ type: 'text', text: '\uD83D\uDD14 NHAC VIEC', color: '#FFFFFF', weight: 'bold', size: 'lg' },
+{ type: 'text', text: '\uD83D\uDD14 NHẮC VIỆC', color: '#FFFFFF', weight: 'bold', size: 'lg' },
 ],
 },
 body: {
