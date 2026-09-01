@@ -4,14 +4,13 @@ on:
     - cron: '0 0 * * *'
     - cron: '0 22 * * *'
     - cron: '10 3 * * *'
-    - cron: '30 4 * * *'
-    - cron: '30 6 * * *'
+    - cron: '0 6 * * *'
     - cron: '0 11 * * *'
     - cron: '10 13 * * *'
   workflow_dispatch:
     inputs:
       id:
-        description: 'Message id to send (morning, morning2, midday, 6, 7, 8, 9)'
+        description: 'Message id to send (morning, morning2, midday, 6, 8, 9)'
         required: false
 jobs:
   send:
@@ -25,8 +24,7 @@ jobs:
             "0 0 * * *") IDS="morning" ;;
             "0 22 * * *") IDS="morning2" ;;
             "10 3 * * *") IDS="midday" ;;
-            "30 4 * * *") IDS="6" ;;
-            "30 6 * * *") IDS="7" ;;
+            "0 6 * * *") IDS="6" ;;
             "0 11 * * *") IDS="8" ;;
             "10 13 * * *") IDS="9" ;;
             *) IDS="${{ github.event.inputs.id }}" ;;
