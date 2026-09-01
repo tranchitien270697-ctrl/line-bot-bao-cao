@@ -116,7 +116,7 @@ return res.send('Sent morning combined card');
 }
 
 if (req.params.id === 'morning2') {
-const text2 = config.SCHEDULED_MESSAGES['2'] + '\n\n' + config.SCHEDULED_MESSAGES['3'];
+const text2 = 'Xin chào ngày mới Anh Chị !\n\nCác công việc sáng nay cần hoàn tất trước 9h\n\n1. Nhập Aba\n2. Nhập Fresh\n3. Kiểm Date/Kiểm Kê/Tem giá /Bắn kệ\n\nTất cả công việc vui lòng có ảnh chụp màn hình và tạo Album báo cáo đầy đủ (Cân Aba,....)\n\nChúc Anh chị làm việc vui vẻ ! Cảm ơn Anh Chị !';
 const msg2 = flexBuilder.buildReminderFlexMessage(text2);
 await client.pushMessage(config.TARGET_GROUP_ID, msg2);
 return res.send('Sent morning2 combined message');
