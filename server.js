@@ -106,7 +106,7 @@ weatherText = (await wRes.text()).trim();
 console.error('Weather fetch error:', weatherErr);
 }
 const lunarText = lunarCalendar.getTodayLunarText();
-const solarText = dayLabel + ', ngay ' + now.getDate() + ' thang ' + (now.getMonth() + 1) + ' nam ' + now.getFullYear();
+const solarText = dayLabel + ', ngày ' + now.getDate() + ' tháng ' + (now.getMonth() + 1) + ' năm ' + now.getFullYear();
 const quote = config.LIFE_QUOTES[Math.floor(Math.random() * config.LIFE_QUOTES.length)];
 const holidayText = lunarCalendar.getTodayHoliday();
 const greetingText = config.SCHEDULED_MESSAGES['1'];
