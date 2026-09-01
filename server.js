@@ -67,6 +67,51 @@ app.post('/api/tracking/store', (req, res) => {
 app.get('/api/tracking/store', (req, res) => {
   res.json(trackingStoreConfig || {});
 });
+
+// ---------- Khach hang giao hang (luu 1 lan, tra cuu theo SDT) ----------
+let trackingCustomers = {};
+const trackingCustomersPath = path.join(__dirname, 'public', 'tracking-customers.json');
+try {
+  if (fs.existsSync(trackingCustomersPath)) {
+    trackingCustomers = JSON.parse(fs.readFileSync(trackingCustomersPath, 'utf8'));
+  }
+} catch (e) { console.error('tracking customers load error', e); }
+
+function normalizePhone(p) {
+  return String(p || '').replace(/[^0-9]/g, '');
+}
+
+app.get('/api/tracking/customer/:phone', (req, res) => {
+  const phone = normalizePhone(req.params.phone);
+  const c = trackingCustomers[phone];
+  if (!c) return res.status(404).json({ error: 'not found' });
+  res.json(c);
+});
+
+app.post('/api/tracking/customer', (req, res) => {
+  const { phone, lat, lng, photoBase64, savedBy } = req.body || {};
+  const p = normalizePhone(phone);
+  if (!p || typeof lat !== 'number' || typeof lng !== 'number') {
+    return res.status(400).json({ error: 'missing fields' });
+  }
+  if (trackingCustomers[p]) {
+    return res.json({ ok: true, existed: true, customer: trackingCustomers[p] });
+  }
+  let photoUrl = null;
+  if (photoBase64) {
+    try {
+      const dir = path.join(__dirname, 'public', 'tmp');
+      const filename = 'khach_' + p + '_' + Date.now() + '.jpg';
+      const filePath = path.join(dir, filename);
+      fs.writeFileSync(filePath, Buffer.from(photoBase64, 'base64'));
+      photoUrl = 'https://' + req.get('host') + '/tmp/' + filename;
+    } catch (e) { console.error('customer photo save error', e); }
+  }
+  const record = { phone: p, lat, lng, photoUrl, savedBy: savedBy || '', savedAt: Date.now() };
+  trackingCustomers[p] = record;
+  try { fs.writeFileSync(trackingCustomersPath, JSON.stringify(trackingCustomers)); } catch (e) { console.error('tracking customers save error', e); }
+  res.json({ ok: true, existed: false, customer: record });
+});
 const client = new lineBotSdk.Client(lineConfig);
 
 app.get('/', (req, res) => res.send('LINE report bot is running'));
