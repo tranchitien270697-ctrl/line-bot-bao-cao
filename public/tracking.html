@@ -166,6 +166,16 @@
 
   .settings-note{font-size:12px; color:var(--muted2); margin-top:10px; line-height:1.6;}
 
+  .map-frame{
+    margin-top:10px; border-radius:14px; overflow:hidden; border:1px solid var(--line);
+    height:220px; background:var(--surface);
+  }
+  .map-frame iframe{width:100%; height:100%; border:0; filter:invert(92%) hue-rotate(180deg) contrast(90%);}
+  .map-empty{
+    height:100%; display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:13px;
+  }
+
   .photo-input-wrap{
     margin-top:14px; border:1px dashed var(--line); border-radius:14px; padding:22px;
     text-align:center; color:var(--muted); font-size:13px; cursor:pointer;
@@ -435,8 +445,13 @@
       <div class="back-row"><button class="back-btn" id="back">← Quay lại</button></div>
       <div class="screen">
         <div class="landing-hero" style="padding-left:0;padding-right:0;">
-          <h1>Chụp ảnh nhà khách</h1>
-          <p>Khách chưa có trong hệ thống. Chụp ảnh mặt tiền nhà để lần sau tài xế khác dễ nhận ra.</p>
+          <h1>Xác nhận vị trí & ảnh nhà</h1>
+          <p>Khách chưa có trong hệ thống. Xem ghim có đúng nhà khách không, chụp ảnh mặt tiền rồi lưu lại.</p>
+        </div>
+        <label class="field-label">Vị trí ghim trên bản đồ</label>
+        <div class="map-frame" id="mapwrap"></div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn btn-outline" id="relocate">📍 Lấy lại vị trí hiện tại</button>
         </div>
         <label class="photo-input-wrap" id="picklabel">
           📷 Bấm để mở camera
@@ -450,6 +465,22 @@
       </div>
     `);
     document.getElementById('back').onclick = () => screenArrive();
+    function drawMap(){
+      const wrap = document.getElementById('mapwrap');
+      const pos = lastKnownPos;
+      if(!pos){ wrap.innerHTML = '<div class="map-empty">Chưa xác định được vị trí.</div>'; return; }
+      wrap.innerHTML = `<iframe src="https://maps.google.com/maps?q=${pos.lat},${pos.lng}&z=18&output=embed" loading="lazy"></iframe>`;
+    }
+    drawMap();
+    document.getElementById('relocate').onclick = () => {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'Đang lấy vị trí…';
+      navigator.geolocation.getCurrentPosition((pos) => {
+        lastKnownPos = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+        drawMap();
+        statusEl.textContent = 'Đã cập nhật vị trí.';
+      }, () => { statusEl.textContent = 'Không lấy được vị trí, thử lại.'; }, {enableHighAccuracy:true, timeout:10000});
+    };
     const fileInput = document.getElementById('photofile');
     const preview = document.getElementById('preview');
     const saveBtn = document.getElementById('save');
