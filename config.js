@@ -10,7 +10,7 @@ module.exports = {
     '5': 'Mình có công việc báo cáo Nộp Tiền trước 14h, Anh Chị nhớ hoàn tất nhé !',
     '6': 'Mình có công việc báo cáo Fresh vào lúc 14h, Anh Chị nhớ hoàn tất nhé !',
     '7': 'Mình có công việc báo cáo Fresh vào lúc 16h, Anh Chị nhớ hoàn tất nhé !',
-    '8': 'Anh Chị cần kiểm tra và hoàn tất các công việc sau đây:\n\n1. Kiểm tra Tool CVST\n2. Kiểm tra hình ảnh  kệ phụ trách\n3. Kiểm tra đơn Online-Các vấn đề tiền\n4. Kiểm tra Fresh cuối ngày\n5. Vệ sinh Toilet\n\nCảm Ơn Anh Chị đã hoàn tất Cv cuối ngày!',
+    '8': 'Anh Chị cần kiểm tra và hoàn tất các công việc sau đây:\n\n1. Kiểm tra Tool CVST\n2. Kiểm tra hình ảnh  kệ phụ trách\n3. Kiểm tra đơn Online-Các vấn đề về tiền\n4. Kiểm tra Fresh cuối ngày\n5. Vệ sinh Toilet\n\nCảm Ơn Anh Chị đã hoàn tất Cv cuối ngày!',
     '9': 'Chúc Anh Chị Ngủ Ngon! Nghĩ ngơi sớm nhé !',
   },
 
