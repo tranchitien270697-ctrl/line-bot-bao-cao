@@ -123,7 +123,7 @@ return res.send('Sent morning2 combined message');
 }
 
 if (req.params.id === 'midday') {
-const text45 = config.SCHEDULED_MESSAGES['4'] + '\n\n' + config.SCHEDULED_MESSAGES['5'];
+const text45 = 'Xin chào Anh Chị, Anh Chị cần hoàn tất các công việc sau:\n\n1. Báo cáo Hình ảnh chất lượng Fresh nhóm 5152- Kế Sách\n(Nhóm Zalo siêu thị cũng gần gửi hình Fresh-Các khuyến mãi đến với Khách Hàng)\n2. Báo cáo Fresh nhóm KV\n3. Báo cáo Thu Ngân nhóm KV\n\nCảm Ơn Anh Chị đã hoàn tất !';
 const msg45 = flexBuilder.buildReminderFlexMessage(text45);
 await client.pushMessage(config.TARGET_GROUP_ID, msg45);
 return res.send('Sent midday combined message');
