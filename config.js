@@ -26,7 +26,7 @@ module.exports = {
     6: ['Trường', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
   },
 
-  WEATHER_LOCATION: 'Soc+Trang',
+  WEATHER_LOCATION: 'Sóc+Trăng',
 
   LIFE_QUOTES: [
     'Hãy sống mỗi ngày như thể đó là ngày cuối cùng, và học hỏi như thể sẽ sống mãi mãi.',
