@@ -5,8 +5,8 @@ on:
     - cron: '0 22 * * *'
     - cron: '50 3 * * *'
     - cron: '10 7 * * *'
-    - cron: '0 11 * * *'
-    - cron: '10 13 * * *'
+    - cron: '30 12 * * *'
+    - cron: '0 15 * * *'
   workflow_dispatch:
     inputs:
       id:
@@ -25,8 +25,8 @@ jobs:
             "0 22 * * *") IDS="morning2" ;;
             "50 3 * * *") IDS="midday" ;;
             "10 7 * * *") IDS="6" ;;
-            "0 11 * * *") IDS="8" ;;
-            "10 13 * * *") IDS="9" ;;
+            "30 12 * * *") IDS="8" ;;
+            "0 15 * * *") IDS="9" ;;
             *) IDS="${{ github.event.inputs.id }}" ;;
           esac
           echo "ids=$IDS" >> $GITHUB_OUTPUT
