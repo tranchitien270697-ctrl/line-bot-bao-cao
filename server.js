@@ -147,7 +147,7 @@ const now6 = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Ch
 const dow6 = now6.getDay();
 const people6 = config.CLEANING_SCHEDULE[dow6] || [];
 const dayLabel6 = config.DAY_LABELS[dow6];
-const text6 = config.SCHEDULED_MESSAGES['6'];
+const text6 = 'Xin chào Anh Chị, Anh Chị cần hoàn tất các công việc sau:\n\n1. Báo cáo Hình ảnh chất lượng Fresh nhóm 5152- Kế Sách\n(Nhóm Zalo siêu thị cũng gần gửi hình Fresh-Các khuyến mãi đến với Khách Hàng)\n2. Anh Chị đã hoàn tất Úp phiếu nộp tiền và hoàn tất báo cáo nhóm KT-KV chưa ?\n\nCảm Ơn Anh Chị đã hoàn tất !';
 const msg6 = flexBuilder.buildReminderWithCleaningFlexMessage(text6, dayLabel6, people6);
 await client.pushMessage(config.TARGET_GROUP_ID, msg6);
 return res.send('Sent id 6 with cleaning reminder');
