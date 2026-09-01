@@ -16,6 +16,57 @@ const fs = require('fs');
 const path = require('path');
 app.use(express.json({ limit: '15mb' }));
 app.use('/tmp', express.static(path.join(__dirname, 'public', 'tmp')));
+
+// ---------- Theo doi xe giao hang ----------
+let trackingDrivers = {};
+let trackingStoreConfig = null;
+const trackingConfigPath = path.join(__dirname, 'public', 'tracking-store.json');
+try {
+  if (fs.existsSync(trackingConfigPath)) {
+    trackingStoreConfig = JSON.parse(fs.readFileSync(trackingConfigPath, 'utf8'));
+  }
+} catch (e) { console.error('tracking config load error', e); }
+
+function slugifyDriver(s) {
+  return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'tai-xe';
+}
+
+app.get('/tracking', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'tracking.html'));
+});
+
+app.post('/api/tracking/driver', (req, res) => {
+  const { name, lat, lng } = req.body || {};
+  if (!name || typeof lat !== 'number' || typeof lng !== 'number') {
+    return res.status(400).json({ error: 'missing fields' });
+  }
+  trackingDrivers[slugifyDriver(name)] = { name, lat, lng, updatedAt: Date.now() };
+  res.json({ ok: true });
+});
+
+app.delete('/api/tracking/driver/:slug', (req, res) => {
+  delete trackingDrivers[req.params.slug];
+  res.json({ ok: true });
+});
+
+app.get('/api/tracking/drivers', (req, res) => {
+  res.json(Object.values(trackingDrivers));
+});
+
+app.post('/api/tracking/store', (req, res) => {
+  const { lat, lng, speedKmh } = req.body || {};
+  if (typeof lat !== 'number' || typeof lng !== 'number') {
+    return res.status(400).json({ error: 'missing fields' });
+  }
+  trackingStoreConfig = { lat, lng, speedKmh: speedKmh || 30 };
+  try { fs.writeFileSync(trackingConfigPath, JSON.stringify(trackingStoreConfig)); } catch (e) { console.error('tracking config save error', e); }
+  res.json({ ok: true });
+});
+
+app.get('/api/tracking/store', (req, res) => {
+  res.json(trackingStoreConfig || {});
+});
 const client = new lineBotSdk.Client(lineConfig);
 
 app.get('/', (req, res) => res.send('LINE report bot is running'));
