@@ -101,7 +101,7 @@ const dayLabel = config.DAY_LABELS[dow];
 let weatherText = 'Khong lay duoc du lieu thoi tiet';
 try {
 const wRes = await fetch('https://wttr.in/' + config.WEATHER_LOCATION + '?format=3&m&lang=vi');
-weatherText = (await wRes.text()).trim();
+weatherText = (await wRes.text()).trim(); const wColonIdx = weatherText.indexOf(':'); if (wColonIdx > -1) { weatherText = 'Sóc Trăng:' + weatherText.slice(wColonIdx + 1); }
 } catch (weatherErr) {
 console.error('Weather fetch error:', weatherErr);
 }
