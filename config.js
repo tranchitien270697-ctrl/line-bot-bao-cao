@@ -3,7 +3,7 @@ module.exports = {
   TARGET_GROUP_ID: 'Cf36a100a627b9eafdd7c5e87fe3a88a6',
   CRON_SECRET: 'kesach2026secret',
   SCHEDULED_MESSAGES: {
-    '1': 'Chào ngày mới Anh Chị, Chúc Anh Chị làm việc vui vẻ !\nNhớ Selfie đúng giờ nhé !',
+    '1': 'Chào ngày mới Anh Chị, Chúc Anh Chị làm việc vui vẻ !',
     '2': 'Mình nhớ báo cáo Nhập Aba, Nhập Fresh, Kiểm Date, Kiểm Kê, In Tem Giá, Các công việc cơ bản trước 8h nhé !',
     '3': 'Mình có công việc báo cáo Fresh vào lúc 10h , Anh Chị nhớ hoàn tất nhé !',
     '4': 'Mình có công việc báo cáo Fresh vào nhóm siêu thị vào lúc 12h, Các nhóm Thu Ngân-Fresh Khu vực vào khung giờ này cũng cần báo cáo, Anh Chị nhớ hoàn tất nhé !',
