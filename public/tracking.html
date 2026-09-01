@@ -277,7 +277,7 @@
       </div>
     `);
     document.getElementById('go-driver').onclick = () => screenDriverSetup();
-    document.getElementById('go-manager').onclick = () => screenManagerInit();
+    document.getElementById('go-manager').onclick = () => screenManagerPin();
     document.getElementById('go-lookup').onclick = () => screenLookup();
   }
 
@@ -486,6 +486,41 @@
   function finishDelivery(){
     delivering = false;
     screenDriverActive();
+  }
+
+  // ---------- MANAGER PIN ----------
+  const MANAGER_PIN = '130452';
+  function screenManagerPin(){
+    view = 'manager-pin';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Quay lại</button></div>
+      <div class="screen">
+        <div class="landing-hero" style="padding-left:0;padding-right:0;">
+          <h1>Khu vực Quản lý</h1>
+          <p>Nhập mã để xem danh sách xe đang giao.</p>
+        </div>
+        <label class="field-label" for="pin">Mã quản lý</label>
+        <input type="text" id="pin" placeholder="Nhập mã" inputmode="numeric" autocomplete="off">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="pinok">Vào xem</button>
+        </div>
+        <p class="settings-note" id="status"></p>
+      </div>
+    `);
+    document.getElementById('back').onclick = screenLanding;
+    const pinInput = document.getElementById('pin');
+    const doCheck = () => {
+      if(pinInput.value.trim() === MANAGER_PIN){
+        screenManagerInit();
+      } else {
+        document.getElementById('status').textContent = 'Mã không đúng.';
+        pinInput.value = '';
+        pinInput.focus();
+      }
+    };
+    document.getElementById('pinok').onclick = doCheck;
+    pinInput.onkeydown = (e) => { if(e.key === 'Enter') doCheck(); };
+    pinInput.focus();
   }
 
   // ---------- MANAGER ----------
