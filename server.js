@@ -66,57 +66,48 @@ app.get('/api/tracking/store', (req, res) => {
 });
 
 // ---------- Khach hang giao hang (luu qua Google Sheet, ben vung khi deploy lai) ----------
-const CUSTOMER_API_URL = 'https://script.google.com/macros/s/AKfycbyqNeDQZrIc5c2yqw0K62PEz4Elkyy7n4A5jeKOya2B_alL1M9Ms_ZiqEpR-O-aVzjAyg/exec';
-const CUSTOMER_API_KEY = 'kesach2026secret';
-
-function normalizePhone(p) {
-  return String(p || '').replace(/[^0-9]/g, '');
-}
+const CUSTOMER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyqNeDQZrIc5c2yqw0K62PEz4Elkyy7n4A5jeKOya2B_alL1M9Ms_ZiqEpR-O-aVzjAyg/exec';
+const CUSTOMER_SHEET_KEY = 'kesach2026secret';
 
 app.get('/api/tracking/customers', async (req, res) => {
   try {
-    const r = await fetch(CUSTOMER_API_URL + '?key=' + CUSTOMER_API_KEY);
+    const r = await fetch(CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY);
     const data = await r.json();
     res.json(data);
   } catch (e) {
-    console.error('customer list fetch error', e);
+    console.error('customer sheet fetch error', e);
     res.status(500).json({ error: 'sheet fetch failed' });
   }
 });
 
 app.get('/api/tracking/customer/:phone', async (req, res) => {
-  const phone = normalizePhone(req.params.phone);
   try {
-    const r = await fetch(CUSTOMER_API_URL + '?key=' + CUSTOMER_API_KEY + '&phone=' + encodeURIComponent(phone));
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&phone=' + encodeURIComponent(req.params.phone);
+    const r = await fetch(url);
     const data = await r.json();
-    if (data.error) return res.status(404).json(data);
+    if (data && data.error) return res.status(404).json(data);
     res.json(data);
   } catch (e) {
-    console.error('customer get fetch error', e);
+    console.error('customer sheet fetch error', e);
     res.status(500).json({ error: 'sheet fetch failed' });
   }
 });
 
 app.post('/api/tracking/customer', async (req, res) => {
-  const { phone, lat, lng, photoBase64, savedBy } = req.body || {};
-  const p = normalizePhone(phone);
-  if (!p || typeof lat !== 'number' || typeof lng !== 'number') {
-    return res.status(400).json({ error: 'missing fields' });
-  }
   try {
-    const r = await fetch(CUSTOMER_API_URL, {
+    const body = Object.assign({}, req.body, { key: CUSTOMER_SHEET_KEY });
+    const r = await fetch(CUSTOMER_SHEET_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: CUSTOMER_API_KEY, phone: p, lat, lng, photoBase64, savedBy })
+      body: JSON.stringify(body)
     });
     const data = await r.json();
     res.json(data);
   } catch (e) {
-    console.error('customer save error', e);
+    console.error('customer sheet save error', e);
     res.status(500).json({ error: 'sheet save failed' });
   }
 });
-const client = new lineBotSdk.Client(lineConfig);
 
 app.get('/', (req, res) => res.send('LINE report bot is running'));
 
