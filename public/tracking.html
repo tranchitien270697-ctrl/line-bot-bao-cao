@@ -666,8 +666,7 @@
         <input type="number" id="speed" value="${(storeConfig && storeConfig.speedKmh) || 30}" min="5" max="80">
         <div class="btn-row">
           <button class="btn btn-primary" id="save">Lưu</button>
-          <button class="btn btn-outline" id="reloc">Đặt lại vị trí siêu thị</button>
-        </div>
+          </div>
       </div>
     `);
     document.getElementById('back').onclick = screenManagerList;
@@ -677,7 +676,6 @@
       await apiPost('/api/tracking/store', storeConfig);
       screenManagerList();
     };
-    document.getElementById('reloc').onclick = screenStoreSetup;
   }
 
   // ---------- LOOKUP ----------
