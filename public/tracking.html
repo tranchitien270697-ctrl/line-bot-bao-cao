@@ -737,7 +737,7 @@
 
   function bindDirectionsBtn(container, c){
     const mapsUrl = storeConfig && storeConfig.lat
-      ? 'https://www.google.com/maps/dir/?api=1&origin=' + storeConfig.lat + ',' + storeConfig.lng + '&destination=' + c.lat + ',' + c.lng
+      ? 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent('Siêu thị Bách hóa XANH, Kế Sách, Sóc Trăng') + '&destination=' + c.lat + ',' + c.lng
       : 'https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng;
     const btn = container.querySelector('#directions');
     if(btn) btn.onclick = () => window.open(mapsUrl, '_blank');
