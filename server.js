@@ -19,7 +19,8 @@ app.use('/tmp', express.static(path.join(__dirname, 'public', 'tmp')));
 
 // ---------- Theo doi xe giao hang ----------
 let trackingDrivers = {};
-let trackingStoreConfig = null;
+const DEFAULT_STORE_LOCATION = { lat: 9.7688092, lng: 105.9873116, speedKmh: 30 };
+let trackingStoreConfig = DEFAULT_STORE_LOCATION;
 const trackingConfigPath = path.join(__dirname, 'public', 'tracking-store.json');
 try {
   if (fs.existsSync(trackingConfigPath)) {
@@ -80,6 +81,10 @@ try {
 function normalizePhone(p) {
   return String(p || '').replace(/[^0-9]/g, '');
 }
+
+app.get('/api/tracking/customers', (req, res) => {
+  res.json(Object.values(trackingCustomers));
+});
 
 app.get('/api/tracking/customer/:phone', (req, res) => {
   const phone = normalizePhone(req.params.phone);
