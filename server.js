@@ -35,6 +35,11 @@ app.get('/tracking', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'tracking.html'));
 });
 
+function slugifyDriver(s) {
+  return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'tai-xe';
+}
+
 app.post('/api/tracking/driver', (req, res) => {
   const { name, lat, lng } = req.body || {};
   if (!name || typeof lat !== 'number' || typeof lng !== 'number') {
