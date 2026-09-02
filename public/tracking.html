@@ -506,8 +506,14 @@
         phone, lat: pos.lat, lng: pos.lng, photoBase64: b64, savedBy: driverName
       });
       if(r.ok){
-        statusEl.textContent = 'Đã lưu thành công.';
-        setTimeout(finishDelivery, 700);
+        if(r.data && r.data.photoError){
+          statusEl.textContent = 'Đã lưu vị trí khách, nhưng ẢNH KHÔNG LƯU ĐƯỢC. Vui lòng báo quản lý để bổ sung ảnh sau.';
+          statusEl.style.color = '#FB6A5D';
+          setTimeout(finishDelivery, 2500);
+        } else {
+          statusEl.textContent = 'Đã lưu thành công.';
+          setTimeout(finishDelivery, 700);
+        }
       } else {
         statusEl.textContent = 'Lưu thất bại, thử lại.';
         saveBtn.disabled = false;
