@@ -19,19 +19,16 @@ app.use('/tmp', express.static(path.join(__dirname, 'public', 'tmp')));
 
 // ---------- Theo doi xe giao hang ----------
 let trackingDrivers = {};
-const DEFAULT_STORE_LOCATION = { lat: 9.7688092, lng: 105.9873116, speedKmh: 30 };
-let trackingStoreConfig = DEFAULT_STORE_LOCATION;
-const trackingConfigPath = path.join(__dirname, 'public', 'tracking-store.json');
+const STORE_LAT = 9.768855;
+const STORE_LNG = 105.987309;
+let trackingSpeedKmh = 30;
+const trackingSpeedPath = path.join(__dirname, 'public', 'tracking-speed.json');
 try {
-  if (fs.existsSync(trackingConfigPath)) {
-    trackingStoreConfig = JSON.parse(fs.readFileSync(trackingConfigPath, 'utf8'));
+  if (fs.existsSync(trackingSpeedPath)) {
+    const s = JSON.parse(fs.readFileSync(trackingSpeedPath, 'utf8'));
+    if (typeof s.speedKmh === 'number') trackingSpeedKmh = s.speedKmh;
   }
-} catch (e) { console.error('tracking config load error', e); }
-
-function slugifyDriver(s) {
-  return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'tai-xe';
-}
+} catch (e) { console.error('tracking speed load error', e); }
 
 app.get('/tracking', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'tracking.html'));
@@ -56,17 +53,16 @@ app.get('/api/tracking/drivers', (req, res) => {
 });
 
 app.post('/api/tracking/store', (req, res) => {
-  const { lat, lng, speedKmh } = req.body || {};
-  if (typeof lat !== 'number' || typeof lng !== 'number') {
-    return res.status(400).json({ error: 'missing fields' });
+  const { speedKmh } = req.body || {};
+  if (typeof speedKmh === 'number' && speedKmh > 0) {
+    trackingSpeedKmh = speedKmh;
+    try { fs.writeFileSync(trackingSpeedPath, JSON.stringify({ speedKmh: trackingSpeedKmh })); } catch (e) { console.error('tracking speed save error', e); }
   }
-  trackingStoreConfig = { lat, lng, speedKmh: speedKmh || 30 };
-  try { fs.writeFileSync(trackingConfigPath, JSON.stringify(trackingStoreConfig)); } catch (e) { console.error('tracking config save error', e); }
-  res.json({ ok: true });
+  res.json({ ok: true, lat: STORE_LAT, lng: STORE_LNG, speedKmh: trackingSpeedKmh });
 });
 
 app.get('/api/tracking/store', (req, res) => {
-  res.json(trackingStoreConfig || {});
+  res.json({ lat: STORE_LAT, lng: STORE_LNG, speedKmh: trackingSpeedKmh });
 });
 
 // ---------- Khach hang giao hang (luu 1 lan, tra cuu theo SDT) ----------
