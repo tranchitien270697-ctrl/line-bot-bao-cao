@@ -4,7 +4,7 @@ const GREY = '#8C8C8C';
 const DARK = '#1A1A1A';
 
 function formatVND(n) {
-    return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' d';
+    return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' D';
 }
 function formatNumber(n, decimals) {
     return new Intl.NumberFormat('vi-VN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(n);
@@ -211,7 +211,7 @@ function buildGoodnightFlexMessage(weatherText, tip) {
       };
 }
 
-function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries) {
+function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal) {
       const BLUE = '#1565C0';
       const totalDelta = todayTotal - yesterdayTotal;
       const totalPct = yesterdayTotal ? (totalDelta / yesterdayTotal) * 100 : null;
@@ -258,6 +258,9 @@ function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industri
                                               { type: 'text', text: arrow(totalDelta) + ' ' + formatPct(totalPct), size: 'sm', weight: 'bold', color: deltaColor(totalDelta), flex: 2, align: 'end' },
                                                         ],
                             },
+                            (monthTotal !== undefined ? { type: 'box', layout: 'horizontal', margin: 'xs', contents: [
+                              { type: 'text', text: 'Lũy kế tháng ' + formatVND(monthTotal), size: 'xs', color: GREY, flex: 5 },
+                            ] } : { type: 'filler' }),
                             { type: 'separator', margin: 'md' },
                             { type: 'text', text: 'NGÀNH HÀNG NỔI BẬT', size: 'xxs', color: GREY, weight: 'bold', margin: 'md' },
                             { type: 'box', layout: 'vertical', margin: 'sm', contents: industryRows },
