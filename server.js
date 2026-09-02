@@ -115,6 +115,22 @@ app.post('/api/tracking/customer', async (req, res) => {
   }
 });
 
+app.delete('/api/tracking/customer/:phone', async (req, res) => {
+  try {
+    const body = { key: CUSTOMER_SHEET_KEY, action: 'delete', phone: req.params.phone };
+    const r = await fetch(CUSTOMER_SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('customer sheet delete error', e);
+    res.status(500).json({ error: 'sheet delete failed' });
+  }
+});
+
 app.get('/', (req, res) => res.send('LINE report bot is running'));
 
 app.get('/push/revenue', async (req, res) => {
