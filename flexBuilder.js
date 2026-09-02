@@ -222,7 +222,7 @@ function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industri
       const top = sorted.slice(0, 6);
       const restCount = sorted.length - top.length;
 
-      const industryRows = top.map((it, i) => {
+      function buildIndustryRow(it, i) {
               const delta = it.t - it.y;
               const pct = it.y ? (delta / it.y) * 100 : null;
               return {
@@ -233,10 +233,20 @@ function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industri
                             { type: 'text', text: arrow(delta) + formatPct(pct), size: 'xxs', color: deltaColor(delta), flex: 2, align: 'end', gravity: 'center' },
                                   ],
               };
-      });
-      if (restCount > 0) {
-              industryRows.push({ type: 'text', text: 'và ' + restCount + ' ngành hàng khác', size: 'xxs', color: GREY, margin: 'md', align: 'center' });
       }
+
+      const FRESH_NAMES = ['Thịt gia cầm gia súc các loại', 'Thủy Hải Sản Các Loại', 'Rau Củ Các Loại', 'Trái Cây Các Loại'];
+      const totalToday = industries.reduce((s, x) => s + (x.t || 0), 0);
+      const freshItems = FRESH_NAMES.map(name => industries.find(x => x.n === name) || { n: name, t: 0, y: 0 });
+      const freshTotal = freshItems.reduce((s, x) => s + (x.t || 0), 0);
+      const fmcgSorted = industries.filter(x => !FRESH_NAMES.includes(x.n)).slice().sort((a, b) => (b.t || 0) - (a.t || 0));
+      const fmcgTop = fmcgSorted.slice(0, 4);
+      const fmcgTotal = totalToday - freshTotal;
+      const freshPct = totalToday ? (freshTotal / totalToday * 100) : 0;
+      const fmcgPct = totalToday ? (fmcgTotal / totalToday * 100) : 0;
+      const freshRows = freshItems.map(buildIndustryRow);
+      const fmcgRows = fmcgTop.map(buildIndustryRow);
+      
 
       return {
               type: 'bubble', size: 'mega',
@@ -262,8 +272,10 @@ function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industri
                               { type: 'text', text: 'Lũy kế tháng ' + formatVND(monthTotal), size: 'xs', color: GREY, flex: 5 },
                             ] } : { type: 'filler' }),
                             { type: 'separator', margin: 'md' },
-                            { type: 'text', text: 'NGÀNH HÀNG NỔI BẬT', size: 'xxs', color: GREY, weight: 'bold', margin: 'md' },
-                            { type: 'box', layout: 'vertical', margin: 'sm', contents: industryRows },
+                            { type: 'text', text: 'FRESH (' + freshPct.toFixed(1) + '%)', size: 'xxs', color: GREY, weight: 'bold', margin: 'md' },
+                            { type: 'box', layout: 'vertical', margin: 'sm', contents: freshRows },
+                            { type: 'text', text: 'FMCG (' + fmcgPct.toFixed(1) + '%)', size: 'xxs', color: GREY, weight: 'bold', margin: 'md' },
+                            { type: 'box', layout: 'vertical', margin: 'sm', contents: fmcgRows },
                             { type: 'text', margin: 'md', size: 'xxs', color: GREY, text: timeStr },
                                   ],
               },
