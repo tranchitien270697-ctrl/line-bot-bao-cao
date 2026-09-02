@@ -141,13 +141,14 @@ app.get('/push/revenue', async (req, res) => {
                   const storeLabel = req.query.store || '5152-Kế Sách';
                   const todayTotal = parseFloat(req.query.todayTotal) || 0;
                   const yesterdayTotal = parseFloat(req.query.yesterdayTotal) || 0;
+                  const monthTotal = req.query.monthTotal !== undefined ? parseFloat(req.query.monthTotal) : undefined;
                   let industries = [];
                   try {
                               industries = JSON.parse(req.query.industries || '[]');
                   } catch (parseErr) {
                               console.error('Industries parse error:', parseErr);
                   }
-                  const revenueMsg = flexBuilder.buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries);
+                  const revenueMsg = flexBuilder.buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal);
                   await client.pushMessage(config.TARGET_GROUP_ID, revenueMsg);
                   res.send('Sent revenue detail card');
         } catch (err) {
