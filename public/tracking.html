@@ -224,6 +224,7 @@
       .replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'tai-xe';
   }
   function normPhone(s){ return String(s||'').replace(/[^0-9]/g,''); }
+  function maskPhone(s){ const p = String(s||''); return p.length > 3 ? '***' + p.slice(3) : p; }
   function haversineKm(lat1, lon1, lat2, lon2){
     const R = 6371;
     const dLat = (lat2-lat1) * Math.PI/180;
@@ -746,7 +747,7 @@
     const wrap = document.getElementById('history');
     if(!wrap) return;
     const r = await apiGet('/api/tracking/customers');
-    const list = r.ok ? r.data : [];
+    let list = r.ok ? r.data : [];
     if(!list.length){
       wrap.innerHTML = '<p class="settings-note">Chưa có khách hàng nào được lưu.</p>';
       return;
@@ -755,13 +756,14 @@
       list.forEach(c => { c.dist = haversineKm(storeConfig.lat, storeConfig.lng, c.lat, c.lng); });
       list.sort((a,b) => a.dist - b.dist);
     }
+    list = list.slice(0, 20);
     const rows = list.map(c => {
       const distTxt = (storeConfig && storeConfig.lat) ? c.dist.toFixed(1) + ' km' : '';
       return `
         <div class="vehicle-row ok" data-phone="${esc(c.phone)}">
           <div class="bar"></div>
           <div class="body">
-            <div class="who"><div class="nm">${esc(c.phone)}</div><div class="upd">${c.savedBy ? 'Lưu bởi ' + esc(c.savedBy) : ''}</div></div>
+            <div class="who"><div class="nm">${maskPhone(c.phone)}</div><div class="upd">${c.savedBy ? 'Lưu bởi ' + esc(c.savedBy) : ''}</div></div>
             <div class="metrics"><div class="d num">${distTxt}</div></div>
           </div>
         </div>`;
