@@ -697,6 +697,8 @@
           <button class="btn btn-primary" id="search">Tìm khách hàng</button>
         </div>
         <div id="result"></div>
+        <label class="field-label" style="margin-top:26px;">Lịch sử khách hàng (gần → xa siêu thị)</label>
+        <div id="history"><p class="settings-note">Đang tải…</p></div>
       </div>
     `);
     document.getElementById('back').onclick = screenLanding;
@@ -710,27 +712,72 @@
         resultEl.innerHTML = '<p class="settings-note">Chưa có dữ liệu khách này. Tài xế giao lần đầu sẽ tự lưu lại.</p>';
         return;
       }
-      const c = r.data;
-      let distTxt = '';
-      if(storeConfig && storeConfig.lat){
-        const d = haversineKm(storeConfig.lat, storeConfig.lng, c.lat, c.lng);
-        distTxt = d.toFixed(1) + ' km từ siêu thị';
-      }
-      const mapsUrl = storeConfig && storeConfig.lat
-        ? 'https://www.google.com/maps/dir/?api=1&origin=' + storeConfig.lat + ',' + storeConfig.lng + '&destination=' + c.lat + ',' + c.lng
-        : 'https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng;
-      resultEl.innerHTML = `
-        <div class="result-card">
-          ${c.photoUrl ? `<img src="${esc(c.photoUrl)}">` : ''}
-          <div class="rc-body">
-            <div class="rc-title">Khách ${esc(c.phone)}</div>
-            <div class="rc-sub">${distTxt}${c.savedBy ? ' · Lưu bởi ' + esc(c.savedBy) : ''}</div>
-            <button class="btn btn-blue" id="directions">Chỉ đường từ siêu thị</button>
-          </div>
-        </div>
-      `;
-      document.getElementById('directions').onclick = () => window.open(mapsUrl, '_blank');
+      resultEl.innerHTML = renderCustomerCard(r.data);
+      bindDirectionsBtn(resultEl, r.data);
     };
+    loadHistory();
+  }
+
+  function renderCustomerCard(c){
+    let distTxt = '';
+    if(storeConfig && storeConfig.lat){
+      const d = haversineKm(storeConfig.lat, storeConfig.lng, c.lat, c.lng);
+      distTxt = d.toFixed(1) + ' km từ siêu thị';
+    }
+    return `
+      <div class="result-card">
+        ${c.photoUrl ? `<img src="${esc(c.photoUrl)}">` : ''}
+        <div class="rc-body">
+          <div class="rc-title">Khách ${esc(c.phone)}</div>
+          <div class="rc-sub">${distTxt}${c.savedBy ? ' · Lưu bởi ' + esc(c.savedBy) : ''}</div>
+          <button class="btn btn-blue" id="directions">Chỉ đường từ siêu thị</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function bindDirectionsBtn(container, c){
+    const mapsUrl = storeConfig && storeConfig.lat
+      ? 'https://www.google.com/maps/dir/?api=1&origin=' + storeConfig.lat + ',' + storeConfig.lng + '&destination=' + c.lat + ',' + c.lng
+      : 'https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng;
+    const btn = container.querySelector('#directions');
+    if(btn) btn.onclick = () => window.open(mapsUrl, '_blank');
+  }
+
+  async function loadHistory(){
+    const wrap = document.getElementById('history');
+    if(!wrap) return;
+    const r = await apiGet('/api/tracking/customers');
+    const list = r.ok ? r.data : [];
+    if(!list.length){
+      wrap.innerHTML = '<p class="settings-note">Chưa có khách hàng nào được lưu.</p>';
+      return;
+    }
+    if(storeConfig && storeConfig.lat){
+      list.forEach(c => { c.dist = haversineKm(storeConfig.lat, storeConfig.lng, c.lat, c.lng); });
+      list.sort((a,b) => a.dist - b.dist);
+    }
+    const rows = list.map(c => {
+      const distTxt = (storeConfig && storeConfig.lat) ? c.dist.toFixed(1) + ' km' : '';
+      return `
+        <div class="vehicle-row ok" data-phone="${esc(c.phone)}">
+          <div class="bar"></div>
+          <div class="body">
+            <div class="who"><div class="nm">${esc(c.phone)}</div><div class="upd">${c.savedBy ? 'Lưu bởi ' + esc(c.savedBy) : ''}</div></div>
+            <div class="metrics"><div class="d num">${distTxt}</div></div>
+          </div>
+        </div>`;
+    }).join('');
+    wrap.innerHTML = `<div class="vehicle-list" style="padding:0;">${rows}</div>`;
+    wrap.querySelectorAll('.vehicle-row').forEach(el => {
+      el.onclick = () => {
+        const c = list.find(x => x.phone === el.dataset.phone);
+        const resultEl = document.getElementById('result');
+        resultEl.innerHTML = renderCustomerCard(c);
+        bindDirectionsBtn(resultEl, c);
+        resultEl.scrollIntoView({behavior:'smooth', block:'start'});
+      };
+    });
   }
 
   function stopTimers(){
