@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Theo dõi xe giao hàng</title>
+<title>Ứng dụng nội bộ 5152 - Kế Sách</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -261,12 +261,53 @@
   const app = document.getElementById('app');
   function render(html){ app.innerHTML = html; }
 
-  function screenLanding(){
+  // ---------- TRANG CHU (HUB) ----------
+  function screenHome(){
     stopTimers();
-    view = 'landing';
+    view = 'home';
     render(`
       <div class="topbar">
-        <div class="brand"><div class="name">Theo dõi xe giao hàng</div><div class="sub">5152 · Kế Sách</div></div>
+        <div class="brand"><div class="name">Ứng dụng nội bộ</div><div class="sub">5152 · Kế Sách</div></div>
+      </div>
+      <div class="landing-hero">
+        <h1>Chọn khu vực làm việc</h1>
+        <p>Các công cụ nội bộ dùng cho nhân viên siêu thị 5152 · Kế Sách.</p>
+      </div>
+      <div class="role-list">
+        <div class="role-card driver" id="go-vehicle">
+          <div class="dot">🛵</div>
+          <div class="txt"><strong>Xe giao hàng</strong><span>Theo dõi vị trí, khách hàng</span></div>
+        </div>
+        <div class="role-card manager" id="go-revenue">
+          <div class="dot">📊</div>
+          <div class="txt"><strong>Doanh thu</strong><span>Sắp ra mắt trên web</span></div>
+        </div>
+        <div class="role-card lookup" id="go-attendance">
+          <div class="dot">✅</div>
+          <div class="txt"><strong>Điểm danh</strong><span>Mở bảng điểm danh các shop</span></div>
+        </div>
+        <div class="role-card lookup" id="go-reports">
+          <div class="dot">📋</div>
+          <div class="txt"><strong>Báo cáo khác</strong><span>Sắp ra mắt trên web</span></div>
+        </div>
+      </div>
+    `);
+    document.getElementById('go-vehicle').onclick = () => screenVehicleHub();
+    document.getElementById('go-revenue').onclick = () => alert('Module Doanh thu đang được xây dựng, sẽ ra mắt sớm!');
+    document.getElementById('go-attendance').onclick = () => window.open('https://docs.google.com/spreadsheets/d/1LgafgAR2cazTh-Phos5PoXFXvo9smz6UPzDWou0Q1YY/edit', '_blank');
+    document.getElementById('go-reports').onclick = () => alert('Module Báo cáo khác đang được xây dựng, sẽ ra mắt sớm!');
+  }
+
+  function screenVehicleHub(){
+    stopTimers();
+    view = 'vehicle-hub';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Trang chủ</button></div>
+      <div class="topbar">
+        <div class="brand">
+          <div class="name">Theo dõi xe giao hàng</div>
+          <div class="sub">5152 · Kế Sách</div>
+        </div>
       </div>
       <div class="landing-hero">
         <h1>Xe đang ở đâu, còn bao lâu về tới?</h1>
@@ -287,8 +328,9 @@
         </div>
       </div>
     `);
+    document.getElementById('back').onclick = screenHome;
     document.getElementById('go-driver').onclick = () => screenDriverSetup();
-    document.getElementById('go-manager').onclick = () => screenManagerPin();
+    document.getElementById('go-manager').onclick = () => screenManagerInit();
     document.getElementById('go-lookup').onclick = () => screenLookup();
   }
 
@@ -309,7 +351,7 @@
         </div>
       </div>
     `);
-    document.getElementById('back').onclick = screenLanding;
+    document.getElementById('back').onclick = screenVehicleHub;
     document.getElementById('start').onclick = () => {
       const val = document.getElementById('dname').value.trim();
       if(!val){ document.getElementById('dname').focus(); return; }
@@ -337,7 +379,7 @@
         <p class="settings-note">Giữ trang này mở trên điện thoại trong lúc giao hàng. Vị trí được cập nhật khoảng mỗi 12 giây.</p>
       </div>
     `);
-    document.getElementById('back').onclick = () => { stopSharing(); screenLanding(); };
+    document.getElementById('back').onclick = () => { stopSharing(); screenVehicleHub(); };
     document.getElementById('stop').onclick = () => { stopSharing(); screenDriverSetup(); };
     document.getElementById('godeliver').onclick = () => { delivering = true; screenDriverActive2(); };
     startSharing();
@@ -360,7 +402,7 @@
         <p class="settings-note">Khi tới nhà khách, bấm "Đã đến nơi" để lưu vị trí và ảnh nhà khách cho lần giao sau.</p>
       </div>
     `);
-    document.getElementById('back').onclick = () => { stopSharing(); screenLanding(); };
+    document.getElementById('back').onclick = () => { stopSharing(); screenVehicleHub(); };
     document.getElementById('cancel').onclick = () => { delivering = false; screenDriverActive(); };
     document.getElementById('arrive').onclick = () => screenArrive();
   }
@@ -545,7 +587,7 @@
         <p class="settings-note" id="status"></p>
       </div>
     `);
-    document.getElementById('back').onclick = screenLanding;
+    document.getElementById('back').onclick = screenVehicleHub;
     const pinInput = document.getElementById('pin');
     const doCheck = () => {
       if(pinInput.value.trim() === MANAGER_PIN){
@@ -587,7 +629,7 @@
         <p class="settings-note" id="status"></p>
       </div>
     `);
-    document.getElementById('back').onclick = screenLanding;
+    document.getElementById('back').onclick = screenVehicleHub;
     document.getElementById('setloc').onclick = () => {
       document.getElementById('status').textContent = 'Đang xác định vị trí…';
       navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -614,7 +656,7 @@
       </div>
     `);
     document.getElementById('settings').onclick = screenManagerSettings;
-    document.getElementById('backhome').onclick = () => { stopTimers(); screenLanding(); };
+    document.getElementById('backhome').onclick = () => { stopTimers(); screenVehicleHub(); };
     document.getElementById('gocustomers').onclick = () => { stopTimers(); screenManagerCustomers(); };
     await refreshList();
     refreshTimer = setInterval(refreshList, 8000);
@@ -765,7 +807,7 @@ async function screenManagerCustomers(){
         <div id="history"><p class="settings-note">Đang tải…</p></div>
       </div>
     `);
-    document.getElementById('back').onclick = screenLanding;
+    document.getElementById('back').onclick = screenVehicleHub;
     document.getElementById('search').onclick = async () => {
       const phone = normPhone(document.getElementById('phone').value);
       const resultEl = document.getElementById('result');
@@ -849,7 +891,7 @@ async function screenManagerCustomers(){
     if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
   }
 
-  screenLanding();
+  screenHome();
 })();
 </script>
 </body>
