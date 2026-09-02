@@ -65,53 +65,56 @@ app.get('/api/tracking/store', (req, res) => {
   res.json({ lat: STORE_LAT, lng: STORE_LNG, speedKmh: trackingSpeedKmh });
 });
 
-// ---------- Khach hang giao hang (luu 1 lan, tra cuu theo SDT) ----------
-let trackingCustomers = {};
-const trackingCustomersPath = path.join(__dirname, 'public', 'tracking-customers.json');
-try {
-  if (fs.existsSync(trackingCustomersPath)) {
-    trackingCustomers = JSON.parse(fs.readFileSync(trackingCustomersPath, 'utf8'));
-  }
-} catch (e) { console.error('tracking customers load error', e); }
+// ---------- Khach hang giao hang (luu qua Google Sheet, ben vung khi deploy lai) ----------
+const CUSTOMER_API_URL = 'https://script.google.com/macros/s/AKfycbyqNeDQZrIc5c2yqw0K62PEz4Elkyy7n4A5jeKOya2B_alL1M9Ms_ZiqEpR-O-aVzjAyg/exec';
+const CUSTOMER_API_KEY = 'kesach2026secret';
 
 function normalizePhone(p) {
   return String(p || '').replace(/[^0-9]/g, '');
 }
 
-app.get('/api/tracking/customers', (req, res) => {
-  res.json(Object.values(trackingCustomers));
+app.get('/api/tracking/customers', async (req, res) => {
+  try {
+    const r = await fetch(CUSTOMER_API_URL + '?key=' + CUSTOMER_API_KEY);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('customer list fetch error', e);
+    res.status(500).json({ error: 'sheet fetch failed' });
+  }
 });
 
-app.get('/api/tracking/customer/:phone', (req, res) => {
+app.get('/api/tracking/customer/:phone', async (req, res) => {
   const phone = normalizePhone(req.params.phone);
-  const c = trackingCustomers[phone];
-  if (!c) return res.status(404).json({ error: 'not found' });
-  res.json(c);
+  try {
+    const r = await fetch(CUSTOMER_API_URL + '?key=' + CUSTOMER_API_KEY + '&phone=' + encodeURIComponent(phone));
+    const data = await r.json();
+    if (data.error) return res.status(404).json(data);
+    res.json(data);
+  } catch (e) {
+    console.error('customer get fetch error', e);
+    res.status(500).json({ error: 'sheet fetch failed' });
+  }
 });
 
-app.post('/api/tracking/customer', (req, res) => {
+app.post('/api/tracking/customer', async (req, res) => {
   const { phone, lat, lng, photoBase64, savedBy } = req.body || {};
   const p = normalizePhone(phone);
   if (!p || typeof lat !== 'number' || typeof lng !== 'number') {
     return res.status(400).json({ error: 'missing fields' });
   }
-  if (trackingCustomers[p]) {
-    return res.json({ ok: true, existed: true, customer: trackingCustomers[p] });
+  try {
+    const r = await fetch(CUSTOMER_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: CUSTOMER_API_KEY, phone: p, lat, lng, photoBase64, savedBy })
+    });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('customer save error', e);
+    res.status(500).json({ error: 'sheet save failed' });
   }
-  let photoUrl = null;
-  if (photoBase64) {
-    try {
-      const dir = path.join(__dirname, 'public', 'tmp');
-      const filename = 'khach_' + p + '_' + Date.now() + '.jpg';
-      const filePath = path.join(dir, filename);
-      fs.writeFileSync(filePath, Buffer.from(photoBase64, 'base64'));
-      photoUrl = 'https://' + req.get('host') + '/tmp/' + filename;
-    } catch (e) { console.error('customer photo save error', e); }
-  }
-  const record = { phone: p, lat, lng, photoUrl, savedBy: savedBy || '', savedAt: Date.now() };
-  trackingCustomers[p] = record;
-  try { fs.writeFileSync(trackingCustomersPath, JSON.stringify(trackingCustomers)); } catch (e) { console.error('tracking customers save error', e); }
-  res.json({ ok: true, existed: false, customer: record });
 });
 const client = new lineBotSdk.Client(lineConfig);
 
