@@ -272,9 +272,9 @@ function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industri
                               { type: 'text', text: 'Lũy kế tháng ' + formatVND(monthTotal), size: 'xs', color: GREY, flex: 5 },
                             ] } : { type: 'filler' }),
                             { type: 'separator', margin: 'md' },
-                            { type: 'text', text: 'FRESH (' + freshPct.toFixed(1) + '%)', size: 'xxs', color: GREY, weight: 'bold', margin: 'md' },
+                            { type: 'text', text: 'FRESH (' + freshPct.toFixed(1) + '%)', size: 'sm', color: '#6FA8DC', weight: 'bold', margin: 'md' },
                             { type: 'box', layout: 'vertical', margin: 'sm', contents: freshRows },
-                            { type: 'text', text: 'FMCG (' + fmcgPct.toFixed(1) + '%)', size: 'xxs', color: GREY, weight: 'bold', margin: 'md' },
+                            { type: 'text', text: 'FMCG (' + fmcgPct.toFixed(1) + '%)', size: 'sm', color: '#6FA8DC', weight: 'bold', margin: 'md' },
                             { type: 'box', layout: 'vertical', margin: 'sm', contents: fmcgRows },
                             { type: 'text', margin: 'md', size: 'xxs', color: GREY, text: timeStr },
                                   ],
@@ -282,11 +282,11 @@ function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industri
       };
 }
 
-function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries) {
+function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal) {
       return {
               type: 'flex',
               altText: 'Doanh thu hôm nay - ' + storeLabel + ': ' + formatVND(todayTotal),
-              contents: buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries),
+              contents: buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal),
       };
 }
 
@@ -413,31 +413,23 @@ contents: [
 return { type: 'flex', altText: reminderText, contents: bubble };
 }
 
-function buildTrackingPromoBubble() {
-  return {
-    type: 'bubble',
-    body: {
-      type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: 'lg', backgroundColor: '#14171D',
-      contents: [
-        { type: 'text', text: '🚚', size: 'xl' },
-        { type: 'text', text: 'Theo dõi xe giao hàng', weight: 'bold', color: '#FFFFFF', size: 'sm', wrap: true, margin: 'sm' },
-        { type: 'text', text: 'Xem vị trí xe, tra cứu khách', size: 'xxs', color: '#8B93A3', wrap: true }
-      ]
-    },
-    footer: {
-      type: 'box', layout: 'vertical', paddingAll: 'md',
-      contents: [
-        { type: 'button', style: 'primary', color: '#F5A623', height: 'sm',
-          action: { type: 'uri', label: 'Mở ứng dụng', uri: 'https://line-bot-bao-cao.onrender.com/tracking' } }
-      ]
-    }
-  };
-}
-
 function wrapWithPromo(flexMsg) {
   try {
-    const mainBubble = flexMsg.contents;
-    flexMsg.contents = { type: 'carousel', contents: [mainBubble, buildTrackingPromoBubble()] };
+    const bubble = flexMsg.contents;
+    const promoRow = {
+      type: 'box', layout: 'horizontal', margin: 'md', spacing: 'sm', alignItems: 'center',
+      action: { type: 'uri', uri: 'https://line-bot-bao-cao.onrender.com/tracking' },
+      contents: [
+        { type: 'text', text: '🚚 Theo dõi xe giao hàng', size: 'xxs', color: '#6FA8DC', flex: 4, gravity: 'center' },
+        { type: 'text', text: 'Mở app ›', size: 'xxs', color: '#6FA8DC', weight: 'bold', flex: 2, align: 'end', gravity: 'center' }
+      ]
+    };
+    if (bubble.footer && bubble.footer.contents) {
+      bubble.footer.contents.push({ type: 'separator', margin: 'md' });
+      bubble.footer.contents.push(promoRow);
+    } else {
+      bubble.footer = { type: 'box', layout: 'vertical', paddingAll: 'md', contents: [promoRow] };
+    }
   } catch (e) {}
   return flexMsg;
 }
