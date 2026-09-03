@@ -283,8 +283,8 @@
           <div class="txt"><strong>Doanh thu</strong><span>Sắp ra mắt trên web</span></div>
         </div>
         <div class="role-card lookup" id="go-attendance">
-          <div class="dot">✅</div>
-          <div class="txt"><strong>Điểm danh</strong><span>Mở bảng điểm danh các shop</span></div>
+          <div class="dot">🕐</div>
+          <div class="txt"><strong>Giờ Công Nhân Viên</strong><span>Danh sách nhân viên siêu thị</span></div>
         </div>
         <div class="role-card lookup" id="go-reports">
           <div class="dot">📋</div>
@@ -294,8 +294,44 @@
     `);
     document.getElementById('go-vehicle').onclick = () => screenVehicleHub();
     document.getElementById('go-revenue').onclick = () => alert('Module Doanh thu đang được xây dựng, sẽ ra mắt sớm!');
-    document.getElementById('go-attendance').onclick = () => window.open('https://docs.google.com/spreadsheets/d/1LgafgAR2cazTh-Phos5PoXFXvo9smz6UPzDWou0Q1YY/edit', '_blank');
+    document.getElementById('go-attendance').onclick = () => screenEmployees();
     document.getElementById('go-reports').onclick = () => alert('Module Báo cáo khác đang được xây dựng, sẽ ra mắt sớm!');
+  }
+
+  async function screenEmployees(){
+    stopTimers();
+    view = 'employees';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Trang chủ</button></div>
+      <div class="landing-hero" style="padding-left:0;padding-right:0;">
+        <h1>Giờ Công Nhân Viên</h1>
+        <p>Danh sách nhân viên siêu thị 5152 · Kế Sách.</p>
+      </div>
+      <div id="empList"><p class="settings-note">Đang tải…</p></div>
+    `);
+    document.getElementById('back').onclick = screenHome;
+    loadEmployees();
+  }
+
+  async function loadEmployees(){
+    const wrap = document.getElementById('empList');
+    if(!wrap) return;
+    const r = await apiGet('/api/employees');
+    const list = r.ok ? r.data : [];
+    if(!list.length){
+      wrap.innerHTML = '<p class="settings-note">Chưa có nhân viên nào.</p>';
+      return;
+    }
+    const rows = list.map(function(e){
+      return `
+        <div class="vehicle-row ok">
+          <div class="bar"></div>
+          <div class="body">
+            <div class="who"><div class="nm">${esc(e.name)}</div><div class="upd">${esc(e.position||'')}</div></div>
+          </div>
+        </div>`;
+    }).join('');
+    wrap.innerHTML = `<div class="vehicle-list" style="padding:0;">${rows}</div>`;
   }
 
   function screenVehicleHub(){
