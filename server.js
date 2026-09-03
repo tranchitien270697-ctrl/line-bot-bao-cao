@@ -149,7 +149,7 @@ app.get('/push/revenue', async (req, res) => {
                               console.error('Industries parse error:', parseErr);
                   }
                   const revenueMsg = flexBuilder.buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal);
-                  await client.pushMessage(config.TARGET_GROUP_ID, revenueMsg);
+                  await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(revenueMsg));
                   res.send('Sent revenue detail card');
         } catch (err) {
                   console.error('Push revenue error:', err);
@@ -225,21 +225,21 @@ const quote = config.LIFE_QUOTES[Math.floor(Math.random() * config.LIFE_QUOTES.l
 const holidayText = lunarCalendar.getTodayHoliday();
 const greetingText = config.SCHEDULED_MESSAGES['1'];
 const morningMsg = flexBuilder.buildMorningCombinedFlexMessage(greetingText, weatherText, solarText, lunarText, quote, holidayText, dayLabel, people);
-await client.pushMessage(config.TARGET_GROUP_ID, morningMsg);
+await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(morningMsg));
 return res.send('Sent morning combined card');
 }
 
 if (req.params.id === 'morning2') {
 const text2 = 'Xin chào ngày mới Anh Chị !\n\nCác công việc sáng nay cần hoàn tất trước 9h\n\n1. Nhập Aba\n2. Nhập Fresh\n3. Kiểm Date/Kiểm Kê/Tem giá /Bắn kệ\n\nTất cả công việc vui lòng có ảnh chụp màn hình và tạo Album báo cáo đầy đủ (Cân Aba,....)\n\nChúc Anh chị làm việc vui vẻ ! Cảm ơn Anh Chị !';
 const msg2 = flexBuilder.buildReminderFlexMessage(text2);
-await client.pushMessage(config.TARGET_GROUP_ID, msg2);
+await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(msg2));
 return res.send('Sent morning2 combined message');
 }
 
 if (req.params.id === 'midday') {
 const text45 = 'Xin chào Anh Chị, Anh Chị cần hoàn tất các công việc sau:\n\n1. Báo cáo Hình ảnh chất lượng Fresh nhóm 5152- Kế Sách\n(Nhóm Zalo siêu thị cũng gần gửi hình Fresh-Các khuyến mãi đến với Khách Hàng)\n2. Báo cáo Fresh nhóm KV\n3. Báo cáo Thu Ngân nhóm KV\n\nCảm Ơn Anh Chị đã hoàn tất !';
 const msg45 = flexBuilder.buildReminderFlexMessage(text45);
-await client.pushMessage(config.TARGET_GROUP_ID, msg45);
+await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(msg45));
 return res.send('Sent midday combined message');
 }
 
@@ -253,7 +253,7 @@ if (req.params.id === '9') {
                       }
                       const tip = config.BUDDHIST_QUOTES[Math.floor(Math.random() * config.BUDDHIST_QUOTES.length)];
                       const goodnightMsg = flexBuilder.buildGoodnightFlexMessage(weatherText9, tip);
-                      await client.pushMessage(config.TARGET_GROUP_ID, goodnightMsg);
+                      await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(goodnightMsg));
                       return res.send('Sent goodnight card');
           }
                   if (req.params.id === '6') {
@@ -263,7 +263,7 @@ const people6 = config.CLEANING_SCHEDULE[dow6] || [];
 const dayLabel6 = config.DAY_LABELS[dow6];
 const text6 = 'Xin chào Anh Chị, Anh Chị cần hoàn tất các công việc sau:\n\n1. Báo cáo Hình ảnh chất lượng Fresh nhóm 5152- Kế Sách\n(Nhóm Zalo siêu thị cũng gần gửi hình Fresh-Các khuyến mãi đến với Khách Hàng)\n2. Anh Chị đã hoàn tất Úp phiếu nộp tiền và hoàn tất báo cáo nhóm KT-KV chưa ?\n\nCảm Ơn Anh Chị đã hoàn tất !';
 const msg6 = flexBuilder.buildReminderWithCleaningFlexMessage(text6, dayLabel6, people6);
-await client.pushMessage(config.TARGET_GROUP_ID, msg6);
+await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(msg6));
 return res.send('Sent id 6 with cleaning reminder');
 }
 
@@ -272,7 +272,7 @@ const text = config.SCHEDULED_MESSAGES[req.params.id];
                               return res.status(404).send('No message for id ' + req.params.id);
                   }
                   const reminderMsg = flexBuilder.buildReminderFlexMessage(text);
-                  await client.pushMessage(config.TARGET_GROUP_ID, reminderMsg);
+                  await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(reminderMsg));
                   res.send('Sent message ' + req.params.id);
         } catch (err) {
                   console.error('Cron error:', err);
