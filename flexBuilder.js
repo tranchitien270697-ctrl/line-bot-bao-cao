@@ -416,7 +416,6 @@ return { type: 'flex', altText: reminderText, contents: bubble };
 function buildTrackingPromoBubble() {
   return {
     type: 'bubble',
-    size: 'micro',
     body: {
       type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: 'lg', backgroundColor: '#14171D',
       contents: [
