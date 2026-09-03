@@ -131,6 +131,17 @@ app.delete('/api/tracking/customer/:phone', async (req, res) => {
   }
 });
 
+app.get('/api/employees', async (req, res) => {
+  try {
+    const r = await fetch(CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=employee_list');
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('employee list fetch error', e);
+    res.status(500).json({ error: 'employee fetch failed' });
+  }
+});
+
 app.get('/', (req, res) => res.send('LINE report bot is running'));
 
 app.get('/push/revenue', async (req, res) => {
