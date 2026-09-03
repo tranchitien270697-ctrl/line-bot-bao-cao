@@ -420,8 +420,8 @@ function wrapWithPromo(flexMsg) {
       type: 'box', layout: 'horizontal', margin: 'md', spacing: 'sm', alignItems: 'center',
       action: { type: 'uri', uri: 'https://line-bot-bao-cao.onrender.com/tracking' },
       contents: [
-        { type: 'text', text: '🚚 Theo dõi xe giao hàng', size: 'xxs', color: '#6FA8DC', flex: 4, gravity: 'center' },
-        { type: 'text', text: 'Mở app ›', size: 'xxs', color: '#6FA8DC', weight: 'bold', flex: 2, align: 'end', gravity: 'center' }
+        { type: 'text', text: '🚚 Theo dõi xe giao hàng', size: 'xxs', color: '#F5A623', flex: 4, gravity: 'center' },
+        { type: 'text', text: 'Mở app ›', size: 'xxs', color: '#F5A623', weight: 'bold', flex: 2, align: 'end', gravity: 'center' }
       ]
     };
     if (bubble.footer && bubble.footer.contents) {
