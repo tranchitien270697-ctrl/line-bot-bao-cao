@@ -413,4 +413,34 @@ contents: [
 return { type: 'flex', altText: reminderText, contents: bubble };
 }
 
-module.exports = { buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage, buildMorningCombinedFlexMessage: buildMorningCombinedFlexMessage, buildReminderWithCleaningFlexMessage: buildReminderWithCleaningFlexMessage };
+function buildTrackingPromoBubble() {
+  return {
+    type: 'bubble',
+    size: 'micro',
+    body: {
+      type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: 'lg', backgroundColor: '#14171D',
+      contents: [
+        { type: 'text', text: '🚚', size: 'xl' },
+        { type: 'text', text: 'Theo dõi xe giao hàng', weight: 'bold', color: '#FFFFFF', size: 'sm', wrap: true, margin: 'sm' },
+        { type: 'text', text: 'Xem vị trí xe, tra cứu khách', size: 'xxs', color: '#8B93A3', wrap: true }
+      ]
+    },
+    footer: {
+      type: 'box', layout: 'vertical', paddingAll: 'md',
+      contents: [
+        { type: 'button', style: 'primary', color: '#F5A623', height: 'sm',
+          action: { type: 'uri', label: 'Mở ứng dụng', uri: 'https://line-bot-bao-cao.onrender.com/tracking' } }
+      ]
+    }
+  };
+}
+
+function wrapWithPromo(flexMsg) {
+  try {
+    const mainBubble = flexMsg.contents;
+    flexMsg.contents = { type: 'carousel', contents: [mainBubble, buildTrackingPromoBubble()] };
+  } catch (e) {}
+  return flexMsg;
+}
+
+module.exports = { wrapWithPromo: wrapWithPromo, buildCleaningFlexMessage: buildCleaningFlexMessage, buildReminderFlexMessage: buildReminderFlexMessage, buildDailyFlexMessage: buildDailyFlexMessage, buildRevenueDetailFlexMessage: buildRevenueDetailFlexMessage, buildGoodnightFlexMessage: buildGoodnightFlexMessage, buildMorningCombinedFlexMessage: buildMorningCombinedFlexMessage, buildReminderWithCleaningFlexMessage: buildReminderWithCleaningFlexMessage };
