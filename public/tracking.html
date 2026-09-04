@@ -280,7 +280,7 @@
         </div>
         <div class="role-card manager" id="go-revenue">
           <div class="dot">📊</div>
-          <div class="txt"><strong>Doanh thu</strong><span>Sắp ra mắt trên web</span></div>
+          <div class="txt"><strong>Doanh thu</strong><span>Xem báo cáo doanh thu theo tháng</span></div>
         </div>
         <div class="role-card lookup" id="go-attendance">
           <div class="dot">🕐</div>
@@ -293,7 +293,7 @@
       </div>
     `);
     document.getElementById('go-vehicle').onclick = () => screenVehicleHub();
-    document.getElementById('go-revenue').onclick = () => alert('Module Doanh thu đang được xây dựng, sẽ ra mắt sớm!');
+    document.getElementById('go-revenue').onclick = () => screenRevenue();
     document.getElementById('go-attendance').onclick = () => screenEmployees();
     document.getElementById('go-reports').onclick = () => alert('Module Báo cáo khác đang được xây dựng, sẽ ra mắt sớm!');
   }
@@ -349,6 +349,79 @@
         </div>`;
     }).join('');
     wrap.innerHTML = `<div class="vehicle-list" style="padding:0;">${rows}</div>`;
+  }
+
+  function fmtVND(n){ return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' D'; }
+  function fmtDayLabel(dateStr){
+    const parts = dateStr.split('-');
+    if(parts.length !== 3) return dateStr;
+    return parts[2] + '/' + parts[1];
+  }
+
+  async function screenRevenue(){
+    stopTimers();
+    view = 'revenue';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Trang chủ</button></div>
+      <div class="landing-hero" style="padding-left:0;padding-right:0;">
+        <h1>Doanh thu</h1>
+        <p>Báo cáo doanh thu siêu thị 5152 · Kế Sách.</p>
+      </div>
+      <div id="revMonthTabs" style="padding:0 20px 10px;"></div>
+      <div id="revList"><p class="settings-note">Đang tải…</p></div>
+    `);
+    document.getElementById('back').onclick = screenHome;
+    loadRevenueList();
+  }
+
+  async function loadRevenueList(){
+    const tabsWrap = document.getElementById('revMonthTabs');
+    const listWrap = document.getElementById('revList');
+    const r = await apiGet('/api/revenue');
+    const all = r.ok ? r.data : [];
+    if(!all.length){
+      listWrap.innerHTML = '<p class="settings-note">Chưa có dữ liệu doanh thu.</p>';
+      return;
+    }
+    const months = Array.from(new Set(all.map(function(d){ return d.date.slice(0,7); }))).sort().reverse();
+    const labels = {};
+    months.forEach(function(m){ labels[m] = 'T' + parseInt(m.slice(5,7),10); });
+    tabsWrap.innerHTML = months.map(function(m){
+      return `<button class="btn btn-outline rev-month-btn" data-month="${m}" style="width:auto; padding:8px 14px; font-size:13px; display:inline-block; margin:0 6px 6px 0;">${labels[m]}</button>`;
+    }).join('');
+    window.__revAll = all;
+    tabsWrap.querySelectorAll('.rev-month-btn').forEach(function(btn){
+      btn.onclick = function(){ showRevenueMonth(btn.dataset.month); };
+    });
+    showRevenueMonth(months[0]);
+  }
+
+  function showRevenueMonth(month){
+    document.querySelectorAll('.rev-month-btn').forEach(function(btn){
+      btn.classList.toggle('btn-primary', btn.dataset.month === month);
+      btn.classList.toggle('btn-outline', btn.dataset.month !== month);
+    });
+    const listWrap = document.getElementById('revList');
+    const days = (window.__revAll || []).filter(function(d){ return d.date.slice(0,7) === month; });
+    days.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+    const monthTotal = days.reduce(function(s,d){ return s + Number(d.total); }, 0);
+    const rows = days.map(function(d){
+      return `
+        <div class="vehicle-row ok">
+          <div class="bar"></div>
+          <div class="body">
+            <div class="who"><div class="nm">Ngày ${fmtDayLabel(d.date)}</div></div>
+            <div class="metrics"><div class="d num">${fmtVND(d.total)}</div></div>
+          </div>
+        </div>`;
+    }).join('');
+    listWrap.innerHTML = `
+      <div style="padding:0 20px 16px;">
+        <div class="settings-note">Tổng tháng</div>
+        <div style="font-size:28px; font-weight:700; color:var(--text);">${fmtVND(monthTotal)}</div>
+      </div>
+      <div class="vehicle-list" style="padding:0;">${rows}</div>
+    `;
   }
 
   function screenVehicleHub(){
