@@ -545,7 +545,7 @@
     `);
     document.getElementById('back').onclick = screenHome;
     document.getElementById('go-driver').onclick = () => screenDriverSetup();
-    document.getElementById('go-manager').onclick = () => screenManagerInit();
+    document.getElementById('go-manager').onclick = () => screenManagerPin();
     document.getElementById('go-lookup').onclick = () => screenLookup();
   }
 
@@ -784,7 +784,7 @@
   }
 
   // ---------- MANAGER PIN ----------
-  const MANAGER_PIN = '130452';
+  const MANAGER_PIN = '452130';
   function screenManagerPin(){
     view = 'manager-pin';
     render(`
