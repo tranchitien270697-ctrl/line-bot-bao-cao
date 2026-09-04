@@ -131,6 +131,19 @@ app.delete('/api/tracking/customer/:phone', async (req, res) => {
   }
 });
 
+app.get('/api/hours', async (req, res) => {
+  try {
+    const month = req.query.month || '';
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=hours_list' + (month ? '&month=' + encodeURIComponent(month) : '');
+    const r = await fetch(url);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('hours fetch error', e);
+    res.status(500).json({ error: 'hours fetch failed' });
+  }
+});
+
 app.get('/api/employees', async (req, res) => {
   try {
     const r = await fetch(CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=employee_list');
