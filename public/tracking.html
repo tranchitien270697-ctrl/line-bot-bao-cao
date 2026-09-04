@@ -354,7 +354,7 @@
   function fmtVND(n){ return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' D'; }
   function fmtDayLabel(dateStr){
     const parts = dateStr.split('-');
-    if(parts.length !== 3) return dateStr;
+    if(parts.length !== 3) return 'Cả tháng';
     return parts[2] + '/' + parts[1];
   }
 
