@@ -301,33 +301,50 @@
   async function screenEmployees(){
     stopTimers();
     view = 'employees';
+    const months = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08'];
+    const monthLabels = {'2026-01':'T1','2026-02':'T2','2026-03':'T3','2026-04':'T4','2026-05':'T5','2026-06':'T6','2026-07':'T7','2026-08':'T8'};
+    const defaultMonth = months[months.length - 1];
+    const tabs = months.map(function(m){
+      return `<button class="btn btn-outline emp-month-btn" data-month="${m}" style="width:auto; padding:8px 14px; font-size:13px; display:inline-block; margin:0 6px 6px 0;">${monthLabels[m]}</button>`;
+    }).join('');
     render(`
       <div class="back-row"><button class="back-btn" id="back">← Trang chủ</button></div>
       <div class="landing-hero" style="padding-left:0;padding-right:0;">
         <h1>Giờ Công Nhân Viên</h1>
         <p>Danh sách nhân viên siêu thị 5152 · Kế Sách.</p>
       </div>
+      <div style="padding:0 20px 10px;">${tabs}</div>
       <div id="empList"><p class="settings-note">Đang tải…</p></div>
     `);
     document.getElementById('back').onclick = screenHome;
-    loadEmployees();
+    document.querySelectorAll('.emp-month-btn').forEach(function(btn){
+      btn.onclick = function(){ loadHoursForMonth(btn.dataset.month); };
+    });
+    loadHoursForMonth(defaultMonth);
   }
 
-  async function loadEmployees(){
+  async function loadHoursForMonth(month){
+    document.querySelectorAll('.emp-month-btn').forEach(function(btn){
+      btn.classList.toggle('btn-primary', btn.dataset.month === month);
+      btn.classList.toggle('btn-outline', btn.dataset.month !== month);
+    });
     const wrap = document.getElementById('empList');
     if(!wrap) return;
-    const r = await apiGet('/api/employees');
+    wrap.innerHTML = '<p class="settings-note">Đang tải…</p>';
+    const r = await apiGet('/api/hours?month=' + month);
     const list = r.ok ? r.data : [];
     if(!list.length){
-      wrap.innerHTML = '<p class="settings-note">Chưa có nhân viên nào.</p>';
+      wrap.innerHTML = '<p class="settings-note">Chưa có dữ liệu giờ công tháng này.</p>';
       return;
     }
+    list.sort(function(a,b){ return b.totalHours - a.totalHours; });
     const rows = list.map(function(e){
       return `
         <div class="vehicle-row ok">
           <div class="bar"></div>
           <div class="body">
-            <div class="who"><div class="nm">${esc(e.name)}</div><div class="upd">${esc(e.position||'')}</div></div>
+            <div class="who"><div class="nm">${esc(e.name)}</div><div class="upd">${e.days} ngày công</div></div>
+            <div class="metrics"><div class="d num">${e.totalHours}h</div></div>
           </div>
         </div>`;
     }).join('');
