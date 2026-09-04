@@ -288,14 +288,14 @@
         </div>
         <div class="role-card lookup" id="go-reports">
           <div class="dot">📋</div>
-          <div class="txt"><strong>Báo cáo khác</strong><span>Sắp ra mắt trên web</span></div>
+          <div class="txt"><strong>Báo cáo khác</strong><span>Lịch vệ sinh và các báo cáo khác</span></div>
         </div>
       </div>
     `);
     document.getElementById('go-vehicle').onclick = () => screenVehicleHub();
     document.getElementById('go-revenue').onclick = () => screenRevenue();
     document.getElementById('go-attendance').onclick = () => screenEmployees();
-    document.getElementById('go-reports').onclick = () => alert('Module Báo cáo khác đang được xây dựng, sẽ ra mắt sớm!');
+    document.getElementById('go-reports').onclick = () => screenReports();
   }
 
   async function screenEmployees(){
@@ -422,6 +422,95 @@
       </div>
       <div class="vehicle-list" style="padding:0;">${rows}</div>
     `;
+  }
+
+  function screenReports(){
+    stopTimers();
+    view = 'reports';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Trang chủ</button></div>
+      <div class="landing-hero" style="padding-left:0;padding-right:0;">
+        <h1>Báo cáo khác</h1>
+        <p>Các báo cáo và lịch làm việc khác của siêu thị 5152 · Kế Sách.</p>
+      </div>
+      <div class="role-list">
+        <div class="role-card lookup" id="go-cleaning">
+          <div class="dot">🧹</div>
+          <div class="txt"><strong>Lịch vệ sinh</strong><span>Phân công vệ sinh theo ngày trong tuần</span></div>
+        </div>
+        <div class="role-card lookup" id="go-report2">
+          <div class="dot">📋</div>
+          <div class="txt"><strong>Việc cuối ngày</strong><span>Sắp ra mắt trên web</span></div>
+        </div>
+        <div class="role-card lookup" id="go-report3">
+          <div class="dot">📝</div>
+          <div class="txt"><strong>Khác</strong><span>Sắp ra mắt trên web</span></div>
+        </div>
+      </div>
+    `);
+    document.getElementById('back').onclick = screenHome;
+    document.getElementById('go-cleaning').onclick = () => screenCleaningSchedule();
+    document.getElementById('go-report2').onclick = () => alert('Sắp ra mắt trên web!');
+    document.getElementById('go-report3').onclick = () => alert('Sắp ra mắt trên web!');
+  }
+
+  function screenCleaningSchedule(){
+    stopTimers();
+    view = 'cleaning';
+    const dayLabels = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const empMap = {
+      'Xuyên': 'Huỳnh Thị Nguyễn Xuyên - 245446',
+      'Biển': 'Nguyễn Thị Biển - 213571',
+      'Mai': 'Nguyễn Thị Mai - 206961',
+      'Thi': 'Trần Rích Thi - 167375',
+      'Vui': 'Lâm Văn Vui - 164000',
+      'Ngọc': 'Nguyễn Phúc Ngọc - 41668',
+      'Thư': 'Võ Thị Minh Thư - 212604',
+      'Tiên': 'Võ Thị Kiều Tiên - 93727',
+      'Oanh': 'Nguyễn Văn Oanh - 283529',
+      'Trường': 'Đặng Huỳnh Đan Trường - 219663',
+    };
+    const schedule = {
+      0: ['Xuyên'],
+      1: ['Biển'],
+      2: ['Mai', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
+      3: ['Thư'],
+      4: ['Tiên', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
+      5: ['Oanh'],
+      6: ['Trường', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
+    };
+    function expandEntry(entry){
+      const m = entry.match(/^([^\s(]+)(.*)$/);
+      if(!m) return esc(entry);
+      const key = m[1];
+      const rest = m[2] || '';
+      if(key.indexOf('/') > -1){
+        const names = key.split('/').map(function(k){ return empMap[k] ? empMap[k].split(' - ')[0] : k; }).join(' / ');
+        return esc(names + rest);
+      }
+      return esc((empMap[key] || key) + rest);
+    }
+    const todayDow = new Date().getDay();
+    const rows = dayLabels.map(function(label, i){
+      const entries = (schedule[i] || []).map(expandEntry).join('<br>');
+      const isToday = i === todayDow;
+      return `
+        <div class="vehicle-row ${isToday ? 'ok' : ''}">
+          <div class="bar"></div>
+          <div class="body">
+            <div class="who"><div class="nm">${label}${isToday ? ' (Hôm nay)' : ''}</div><div class="upd">${entries}</div></div>
+          </div>
+        </div>`;
+    }).join('');
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Báo cáo khác</button></div>
+      <div class="landing-hero" style="padding-left:0;padding-right:0;">
+        <h1>Lịch vệ sinh</h1>
+        <p>Phân công vệ sinh siêu thị 5152 · Kế Sách theo ngày trong tuần.</p>
+      </div>
+      <div class="vehicle-list" style="padding:0;">${rows}</div>
+    `);
+    document.getElementById('back').onclick = screenReports;
   }
 
   function screenVehicleHub(){
