@@ -26,7 +26,7 @@ jobs:
             "50 3 * * *") IDS="midday" ;;
             "10 7 * * *") IDS="6" ;;
             "30 12 * * *") IDS="8" ;;
-            "0 15 * * *") IDS="9" ;;
+            "30 15 * * *") IDS="9" ;;
             *) IDS="${{ github.event.inputs.id }}" ;;
           esac
           echo "ids=$IDS" >> $GITHUB_OUTPUT
