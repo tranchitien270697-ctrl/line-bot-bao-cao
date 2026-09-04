@@ -410,7 +410,7 @@
         <div class="vehicle-row ok">
           <div class="bar"></div>
           <div class="body">
-            <div class="who"><div class="nm">Ngày ${fmtDayLabel(d.date)}</div></div>
+            <div class="who"><div class="nm">${d.date.split('-').length===3 ? 'Ngày ' + fmtDayLabel(d.date) : fmtDayLabel(d.date)}</div></div>
             <div class="metrics"><div class="d num">${fmtVND(d.total)}</div></div>
           </div>
         </div>`;
