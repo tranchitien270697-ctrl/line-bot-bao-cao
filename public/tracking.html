@@ -689,8 +689,21 @@
       statusEl.textContent = 'Đang kiểm tra…';
       const r = await apiGet('/api/tracking/customer/' + phone);
       if(r.ok){
-        statusEl.textContent = 'Khách đã có sẵn trong hệ thống, không cần lưu lại.';
-        setTimeout(finishDelivery, 900);
+        statusEl.textContent = 'Khách đã có dữ liệu, đang định vị lại để xác nhận…';
+        try {
+          const pos = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000 }));
+          const dist = haversineKm(pos.coords.latitude, pos.coords.longitude, r.data.lat, r.data.lng);
+          if (dist <= 0.1) {
+            statusEl.textContent = '✅ Đã có dữ liệu, đúng vị trí (cách ' + Math.round(dist * 1000) + 'm). Không cần lưu lại.';
+            setTimeout(finishDelivery, 1200);
+          } else {
+            statusEl.textContent = '⚠️ Vị trí hiện tại cách vị trí đã lưu ' + dist.toFixed(2) + 'km — đang lưu lại vị trí mới…';
+            setTimeout(() => screenCapturePhoto(phone), 1500);
+          }
+        } catch (e) {
+          statusEl.textContent = 'Khách đã có dữ liệu (không lấy được vị trí hiện tại để so sánh). Không cần lưu lại.';
+          setTimeout(finishDelivery, 1200);
+        }
       } else {
         screenCapturePhoto(phone);
       }
