@@ -1015,10 +1015,12 @@
       <div id="listwrap"></div>
       <div style="padding:20px 20px 0 20px; display:flex; flex-direction:column; gap:10px;">
         <button class="btn btn-blue" id="gocustomers">📋 Quản lý khách hàng</button>
+        <button class="btn btn-outline" id="gotodayorders">📦 Đơn hôm nay</button>
         <button class="btn btn-outline" id="backhome">← Về màn hình chính</button>
       </div>
     `);
     document.getElementById('settings').onclick = screenManagerSettings;
+    document.getElementById('gotodayorders').onclick = screenTodayOrders;
     document.getElementById('backhome').onclick = () => { stopTimers(); screenVehicleHub(); };
     document.getElementById('gocustomers').onclick = () => { stopTimers(); screenManagerCustomers(); };
     await refreshList();
@@ -1064,6 +1066,49 @@
     wrap.querySelectorAll('.vehicle-row').forEach(el => {
       el.onclick = () => window.open(el.dataset.url, '_blank');
     });
+  }
+
+  async function screenTodayOrders(){
+    stopTimers();
+    view = 'today-orders';
+    const today = new Date();
+    const label = today.getDate() + '/' + (today.getMonth()+1);
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Danh sách xe</button></div>
+      <div class="landing-hero" style="padding-left:0;padding-right:0;">
+        <h1>Đơn hôm nay (${label})</h1>
+        <p>Danh sách các đơn đã giao hôm nay.</p>
+      </div>
+      <div id="todayOrdersList"><p class="settings-note">Đang tải…</p></div>
+    `);
+    document.getElementById('back').onclick = screenManagerList;
+    const wrap = document.getElementById('todayOrdersList');
+    const r = await apiGet('/api/tracking/orders/today');
+    if(!r.ok || !r.data || !r.data.length){
+      wrap.innerHTML = '<p class="settings-note">Chưa có đơn nào hôm nay.</p>';
+      return;
+    }
+    const rows = r.data.map(function(o){
+      const t = new Date(o.timestamp);
+      const hh = String(t.getHours()).padStart(2,'0');
+      const mi = String(t.getMinutes()).padStart(2,'0');
+      const mapUrl = 'https://www.google.com/maps?q=' + o.lat + ',' + o.lng;
+      return `
+        <div class="vehicle-row ok">
+          <div class="bar"></div>
+          <div class="body">
+            <div class="who"><div class="nm">SĐT: ${esc(String(o.phone))}</div><div class="upd">Tài xế ${esc(String(o.driver||''))} · ${hh}:${mi}</div></div>
+            <div class="metrics"><a href="${mapUrl}" target="_blank" class="d" style="color:var(--amber); text-decoration:none;">Xem bản đồ ›</a></div>
+          </div>
+        </div>`;
+    }).join('');
+    wrap.innerHTML = `
+      <div style="padding:0 20px 14px;">
+        <div class="settings-note">Tổng số đơn</div>
+        <div style="font-size:26px; font-weight:700; color:var(--text);">${r.data.length}</div>
+      </div>
+      <div class="vehicle-list" style="padding:0;">${rows}</div>
+    `;
   }
 
   function screenManagerSettings(){
