@@ -168,6 +168,12 @@
   .prow-sub{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;}
   .prow-val{flex:0 0 auto; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; white-space:nowrap; padding-left:8px;}
 
+  .home-stats{display:flex; gap:10px; margin-top:14px;}
+  .stat-card{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px;}
+  .stat-label{font-size:12px; color:var(--muted); margin-bottom:4px;}
+  .stat-value{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text);}
+
+
 
   .empty-state{
     margin:20px 20px 0 20px; padding:32px 20px; text-align:center;
@@ -272,7 +278,7 @@
   function render(html){ app.innerHTML = html; }
 
   // ---------- TRANG CHU (HUB) ----------
-  function screenHome(){
+  async function screenHome(){
     stopTimers();
     view = 'home';
     render(`
@@ -281,7 +287,16 @@
       </div>
       <div class="landing-hero">
         <h1>Chào Mừng Bạn Đến Với Bách Hóa Xanh Kế Sách</h1>
-        <p>Các công cụ nội bộ dùng cho nhân viên siêu thị 5152 · Kế Sách.</p>
+        <div class="home-stats">
+          <div class="stat-card">
+            <div class="stat-label">Doanh thu hôm nay</div>
+            <div class="stat-value" id="statToday">…</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Doanh thu tháng này</div>
+            <div class="stat-value" id="statMonth">…</div>
+          </div>
+        </div>
       </div>
       <div class="role-list">
         <div class="role-card driver" id="go-vehicle">
@@ -306,6 +321,20 @@
     document.getElementById('go-revenue').onclick = () => screenRevenue();
     document.getElementById('go-attendance').onclick = () => screenEmployees();
     document.getElementById('go-reports').onclick = () => screenReports();
+    try {
+      const r = await apiGet('/api/revenue');
+      if(r.ok && r.data){
+        const now = new Date();
+        const todayStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+        const monthStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+        const todayRec = r.data.find(function(d){ return d.date === todayStr; });
+        const monthTotal = r.data.filter(function(d){ return d.date.slice(0,7) === monthStr; }).reduce(function(s,d){ return s+Number(d.total); },0);
+        const elToday = document.getElementById('statToday');
+        const elMonth = document.getElementById('statMonth');
+        if(elToday) elToday.textContent = todayRec ? fmtVND(todayRec.total) : 'Chưa có';
+        if(elMonth) elMonth.textContent = fmtVND(monthTotal);
+      }
+    } catch(e) {}
   }
 
   async function screenEmployees(){
