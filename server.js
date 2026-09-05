@@ -168,6 +168,18 @@ app.get('/api/revenue/:date', async (req, res) => {
   }
 });
 
+app.get('/api/revenue/:date/products', async (req, res) => {
+  try {
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=revenue_products&date=' + encodeURIComponent(req.params.date);
+    const r = await fetch(url);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('revenue products fetch error', e);
+    res.status(500).json({ error: 'revenue products fetch failed' });
+  }
+});
+
 app.get('/api/employees', async (req, res) => {
   try {
     const r = await fetch(CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=employee_list');
