@@ -173,6 +173,12 @@
   .stat-label{font-size:12px; color:var(--muted); margin-bottom:4px;}
   .stat-value{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text);}
 
+  .top-cards{display:flex; gap:8px;}
+  .top-card{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 10px; text-align:center;}
+  .top-card-label{font-size:10px; color:var(--muted); margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .top-card-value{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+
 
 
   .empty-state{
@@ -282,9 +288,20 @@
     stopTimers();
     view = 'home';
     render(`
-      <div class="topbar">
-        <div class="brand"><div class="name">Ứng dụng nội bộ</div><div class="sub">5152 · Kế Sách</div></div>
-      </div>
+      <div class="top-cards">
+          <div class="top-card">
+            <div class="top-card-label">🌤️ Thời tiết</div>
+            <div class="top-card-value" id="cardWeather">…</div>
+          </div>
+          <div class="top-card">
+            <div class="top-card-label">📅 Dương lịch</div>
+            <div class="top-card-value" id="cardSolar">…</div>
+          </div>
+          <div class="top-card">
+            <div class="top-card-label">🏮 Âm lịch</div>
+            <div class="top-card-value" id="cardLunar">…</div>
+          </div>
+        </div>
       <div class="landing-hero">
         <h1>Chào Mừng Bạn Đến Với Bách Hóa Xanh Kế Sách</h1>
         <div class="home-stats">
@@ -321,6 +338,43 @@
     document.getElementById('go-revenue').onclick = () => screenRevenue();
     document.getElementById('go-attendance').onclick = () => screenEmployees();
     document.getElementById('go-reports').onclick = () => screenReports();
+    const nowD = new Date();
+    const dayNames = ['Chủ Nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
+    const elSolar = document.getElementById('cardSolar');
+    if(elSolar) elSolar.textContent = dayNames[nowD.getDay()] + ', ' + String(nowD.getDate()).padStart(2,'0') + '/' + String(nowD.getMonth()+1).padStart(2,'0');
+    const todayKey = nowD.getFullYear()+'-'+(nowD.getMonth()+1)+'-'+nowD.getDate();
+    const elLunar = document.getElementById('cardLunar');
+    if(elLunar){
+      try {
+        const cachedLunar = JSON.parse(localStorage.getItem('lunar-cache') || 'null');
+        if(cachedLunar && cachedLunar.date === todayKey){
+          elLunar.textContent = cachedLunar.text;
+        } else {
+          const lr = await apiGet('/api/lunar-today');
+          if(lr.ok && lr.data && lr.data.text){
+            elLunar.textContent = lr.data.text;
+            localStorage.setItem('lunar-cache', JSON.stringify({date: todayKey, text: lr.data.text}));
+          } else { elLunar.textContent = 'Không rõ'; }
+        }
+      } catch(e) { elLunar.textContent = 'Không rõ'; }
+    }
+    const elWeather = document.getElementById('cardWeather');
+    if(elWeather){
+      try {
+        const cachedW = JSON.parse(localStorage.getItem('weather-cache') || 'null');
+        const nowMs = Date.now();
+        if(cachedW && (nowMs - cachedW.ts) < 3600000){
+          elWeather.textContent = cachedW.text;
+        } else {
+          const wr = await fetch('https://api.open-meteo.com/v1/forecast?latitude=9.768&longitude=105.977&current_weather=true');
+          const wd = await wr.json();
+          const temp = wd.current_weather ? wd.current_weather.temperature : undefined;
+          const wtext = temp !== undefined ? Math.round(temp) + '°C' : 'Không rõ';
+          elWeather.textContent = wtext;
+          localStorage.setItem('weather-cache', JSON.stringify({ts: nowMs, text: wtext}));
+        }
+      } catch(e) { elWeather.textContent = 'Không rõ'; }
+    }
     try {
       const r = await apiGet('/api/revenue');
       if(r.ok && r.data){
