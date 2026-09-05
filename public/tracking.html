@@ -406,11 +406,13 @@
     days.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
     const monthTotal = days.reduce(function(s,d){ return s + Number(d.total); }, 0);
     const rows = days.map(function(d){
+      const isDay = d.date.split('-').length === 3;
+      const label = isDay ? 'Ngày ' + fmtDayLabel(d.date) : fmtDayLabel(d.date);
       return `
-        <div class="vehicle-row ok">
+        <div class="vehicle-row ok" ${isDay ? 'data-date="' + d.date + '" style="cursor:pointer;"' : ''}>
           <div class="bar"></div>
           <div class="body">
-            <div class="who"><div class="nm">${d.date.split('-').length===3 ? 'Ngày ' + fmtDayLabel(d.date) : fmtDayLabel(d.date)}</div></div>
+            <div class="who"><div class="nm">${label}</div>${isDay ? '<div class="upd">Bấm để xem chi tiết ngành hàng ›</div>' : ''}</div>
             <div class="metrics"><div class="d num">${fmtVND(d.total)}</div></div>
           </div>
         </div>`;
@@ -422,9 +424,62 @@
       </div>
       <div class="vehicle-list" style="padding:0;">${rows}</div>
     `;
+    listWrap.querySelectorAll('[data-date]').forEach(function(el){
+      el.onclick = function(){ screenRevenueDayDetail(el.dataset.date); };
+    });
   }
 
-  function screenReports(){
+  async function screenRevenueDayDetail(date){
+    stopTimers();
+    view = 'revenue-day';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Doanh thu</button></div>
+      <div class="landing-hero" style="padding-left:0;padding-right:0;">
+        <h1>Ngày ${fmtDayLabel(date)}</h1>
+        <p>Chi tiết doanh thu theo ngành hàng.</p>
+      </div>
+      <div id="revDayDetail"><p class="settings-note">Đang tải…</p></div>
+    `);
+    document.getElementById('back').onclick = screenRevenue;
+    const wrap = document.getElementById('revDayDetail');
+    const r = await apiGet('/api/revenue/' + date);
+    if(!r.ok || !r.data || !r.data.industries || !r.data.industries.length){
+      wrap.innerHTML = '<p class="settings-note">Không có dữ liệu chi tiết ngành hàng cho ngày này.</p>';
+      return;
+    }
+    const industries = r.data.industries;
+    const FRESH_NAMES = ['Thịt gia cầm gia súc các loại', 'Thủy Hải Sản Các Loại', 'Rau Củ Các Loại', 'Trái Cây Các Loại'];
+    const totalToday = industries.reduce(function(s,x){ return s+(x.t||0); },0);
+    const freshItems = FRESH_NAMES.map(function(name){ return industries.find(function(x){ return x.n===name; }) || {n:name, t:0}; });
+    const freshTotal = freshItems.reduce(function(s,x){ return s+(x.t||0); },0);
+    const fmcgSorted = industries.filter(function(x){ return FRESH_NAMES.indexOf(x.n) === -1; }).slice().sort(function(a,b){ return (b.t||0)-(a.t||0); });
+    const fmcgTotal = totalToday - freshTotal;
+    const freshPct = totalToday ? (freshTotal/totalToday*100) : 0;
+    const fmcgPct = totalToday ? (fmcgTotal/totalToday*100) : 0;
+    function row(it){
+      return `
+        <div class="vehicle-row ok">
+          <div class="bar"></div>
+          <div class="body">
+            <div class="who"><div class="nm">${esc(it.n)}</div></div>
+            <div class="metrics"><div class="d num">${fmtVND(it.t||0)}</div></div>
+          </div>
+        </div>`;
+    }
+    wrap.innerHTML = `
+      <div style="padding:0 20px 14px;">
+        <div style="font-size:26px; font-weight:700; color:var(--text);">${fmtVND(totalToday)}</div>
+      </div>
+      <div style="padding:0 20px 8px;">
+        <div style="font-weight:700; color:#6FA8DC;">FRESH (${freshPct.toFixed(1)}%) — ${fmtVND(freshTotal)}</div>
+      </div>
+      <div class="vehicle-list" style="padding:0 0 14px;">${freshItems.map(row).join('')}</div>
+      <div style="padding:0 20px 8px;">
+        <div style="font-weight:700; color:#6FA8DC;">FMCG (${fmcgPct.toFixed(1)}%) — ${fmtVND(fmcgTotal)}</div>
+      </div>
+      <div class="vehicle-list" style="padding:0;">${fmcgSorted.map(row).join('')}</div>
+    `;
+  }function screenReports(){
     stopTimers();
     view = 'reports';
     render(`
