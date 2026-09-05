@@ -789,39 +789,51 @@
       <div class="screen">
         <div class="landing-hero" style="padding-left:0;padding-right:0;">
           <h1>Xác nhận giao hàng</h1>
-          <p>Nhập số điện thoại khách để lưu vị trí nhà cho lần giao sau.</p>
+          <p>Nhập số điện thoại khách để kiểm tra.</p>
         </div>
-        <label class="field-label" for="phone">Số điện thoại khách</label>
-        <input type="tel" id="phone" placeholder="VD: 0909 123 456">
+        <label class="settings-label">Số điện thoại khách</label>
+        <input type="tel" id="phone" class="input" placeholder="VD: 0909 123 456">
         <div class="btn-row">
           <button class="btn btn-primary" id="check">Kiểm tra & Hoàn tất</button>
         </div>
         <p class="settings-note" id="status"></p>
+        <div id="confirmBox"></div>
       </div>
     `);
     document.getElementById('back').onclick = screenDriverActive2;
     document.getElementById('check').onclick = async () => {
       const phone = normPhone(document.getElementById('phone').value);
       const statusEl = document.getElementById('status');
+      const confirmBox = document.getElementById('confirmBox');
+      confirmBox.innerHTML = '';
       if(!phone || phone.length < 8){ statusEl.textContent = 'Số điện thoại chưa hợp lệ.'; return; }
       statusEl.textContent = 'Đang kiểm tra…';
       const r = await apiGet('/api/tracking/customer/' + phone);
       if(r.ok){
-        statusEl.textContent = 'Khách đã có dữ liệu, đang định vị lại để xác nhận…';
-        try {
-          const pos = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000 }));
-          const dist = haversineKm(pos.coords.latitude, pos.coords.longitude, r.data.lat, r.data.lng);
-          if (dist <= 0.1) {
-            statusEl.textContent = '✅ Đã có dữ liệu, đúng vị trí (cách ' + Math.round(dist * 1000) + 'm). Không cần lưu lại.';
-            setTimeout(finishDelivery, 1200);
-          } else {
-            statusEl.textContent = '⚠️ Vị trí hiện tại cách vị trí đã lưu ' + dist.toFixed(2) + 'km — đang lưu lại vị trí mới…';
-            setTimeout(() => screenCapturePhoto(phone), 1500);
-          }
-        } catch (e) {
-          statusEl.textContent = 'Khách đã có dữ liệu (không lấy được vị trí hiện tại để so sánh). Không cần lưu lại.';
-          setTimeout(finishDelivery, 1200);
-        }
+        statusEl.textContent = '📍 Khách đã có vị trí trong hệ thống.';
+        confirmBox.innerHTML = `
+          <div class="btn-row" style="margin-top:10px;">
+            <button class="btn btn-primary" id="confirmYes">✓ Đúng, hoàn tất nhanh</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-outline" id="confirmNo">Cập nhật lại vị trí mới</button>
+          </div>
+        `;
+        document.getElementById('confirmYes').onclick = async () => {
+          confirmBox.innerHTML = '';
+          statusEl.textContent = 'Đang hoàn tất…';
+          try {
+            const now = new Date();
+            const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+            await apiPost('/api/tracking/order', { date: dateStr, phone: phone, lat: r.data.lat, lng: r.data.lng, driver: driverName });
+          } catch(e) {}
+          statusEl.textContent = '✅ Hoàn tất.';
+          setTimeout(finishDelivery, 500);
+        };
+        document.getElementById('confirmNo').onclick = () => {
+          confirmBox.innerHTML = '';
+          screenCapturePhoto(phone);
+        };
       } else {
         screenCapturePhoto(phone);
       }
@@ -894,6 +906,11 @@
         phone, lat: pos.lat, lng: pos.lng, photoBase64: b64, savedBy: driverName
       });
       if(r.ok){
+        try {
+          const now = new Date();
+          const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+          await apiPost('/api/tracking/order', { date: dateStr, phone: phone, lat: pos.lat, lng: pos.lng, driver: driverName });
+        } catch(e) {}
         if(r.data && r.data.photoError){
           statusEl.textContent = 'Đã lưu vị trí khách, nhưng ẢNH KHÔNG LƯU ĐƯỢC. Vui lòng báo quản lý để bổ sung ảnh sau.';
           statusEl.style.color = '#FB6A5D';
