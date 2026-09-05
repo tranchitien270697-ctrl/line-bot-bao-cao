@@ -159,6 +159,16 @@
   .vehicle-row .metrics .d{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px;}
   .vehicle-row .metrics .t{font-size:12px; color:var(--muted);}
 
+  .prow-list{display:flex; flex-direction:column; gap:8px; padding:0 20px;}
+  .prow{display:flex; align-items:stretch; background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden;}
+  .prow-bar{width:5px; flex-shrink:0; background:var(--amber);}
+  .prow-body{flex:1; min-width:0; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .prow-txt{flex:1 1 auto; min-width:0;}
+  .prow-nm{font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .prow-sub{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;}
+  .prow-val{flex:0 0 auto; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; white-space:nowrap; padding-left:8px;}
+
+
   .empty-state{
     margin:20px 20px 0 20px; padding:32px 20px; text-align:center;
     border:1px dashed var(--line); border-radius:16px; color:var(--muted); font-size:13px; line-height:1.6;
@@ -438,9 +448,14 @@
         <h1>Ngày ${fmtDayLabel(date)}</h1>
         <p>Chi tiết doanh thu theo ngành hàng.</p>
       </div>
+      <div style="padding:0 20px 16px;">
+        <button class="btn btn-outline" id="btnTopProducts" style="width:100%;">🔥 Xem sản phẩm bán chạy nhất</button>
+      </div>
       <div id="revDayDetail"><p class="settings-note">Đang tải…</p></div>
     `);
     document.getElementById('back').onclick = screenRevenue;
+    const btnTop = document.getElementById('btnTopProducts');
+    if (btnTop) btnTop.onclick = () => screenTopProducts(date);
     const wrap = document.getElementById('revDayDetail');
     const r = await apiGet('/api/revenue/' + date);
     if(!r.ok || !r.data || !r.data.industries || !r.data.industries.length){
@@ -478,12 +493,7 @@
         <div style="font-weight:700; color:#6FA8DC;">FMCG (${fmcgPct.toFixed(1)}%) — ${fmtVND(fmcgTotal)}</div>
       </div>
       <div class="vehicle-list" style="padding:0;">${fmcgSorted.map(row).join('')}</div>
-      <div style="padding:16px 20px 0;">
-        <button class="btn btn-outline" id="btnTopProducts" style="width:100%;">🔥 Xem sản phẩm bán chạy nhất</button>
-      </div>
     `;
-    const btnTop = document.getElementById('btnTopProducts');
-    if (btnTop) btnTop.onclick = () => screenTopProducts(date);
   }
 
   async function screenTopProducts(date){
@@ -493,7 +503,7 @@
       <div class="back-row"><button class="back-btn" id="back">← Ngày ${fmtDayLabel(date)}</button></div>
       <div class="landing-hero" style="padding-left:0;padding-right:0;">
         <h1>Sản phẩm bán chạy nhất</h1>
-        <p>Top 50 sản phẩm theo doanh thu ngày ${fmtDayLabel(date)}.</p>
+        <p>Top 50 sản phẩm theo doanh thu ngày ${fmtDayLabel(date)}, chia FRESH / FMCG.</p>
       </div>
       <div id="topProductsList"><p class="settings-note">Đang tải…</p></div>
     `);
@@ -504,18 +514,35 @@
       wrap.innerHTML = '<p class="settings-note">Không có dữ liệu sản phẩm cho ngày này.</p>';
       return;
     }
-    const rows = r.data.map(function(p, i){
+    const FRESH_NAMES = ['Thịt gia cầm gia súc các loại', 'Thủy Hải Sản Các Loại', 'Rau Củ Các Loại', 'Trái Cây Các Loại'];
+    const freshProducts = r.data.filter(function(p){ return FRESH_NAMES.indexOf(p.ind) > -1; }).sort(function(a,b){ return b.t-a.t; });
+    const fmcgProducts = r.data.filter(function(p){ return FRESH_NAMES.indexOf(p.ind) === -1; }).sort(function(a,b){ return b.t-a.t; });
+    function prow(p, i){
       return `
-        <div class="vehicle-row ok">
-          <div class="bar"></div>
-          <div class="body">
-            <div class="who"><div class="nm">${i+1}. ${esc(p.n)}</div><div class="upd">${esc(p.ind)} · SL: ${p.qty}</div></div>
-            <div class="metrics"><div class="d num">${fmtVND(p.t)}</div></div>
+        <div class="prow">
+          <div class="prow-bar"></div>
+          <div class="prow-body">
+            <div class="prow-txt">
+              <div class="prow-nm">${i+1}. ${esc(p.n)}</div>
+              <div class="prow-sub">${esc(p.ind)} · SL: ${p.qty}</div>
+            </div>
+            <div class="prow-val">${fmtVND(p.t)}</div>
           </div>
         </div>`;
-    }).join('');
-    wrap.innerHTML = `<div class="vehicle-list" style="padding:0;">${rows}</div>`;
-  }function screenReports(){
+    }
+    wrap.innerHTML = `
+      <div style="padding:0 20px 8px;">
+        <div style="font-weight:700; color:#6FA8DC;">FRESH — ${freshProducts.length} sản phẩm</div>
+      </div>
+      <div class="prow-list">${freshProducts.map(prow).join('')}</div>
+      <div style="padding:16px 20px 8px;">
+        <div style="font-weight:700; color:#6FA8DC;">FMCG — ${fmcgProducts.length} sản phẩm</div>
+      </div>
+      <div class="prow-list">${fmcgProducts.map(prow).join('')}</div>
+    `;
+  }
+
+  function screenReports(){
     stopTimers();
     view = 'reports';
     render(`
