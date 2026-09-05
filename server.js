@@ -140,6 +140,24 @@ app.get('/api/lunar-today', (req, res) => {
   }
 });
 
+app.get('/api/today-info', (req, res) => {
+  try {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+    const dayNames = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const dayLabel = dayNames[now.getDay()];
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const solarText = dayLabel + ', ' + dd + '/' + mm + '/' + yyyy;
+    let lunarText = '';
+    try { lunarText = lunarCalendar.getTodayLunarText(); } catch (e) { lunarText = ''; }
+    res.json({ solarText, lunarText });
+  } catch (e) {
+    console.error('today-info error', e);
+    res.status(500).json({ error: 'today-info failed' });
+  }
+});
+
 app.get('/api/tracking/orders/today', async (req, res) => {
   try {
     const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
