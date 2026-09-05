@@ -130,6 +130,16 @@ app.post('/api/tracking/order', async (req, res) => {
   }
 });
 
+app.get('/api/lunar-today', (req, res) => {
+  try {
+    const text = lunarCalendar.getTodayLunarText();
+    res.json({ text: text });
+  } catch (e) {
+    console.error('lunar today error', e);
+    res.status(500).json({ error: 'lunar today failed' });
+  }
+});
+
 app.get('/api/tracking/orders/today', async (req, res) => {
   try {
     const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
