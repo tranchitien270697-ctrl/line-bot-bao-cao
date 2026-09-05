@@ -174,7 +174,7 @@
   .stat-value{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text);}
 
   .top-cards{display:flex; gap:8px;}
-  .top-card{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 10px; text-align:center;}
+  .top-card{flex:1; min-width:0; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 10px; text-align:center;}
   .top-card-label{font-size:10px; color:var(--muted); margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .top-card-value{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 
@@ -343,16 +343,21 @@
     const elSolar = document.getElementById('cardSolar');
     if(elSolar) elSolar.textContent = dayNames[nowD.getDay()] + ', ' + String(nowD.getDate()).padStart(2,'0') + '/' + String(nowD.getMonth()+1).padStart(2,'0');
     const todayKey = nowD.getFullYear()+'-'+(nowD.getMonth()+1)+'-'+nowD.getDate();
+    function shortLunar(text){
+      const m = text && text.match(/Ngày\s*(\d+)\s*tháng\s*(\d+)/);
+      if(!m) return text;
+      return String(m[1]).padStart(2,'0') + '/' + String(m[2]).padStart(2,'0');
+    }
     const elLunar = document.getElementById('cardLunar');
     if(elLunar){
       try {
         const cachedLunar = JSON.parse(localStorage.getItem('lunar-cache') || 'null');
         if(cachedLunar && cachedLunar.date === todayKey){
-          elLunar.textContent = cachedLunar.text;
+          elLunar.textContent = shortLunar(cachedLunar.text);
         } else {
           const lr = await apiGet('/api/lunar-today');
           if(lr.ok && lr.data && lr.data.text){
-            elLunar.textContent = lr.data.text;
+            elLunar.textContent = shortLunar(lr.data.text);
             localStorage.setItem('lunar-cache', JSON.stringify({date: todayKey, text: lr.data.text}));
           } else { elLunar.textContent = 'Không rõ'; }
         }
