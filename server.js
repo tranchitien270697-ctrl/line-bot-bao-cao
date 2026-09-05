@@ -114,6 +114,39 @@ app.post('/api/tracking/customer', async (req, res) => {
     res.status(500).json({ error: 'sheet save failed' });
   }
 });
+app.post('/api/tracking/order', async (req, res) => {
+  try {
+    const body = Object.assign({}, req.body, { key: CUSTOMER_SHEET_KEY, action: 'order_log' });
+    const r = await fetch(CUSTOMER_SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('order log error', e);
+    res.status(500).json({ error: 'order log failed' });
+  }
+});
+
+app.get('/api/tracking/orders/today', async (req, res) => {
+  try {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const today = yyyy + '-' + mm + '-' + dd;
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=orders_today&date=' + today;
+    const r = await fetch(url);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('orders today fetch error', e);
+    res.status(500).json({ error: 'orders today fetch failed' });
+  }
+});
+
 
 app.delete('/api/tracking/customer/:phone', async (req, res) => {
   try {
