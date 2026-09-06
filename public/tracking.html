@@ -970,12 +970,17 @@
           <div class="dot">🔍</div>
           <div class="txt"><strong>Tra cứu khách hàng</strong><span>Tìm vị trí nhà khách theo SĐT</span></div>
         </div>
+        <div class="role-card lookup" id="go-today-orders-public">
+          <div class="dot">📦</div>
+          <div class="txt"><strong>Đơn hôm nay</strong><span>Xem danh sách đơn đã giao hôm nay</span></div>
+        </div>
       </div>
     `);
     document.getElementById('back').onclick = screenHome;
     document.getElementById('go-driver').onclick = () => screenDriverSetup();
     document.getElementById('go-manager').onclick = () => screenManagerPin();
     document.getElementById('go-lookup').onclick = () => screenLookup();
+    document.getElementById('go-today-orders-public').onclick = () => screenTodayOrders();
   }
 
   async function screenDriverSetup(){
@@ -1385,14 +1390,14 @@
     const today = new Date();
     const label = today.getDate() + '/' + (today.getMonth()+1);
     render(`
-      <div class="back-row"><button class="back-btn" id="back">← Danh sách xe</button></div>
+      <div class="back-row"><button class="back-btn" id="back">← Xe giao hàng</button></div>
       <div class="landing-hero" style="padding-left:0;padding-right:0;">
         <h1>Đơn hôm nay (${label})</h1>
         <p>Danh sách các đơn đã giao hôm nay.</p>
       </div>
       <div id="todayOrdersList"><p class="settings-note">Đang tải…</p></div>
     `);
-    document.getElementById('back').onclick = screenManagerList;
+    document.getElementById('back').onclick = screenVehicleHub;
     const wrap = document.getElementById('todayOrdersList');
     const r = await apiGet('/api/tracking/orders/today');
     if(!r.ok || !r.data || !r.data.length){
