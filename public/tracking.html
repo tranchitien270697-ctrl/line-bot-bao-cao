@@ -315,6 +315,10 @@
             <div class="stat-value" id="statMonth">…</div>
           </div>
         </div>
+        <div class="stat-card" style="margin-top:10px;">
+          <div class="stat-label">🎯 Doanh thu năm 2026 (chỉ tiêu 36.123.000.000 D)</div>
+          <div class="stat-value" id="statYear">…</div>
+        </div>
       </div>
       <div class="role-list">
         <div class="role-card driver" id="go-vehicle">
@@ -397,6 +401,11 @@
         const elMonth = document.getElementById('statMonth');
         if(elToday) elToday.textContent = todayRec ? fmtVND(todayRec.total) : 'Chưa có';
         if(elMonth) elMonth.textContent = fmtVND(monthTotal);
+        const yearTotal = r.data.reduce(function(s,d){ return s + Number(d.total||0); }, 0);
+        const YEAR_TARGET = 36123000000;
+        const pct = (yearTotal / YEAR_TARGET * 100).toFixed(1);
+        const elYear = document.getElementById('statYear');
+        if(elYear) elYear.textContent = fmtVND(yearTotal) + ' — ' + pct + '%';
       }
     } catch(e) {}
     try {
