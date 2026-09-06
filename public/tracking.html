@@ -337,18 +337,13 @@
           <div class="dot">🕐</div>
           <div class="txt"><strong>Giờ Công Nhân Viên</strong><span>Danh sách nhân viên siêu thị</span></div>
         </div>
-        <div class="role-card lookup" id="go-reports">
-          <div class="dot">📋</div>
-          <div class="txt"><strong>Báo cáo khác</strong><span>Lịch vệ sinh và các báo cáo khác</span></div>
-        </div>
       </div>
     `);
     document.getElementById('go-vehicle').onclick = () => screenVehicleHub();
     document.getElementById('go-revenue').onclick = () => screenRevenue();
     document.getElementById('go-loss').onclick = () => screenLossHome();
     document.getElementById('go-attendance').onclick = () => screenEmployees();
-    document.getElementById('go-reports').onclick = () => screenReports();
-    const nowD = new Date();
+        const nowD = new Date();
     const dayNames = ['Chủ Nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
     const elSolar = document.getElementById('cardSolar');
     if(elSolar) elSolar.textContent = dayNames[nowD.getDay()] + ', ' + String(nowD.getDate()).padStart(2,'0') + '/' + String(nowD.getMonth()+1).padStart(2,'0');
