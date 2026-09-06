@@ -659,6 +659,7 @@
         <p>Báo cáo doanh thu siêu thị 5152 · Kế Sách.</p>
       </div>
       <div id="revMonthTabs" style="padding:0 20px 10px;"></div>
+      <div id="revChart" style="padding:0 20px 14px;"></div>
       <div id="revList"><p class="settings-note">Đang tải…</p></div>
     `);
     document.getElementById('back').onclick = screenHome;
@@ -687,6 +688,38 @@
     showRevenueMonth(months[0]);
   }
 
+  function renderRevenueChart(days){
+    const chartWrap = document.getElementById('revChart');
+    if(!chartWrap) return;
+    if(!days || !days.length){ chartWrap.innerHTML = ''; return; }
+    const vals = days.map(function(d){ return Number(d.total)||0; });
+    const maxVal = Math.max.apply(null, vals);
+    const minVal = Math.min.apply(null, vals);
+    const n = days.length;
+    const barW = 100 / n;
+    const barGap = Math.min(0.4, barW * 0.15);
+    const bars = days.map(function(d, i){
+      const val = vals[i];
+      const h = maxVal > 0 ? (val / maxVal * 82) : 0;
+      const x = i * barW + barGap;
+      const w = Math.max(barW - barGap * 2, 0.3);
+      const y = 92 - h;
+      const dayNum = d.date.split('-')[2];
+      const isMax = val === maxVal;
+      const isMin = val === minVal && minVal !== maxVal;
+      const color = isMax ? 'var(--green)' : (isMin ? 'var(--red)' : 'var(--amber)');
+      return '<rect x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + w.toFixed(2) + '" height="' + Math.max(h,0.5).toFixed(2) + '" fill="' + color + '" rx="0.4"><title>Ngày ' + dayNum + ': ' + fmtVND(val) + '</title></rect>';
+    }).join('');
+    const maxDay = days.find(function(d){ return Number(d.total) === maxVal; });
+    const minDay = days.find(function(d){ return Number(d.total) === minVal; });
+    chartWrap.innerHTML =
+      '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 10px 8px;">' +
+        '<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%; height:120px; display:block;">' + bars + '</svg>' +
+        '<div style="margin-top:8px; font-size:12px; color:var(--muted);">🟢 Cao nhất ' + fmtDayLabel(maxDay.date) + ': ' + fmtVND(maxVal) + '</div>' +
+        '<div style="font-size:12px; color:var(--muted);">🔴 Thấp nhất ' + fmtDayLabel(minDay.date) + ': ' + fmtVND(minVal) + '</div>' +
+      '</div>';
+  }
+
   function showRevenueMonth(month){
     document.querySelectorAll('.rev-month-btn').forEach(function(btn){
       btn.classList.toggle('btn-primary', btn.dataset.month === month);
@@ -696,6 +729,7 @@
     const days = (window.__revAll || []).filter(function(d){ return d.date.slice(0,7) === month; });
     days.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
     const monthTotal = days.reduce(function(s,d){ return s + Number(d.total); }, 0);
+    renderRevenueChart(days);
     const rows = days.map(function(d){
       const isDay = d.date.split('-').length === 3;
       const label = isDay ? 'Ngày ' + fmtDayLabel(d.date) : fmtDayLabel(d.date);
