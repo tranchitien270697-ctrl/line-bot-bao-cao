@@ -315,6 +315,10 @@
             <div class="stat-value" id="statMonth">…</div>
           </div>
         </div>
+        <div class="stat-card" style="margin-top:10px;">
+          <div class="stat-label">🧹 Vệ sinh hôm nay</div>
+          <div class="stat-value" id="statCleaning">…</div>
+        </div>
       </div>
       <div class="role-list">
         <div class="role-card driver" id="go-vehicle">
@@ -398,6 +402,13 @@
         const elMonth = document.getElementById('statMonth');
         if(elToday) elToday.textContent = todayRec ? fmtVND(todayRec.total) : 'Chưa có';
         if(elMonth) elMonth.textContent = fmtVND(monthTotal);
+      }
+    } catch(e) {}
+    try {
+      const elCleaning = document.getElementById('statCleaning');
+      if(elCleaning){
+        const info = getTodayCleaningText();
+        elCleaning.textContent = info.mainName;
       }
     } catch(e) {}
   }
@@ -557,6 +568,47 @@
   }
 
   function fmtVND(n){ return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' D'; }
+  function getTodayCleaningText(){
+    const dayLabels = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const empMap = {
+      'Xuyên': 'Huỳnh Thị Nguyễn Xuyên - 245446',
+      'Biển': 'Nguyễn Thị Biển - 213571',
+      'Mai': 'Nguyễn Thị Mai - 206961',
+      'Thi': 'Trần Rích Thi - 167375',
+      'Vui': 'Lâm Văn Vui - 164000',
+      'Ngọc': 'Nguyễn Phúc Ngọc - 41668',
+      'Thư': 'Võ Thị Minh Thư - 212604',
+      'Tiên': 'Võ Thị Kiều Tiên - 93727',
+      'Oanh': 'Nguyễn Văn Oanh - 283529',
+      'Trường': 'Đặng Huỳnh Đan Trường - 219663'
+    };
+    const schedule = {
+      0: ['Xuyên'],
+      1: ['Biển'],
+      2: ['Mai', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
+      3: ['Thư'],
+      4: ['Tiên', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
+      5: ['Oanh'],
+      6: ['Trường', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)']
+    };
+    function expandEntry(entry){
+      const m = entry.match(/^([^\s(]+)(.*)$/);
+      if(!m) return entry;
+      const key = m[1];
+      const rest = m[2] || '';
+      if(key.indexOf('/') > -1){
+        const names = key.split('/').map(function(k){ return empMap[k] ? empMap[k].split(' - ')[0] : k; }).join(' / ');
+        return names + rest;
+      }
+      return (empMap[key] || key) + rest;
+    }
+    const now = new Date();
+    const dayIdx = now.getDay();
+    const entries = schedule[dayIdx] || [];
+    const mainName = entries.length ? expandEntry(entries[0]).split(' - ')[0] : 'Chưa phân công';
+    return { dayLabel: dayLabels[dayIdx], mainName: mainName };
+  }
+
   function fmtDayLabel(dateStr){
     const parts = dateStr.split('-');
     if(parts.length !== 3) return 'Cả tháng';
