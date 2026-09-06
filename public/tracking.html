@@ -740,31 +740,61 @@
   function screenReports(){
     stopTimers();
     view = 'reports';
+    const dayLabels = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const empMap = {
+      'Xuyên': 'Huỳnh Thị Nguyễn Xuyên - 245446',
+      'Biển': 'Nguyễn Thị Biển - 213571',
+      'Mai': 'Nguyễn Thị Mai - 206961',
+      'Thi': 'Trần Rích Thi - 167375',
+      'Vui': 'Lâm Văn Vui - 164000',
+      'Ngọc': 'Nguyễn Phúc Ngọc - 41668',
+      'Thư': 'Võ Thị Minh Thư - 212604',
+      'Tiên': 'Võ Thị Kiều Tiên - 93727',
+      'Oanh': 'Nguyễn Văn Oanh - 283529',
+      'Trường': 'Đặng Huỳnh Đan Trường - 219663'
+    };
+    const schedule = {
+      0: ['Xuyên'],
+      1: ['Biển'],
+      2: ['Mai', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
+      3: ['Thư'],
+      4: ['Tiên', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)'],
+      5: ['Oanh'],
+      6: ['Trường', 'Thi (Vệ sinh kho)', 'Vui/Ngọc (Trần nhà, Áp kính)']
+    };
+    function expandEntry(entry){
+      const m = entry.match(/^([^\s(]+)(.*)$/);
+      if(!m) return esc(entry);
+      const key = m[1];
+      const rest = m[2] || '';
+      if(key.indexOf('/') > -1){
+        const names = key.split('/').map(function(k){ return empMap[k] ? empMap[k].split(' - ')[0] : k; }).join(' / ');
+        return esc(names + rest);
+      }
+      return esc((empMap[key] || key) + rest);
+    }
+    const now = new Date();
+    const dayIdx = now.getDay();
+    const todayLabel = dayLabels[dayIdx];
+    const entries = schedule[dayIdx] || [];
+    const rows = entries.map(function(entry){
+      return `
+        <div class="vehicle-row ok">
+          <div class="bar"></div>
+          <div class="body">
+            <div class="who"><div class="nm">${expandEntry(entry)}</div></div>
+          </div>
+        </div>`;
+    }).join('');
     render(`
       <div class="back-row"><button class="back-btn" id="back">← Trang chủ</button></div>
       <div class="landing-hero" style="padding-left:0;padding-right:0;">
-        <h1>Báo cáo khác</h1>
-        <p>Các báo cáo và lịch làm việc khác của siêu thị 5152 · Kế Sách.</p>
+        <h1>Lịch vệ sinh hôm nay</h1>
+        <p>${todayLabel} — nhân viên trực vệ sinh.</p>
       </div>
-      <div class="role-list">
-        <div class="role-card lookup" id="go-cleaning">
-          <div class="dot">🧹</div>
-          <div class="txt"><strong>Lịch vệ sinh</strong><span>Phân công vệ sinh theo ngày trong tuần</span></div>
-        </div>
-        <div class="role-card lookup" id="go-report2">
-          <div class="dot">📋</div>
-          <div class="txt"><strong>Việc cuối ngày</strong><span>Sắp ra mắt trên web</span></div>
-        </div>
-        <div class="role-card lookup" id="go-report3">
-          <div class="dot">📝</div>
-          <div class="txt"><strong>Khác</strong><span>Sắp ra mắt trên web</span></div>
-        </div>
-      </div>
+      <div class="vehicle-list" style="padding:0 20px;">${rows || '<p class="settings-note">Không có phân công hôm nay.</p>'}</div>
     `);
     document.getElementById('back').onclick = screenHome;
-    document.getElementById('go-cleaning').onclick = () => screenCleaningSchedule();
-    document.getElementById('go-report2').onclick = () => alert('Sắp ra mắt trên web!');
-    document.getElementById('go-report3').onclick = () => alert('Sắp ra mắt trên web!');
   }
 
   function screenCleaningSchedule(){
