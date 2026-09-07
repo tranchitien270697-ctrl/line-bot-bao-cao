@@ -348,6 +348,7 @@
         <div class="stat-card" style="margin-top:10px;">
           <div class="stat-label">🧾 Lượt bill hôm nay</div>
           <div class="stat-value" id="statTodayBillCard">…</div>
+          <div class="stat-label" id="statTodayBillCompare" style="margin-top:4px;"></div>
         </div>
       </div>
       <div class="role-list">
@@ -456,6 +457,18 @@
         if(todayBill){
           if(elTodayBillSub) elTodayBillSub.textContent = todayBill.bills + ' bill · TB ' + fmtVND(todayBill.avg);
           if(elTodayBillCard) elTodayBillCard.textContent = todayBill.bills + ' bill';
+          const dt3 = new Date(todayStr2 + 'T00:00:00');
+          dt3.setDate(dt3.getDate() - 1);
+          const prevDateStr = dt3.toISOString().slice(0,10);
+          const prevBill = rBill.data.find(function(b){ return b.date === prevDateStr; });
+          const elCompare = document.getElementById('statTodayBillCompare');
+          if(elCompare && prevBill && prevBill.bills > 0){
+            const diffB = todayBill.bills - prevBill.bills;
+            const pctB = Math.round(diffB / prevBill.bills * 100);
+            const signB = diffB >= 0 ? '+' : '';
+            const colorB = diffB >= 0 ? 'var(--green)' : 'var(--red)';
+            elCompare.innerHTML = '<span style="color:' + colorB + ';">' + signB + pctB + '% so hôm qua</span> (' + prevBill.bills + ' bill)';
+          }
         } else {
           if(elTodayBillCard) elTodayBillCard.textContent = 'Chưa có';
         }
