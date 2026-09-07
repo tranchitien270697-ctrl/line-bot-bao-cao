@@ -334,6 +334,7 @@
           <div class="stat-card">
             <div class="stat-label">Doanh thu hôm nay</div>
             <div class="stat-value" id="statToday">…</div>
+            <div class="stat-label" id="statTodayBill" style="margin-top:4px;"></div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Doanh thu tháng này</div>
@@ -341,8 +342,12 @@
           </div>
         </div>
         <div class="stat-card" style="margin-top:10px;">
-          <div class="stat-label">🎯 Doanh thu năm 2026 (chỉ tiêu 36.123.000.000 D)</div>
+          <div class="stat-label">🎯 Doanh thu năm 2026 (chỉ tiêu 36.1 tỷ)</div>
           <div class="stat-value" id="statYear">…</div>
+        </div>
+        <div class="stat-card" style="margin-top:10px;">
+          <div class="stat-label">🧾 Lượt bill hôm nay</div>
+          <div class="stat-value" id="statTodayBillCard">…</div>
         </div>
       </div>
       <div class="role-list">
@@ -435,7 +440,25 @@
         const YEAR_TARGET = 36123000000;
         const pct = (yearTotal / YEAR_TARGET * 100).toFixed(1);
         const elYear = document.getElementById('statYear');
-        if(elYear) elYear.textContent = fmtVND(yearTotal) + ' — ' + pct + '%';
+        const yearTy = (yearTotal / 1e9).toFixed(1);
+        if(elYear) elYear.textContent = yearTy + ' tỷ — ' + pct + '%';
+      }
+    } catch(e) {}
+    try {
+      const rBill = await apiGet('/api/bills');
+      if(rBill.ok && rBill.data){
+        const now2 = new Date();
+        const vnNow2 = new Date(now2.getTime() + 7*60*60*1000);
+        const todayStr2 = vnNow2.toISOString().slice(0,10);
+        const todayBill = rBill.data.find(function(b){ return b.date === todayStr2; });
+        const elTodayBillSub = document.getElementById('statTodayBill');
+        const elTodayBillCard = document.getElementById('statTodayBillCard');
+        if(todayBill){
+          if(elTodayBillSub) elTodayBillSub.textContent = todayBill.bills + ' bill · TB ' + fmtVND(todayBill.avg);
+          if(elTodayBillCard) elTodayBillCard.textContent = todayBill.bills + ' bill';
+        } else {
+          if(elTodayBillCard) elTodayBillCard.textContent = 'Chưa có';
+        }
       }
     } catch(e) {}
     try {
