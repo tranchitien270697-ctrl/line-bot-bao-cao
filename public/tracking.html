@@ -1409,6 +1409,59 @@
     };
   }
 
+  async function screenVisitStats(){
+    stopTimers();
+    view = 'visit-stats';
+    render(`
+      <div class="back-row"><button class="back-btn" id="back">← Quản lý</button></div>
+      <div class="landing-hero" style="padding-left:0;padding-right:0;">
+        <h1>Lượt truy cập</h1>
+        <p>Số lượt mở trang web theo ngày.</p>
+      </div>
+      <div id="visitContent"><p class="settings-note">Đang tải…</p></div>
+    `);
+    document.getElementById('back').onclick = screenManagerList;
+    const wrap = document.getElementById('visitContent');
+    const r = await apiGet('/api/visits');
+    if(!r.ok || !r.data || !r.data.length){
+      wrap.innerHTML = '<p class="settings-note">Chưa có dữ liệu lượt truy cập.</p>';
+      return;
+    }
+    const days = r.data.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+    const now = new Date();
+    const vnNow = new Date(now.getTime() + 7*60*60*1000);
+    const todayStr = vnNow.toISOString().slice(0,10);
+    const curMonth = todayStr.slice(0,7);
+    const todayCount = (days.find(function(d){ return d.date === todayStr; }) || {count:0}).count;
+    const monthTotal = days.filter(function(d){ return d.date.slice(0,7) === curMonth; }).reduce(function(s,d){ return s+d.count; }, 0);
+    const rows = days.map(function(d){
+      return `
+        <div class="vehicle-row ok">
+          <div class="bar"></div>
+          <div class="body">
+            <div class="who"><div class="nm">Ngày ${fmtDayLabel(d.date)}</div></div>
+            <div class="metrics"><div class="d num">${d.count}</div></div>
+          </div>
+        </div>`;
+    }).join('');
+    wrap.innerHTML = `
+      <div class="home-stats" style="padding:0 20px 14px; display:flex; gap:10px;">
+        <div class="stat-card">
+          <div class="stat-label">Hôm nay</div>
+          <div class="stat-value">${todayCount}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tháng này</div>
+          <div class="stat-value">${monthTotal}</div>
+        </div>
+      </div>
+      <div style="padding:0 20px 8px;">
+        <div style="font-weight:700; color:#6FA8DC;">Lượt truy cập theo ngày</div>
+      </div>
+      <div class="vehicle-list" style="padding:0;">${rows}</div>
+    `;
+  }
+
   async function screenManagerList(){
     view = 'manager-list';
     render(`
@@ -1420,11 +1473,13 @@
       <div style="padding:20px 20px 0 20px; display:flex; flex-direction:column; gap:10px;">
         <button class="btn btn-blue" id="gocustomers">📋 Quản lý khách hàng</button>
         <button class="btn btn-outline" id="gotodayorders">📦 Đơn hôm nay</button>
+        <button class="btn btn-outline" id="govisitstats">📊 Lượt truy cập</button>
         <button class="btn btn-outline" id="backhome">← Về màn hình chính</button>
       </div>
     `);
     document.getElementById('settings').onclick = screenManagerSettings;
     document.getElementById('gotodayorders').onclick = screenTodayOrders;
+    document.getElementById('govisitstats').onclick = screenVisitStats;
     document.getElementById('backhome').onclick = () => { stopTimers(); screenVehicleHub(); };
     document.getElementById('gocustomers').onclick = () => { stopTimers(); screenManagerCustomers(); };
     await refreshList();
@@ -1703,6 +1758,7 @@ async function screenManagerCustomers(){
     if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
   }
 
+  fetch('/api/visit', {method:'POST'}).catch(function(){});
   screenHome();
 })();
 </script>
