@@ -169,6 +169,18 @@ app.get('/api/visits', async (req, res) => {
   }
 });
 
+app.get('/api/bills', async (req, res) => {
+  try {
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=bill_stats';
+    const r = await fetch(url);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('bill stats fetch error', e);
+    res.status(500).json({ error: 'bill stats fetch failed' });
+  }
+});
+
 app.get('/api/loss', async (req, res) => {
   try {
     const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=loss_list';
