@@ -699,6 +699,13 @@
     const listWrap = document.getElementById('revList');
     const r = await apiGet('/api/revenue');
     const all = r.ok ? r.data : [];
+    try {
+      const rb = await apiGet('/api/bills');
+      window.__billsCache = {};
+      if(rb.ok && rb.data){
+        rb.data.forEach(function(b){ window.__billsCache[b.date] = b; });
+      }
+    } catch(e) { window.__billsCache = {}; }
     if(!all.length){
       listWrap.innerHTML = '<p class="settings-note">Chưa có dữ liệu doanh thu.</p>';
       return;
@@ -785,13 +792,19 @@
     const monthTotal = days.reduce(function(s,d){ return s + Number(d.total); }, 0);
     renderRevenueChart(days, month);
     const rows = days.map(function(d){
-      const isDay = d.date.split('-').length === 3;
+      const isDay = d.date.split('-')[2].length === 3;
       const label = isDay ? 'Ngày ' + fmtDayLabel(d.date) : fmtDayLabel(d.date);
+      const billRec = isDay && window.__billsCache ? window.__billsCache[d.date] : null;
+      const billHtml = billRec ? '<div class="upd">' + billRec.bills + ' bill · TB ' + fmtVND(billRec.avg) + '</div>' : '';
       return `
         <div class="vehicle-row ok" ${isDay ? 'data-date="' + d.date + '" style="cursor:pointer;"' : ''}>
           <div class="bar"></div>
           <div class="body">
-            <div class="who"><div class="nm">${label}</div>${isDay ? '<div class="upd">Bấm để xem chi tiết ngành hàng ›</div>' : ''}</div>
+            <div class="who">
+              <div class="nm">${label}</div>
+              <div class="upd">${isDay ? 'Bấm để xem chi tiết ngành hàng ›' : ''}</div>
+              ${billHtml}
+            </div>
             <div class="metrics"><div class="d num">${fmtVND(d.total)}</div></div>
           </div>
         </div>`;
