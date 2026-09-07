@@ -808,6 +808,43 @@
     });
   }
 
+  async function loadBillInfo(date){
+    const wrap = document.getElementById('billInfo');
+    if(!wrap) return;
+    try {
+      const r = await apiGet('/api/bills');
+      if(!r.ok || !r.data){ wrap.innerHTML = ''; return; }
+      const dayRec = r.data.find(function(d){ return d.date === date; });
+      if(!dayRec){ wrap.innerHTML = ''; return; }
+      const dt = new Date(date + 'T00:00:00');
+      dt.setDate(dt.getDate() - 1);
+      const prevDate = dt.toISOString().slice(0,10);
+      const prevRec = r.data.find(function(d){ return d.date === prevDate; });
+      let compareHtml = '';
+      if(prevRec && prevRec.bills > 0){
+        const diff = dayRec.bills - prevRec.bills;
+        const pct = Math.round(diff / prevRec.bills * 100);
+        const sign = diff >= 0 ? '+' : '';
+        const color = diff >= 0 ? 'var(--green)' : 'var(--red)';
+        compareHtml = '<div style="font-size:12px; color:' + color + '; margin-top:4px;">' + sign + pct + '% so hôm qua (' + prevRec.bills + ' bill)</div>';
+      }
+      wrap.innerHTML =
+        '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">' +
+          '<div>' +
+            '<div class="settings-note">Số bill</div>' +
+            '<div style="font-size:20px; font-weight:700; color:var(--text);">' + dayRec.bills + '</div>' +
+            compareHtml +
+          '</div>' +
+          '<div style="text-align:right;">' +
+            '<div class="settings-note">TB/bill</div>' +
+            '<div style="font-size:20px; font-weight:700; color:var(--text);">' + fmtVND(dayRec.avg) + '</div>' +
+          '</div>' +
+        '</div>';
+    } catch(e) {
+      wrap.innerHTML = '';
+    }
+  }
+
   async function screenRevenueDayDetail(date){
     stopTimers();
     view = 'revenue-day';
@@ -820,9 +857,11 @@
       <div style="padding:0 20px 16px;">
         <button class="btn btn-outline" id="btnTopProducts" style="width:100%;">🔥 Xem sản phẩm bán chạy nhất</button>
       </div>
+      <div id="billInfo" style="padding:0 20px 16px;"></div>
       <div id="revDayDetail"><p class="settings-note">Đang tải…</p></div>
     `);
     document.getElementById('back').onclick = screenRevenue;
+    loadBillInfo(date);
     const btnTop = document.getElementById('btnTopProducts');
     if (btnTop) btnTop.onclick = () => screenTopProducts(date);
     const wrap = document.getElementById('revDayDetail');
