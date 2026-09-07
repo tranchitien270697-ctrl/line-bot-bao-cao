@@ -755,7 +755,7 @@
       const isMax = val === thisMax;
       const isMin = val === thisMin && thisMin !== thisMax;
       const color = isMax ? 'var(--green)' : (isMin ? 'var(--red)' : 'var(--amber)');
-      let rects = '<rect x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + subW.toFixed(2) + '" height="' + Math.max(h,0.5).toFixed(2) + '" fill="' + color + '" rx="0.4"><title>Ngày ' + dayNum + ' (tháng này): ' + fmtVND(val) + '</title></rect>';
+      let rects = '<rect data-idx="' + i + '" x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + subW.toFixed(2) + '" height="' + Math.max(h,0.5).toFixed(2) + '" fill="' + color + '" rx="0.4" style="cursor:pointer;"><title>Ngày ' + dayNum + ' (tháng này): ' + fmtVND(val) + '</title></rect>';
       if(hasPrev){
         const pv = prevByDay[dayNum] || 0;
         const ph = scaleMax > 0 ? (pv / scaleMax * 82) : 0;
@@ -774,11 +774,21 @@
       '</div>' : '';
     chartWrap.innerHTML =
       '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 10px 8px;">' +
+        '<div id="chartTapInfo" style="font-size:14px; font-weight:700; color:var(--amber); min-height:20px; margin-bottom:8px; text-align:center;">👆 Chạm vào cột để xem chi tiết</div>' +
         '<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%; height:120px; display:block;">' + bars + '</svg>' +
         legend +
         '<div style="margin-top:8px; font-size:12px; color:var(--muted);">🟢 Cao nhất ' + fmtDayLabel(maxDay.date) + ': ' + fmtVND(thisMax) + '</div>' +
         '<div style="font-size:12px; color:var(--muted);">🔴 Thấp nhất ' + fmtDayLabel(minDay.date) + ': ' + fmtVND(thisMin) + '</div>' +
       '</div>';
+    const tapInfo = document.getElementById('chartTapInfo');
+    chartWrap.querySelectorAll('rect[data-idx]').forEach(function(rect){
+      rect.onclick = function(){
+        const idx = Number(rect.getAttribute('data-idx'));
+        const d = days[idx];
+        if(!d || !tapInfo) return;
+        tapInfo.textContent = 'Ngày ' + fmtDayLabel(d.date) + ': ' + fmtVND(Number(d.total)||0);
+      };
+    });
   }
 
   function showRevenueMonth(month){
