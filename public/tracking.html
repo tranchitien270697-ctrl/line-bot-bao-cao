@@ -792,9 +792,9 @@
     const monthTotal = days.reduce(function(s,d){ return s + Number(d.total); }, 0);
     renderRevenueChart(days, month);
     const rows = days.map(function(d){
-      const isDay = d.date.split('-')[2].length === 3;
+      const isDay = d.date.split('-')[2].length === 2;
       const label = isDay ? 'Ngày ' + fmtDayLabel(d.date) : fmtDayLabel(d.date);
-      const billRec = isDay && window.__billsCache ? window.__billsCache[d.date] : null;
+      const billRec = window.__billsCache ? window.__billsCache[d.date] : null;
       const billHtml = billRec ? '<div class="upd">' + billRec.bills + ' bill · TB ' + fmtVND(billRec.avg) + '</div>' : '';
       return `
         <div class="vehicle-row ok" ${isDay ? 'data-date="' + d.date + '" style="cursor:pointer;"' : ''}>
