@@ -140,6 +140,35 @@ app.get('/api/lunar-today', (req, res) => {
   }
 });
 
+app.post('/api/visit', async (req, res) => {
+  try {
+    const now = new Date();
+    const vnDate = new Date(now.getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY;
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: CUSTOMER_SHEET_KEY, action: 'visit_log', date: vnDate })
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('visit log error', e);
+    res.status(500).json({ error: 'visit log failed' });
+  }
+});
+
+app.get('/api/visits', async (req, res) => {
+  try {
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=visit_stats';
+    const r = await fetch(url);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('visit stats fetch error', e);
+    res.status(500).json({ error: 'visit stats fetch failed' });
+  }
+});
+
 app.get('/api/loss', async (req, res) => {
   try {
     const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=loss_list';
