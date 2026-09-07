@@ -530,6 +530,7 @@
     });
     const top5 = Object.entries(totalMap).sort(function(a,b){ return b[1]-a[1]; }).slice(0,5);
     const avgPerDay = daysWithData > 0 ? grandTotal / daysWithData : 0;
+    const totalAmtEst = r.data.reduce(function(s,d){ return s + (category === 'fresh' ? (Number(d.freshAmt)||0) : (Number(d.fmcgAmt)||0)); }, 0);
     const top5Rows = top5.map(function(item, i){
       return `
         <div class="prow">
@@ -564,6 +565,10 @@
       <div style="padding:0 20px 14px;">
         <div class="settings-note">Trung bình mất mát / ngày</div>
         <div style="font-size:22px; font-weight:700; color:var(--text);">${avgPerDay.toFixed(1)}</div>
+      </div>
+      <div style="padding:0 20px 14px;">
+        <div class="settings-note">💰 Tổng thành tiền mất mát ước tính</div>
+        <div style="font-size:22px; font-weight:700; color:var(--red);">${fmtVND(totalAmtEst)}</div>
       </div>
       <div style="padding:0 20px 8px;">
         <div style="font-weight:700; color:#6FA8DC;">Mất mát theo ngày</div>
