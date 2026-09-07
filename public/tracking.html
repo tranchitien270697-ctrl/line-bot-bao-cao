@@ -688,35 +688,61 @@
     showRevenueMonth(months[0]);
   }
 
-  function renderRevenueChart(days){
+  function renderRevenueChart(days, month){
     const chartWrap = document.getElementById('revChart');
     if(!chartWrap) return;
     if(!days || !days.length){ chartWrap.innerHTML = ''; return; }
+    const parts = month.split('-').map(Number);
+    let py = parts[0], pm = parts[1] - 1;
+    if(pm < 1){ pm = 12; py -= 1; }
+    const prevMonth = py + '-' + String(pm).padStart(2,'0');
+    const allData = window.__revAll || [];
+    const prevByDay = {};
+    allData.forEach(function(d){
+      if(d.date.slice(0,7) === prevMonth){ prevByDay[d.date.split('-')[2]] = Number(d.total)||0; }
+    });
+    const hasPrev = Object.keys(prevByDay).length > 0;
     const vals = days.map(function(d){ return Number(d.total)||0; });
-    const maxVal = Math.max.apply(null, vals);
-    const minVal = Math.min.apply(null, vals);
+    const thisMax = Math.max.apply(null, vals);
+    const thisMin = Math.min.apply(null, vals);
+    const prevVals = hasPrev ? Object.keys(prevByDay).map(function(k){ return prevByDay[k]; }) : [0];
+    const scaleMax = Math.max.apply(null, vals.concat(prevVals));
     const n = days.length;
     const barW = 100 / n;
-    const barGap = Math.min(0.4, barW * 0.15);
+    const barGap = Math.min(0.4, barW * 0.1);
+    const subW = hasPrev ? (barW - barGap * 2) / 2 : (barW - barGap * 2);
     const bars = days.map(function(d, i){
       const val = vals[i];
-      const h = maxVal > 0 ? (val / maxVal * 82) : 0;
-      const x = i * barW + barGap;
-      const w = Math.max(barW - barGap * 2, 0.3);
-      const y = 92 - h;
       const dayNum = d.date.split('-')[2];
-      const isMax = val === maxVal;
-      const isMin = val === minVal && minVal !== maxVal;
+      const h = scaleMax > 0 ? (val / scaleMax * 82) : 0;
+      const x = i * barW + barGap;
+      const y = 92 - h;
+      const isMax = val === thisMax;
+      const isMin = val === thisMin && thisMin !== thisMax;
       const color = isMax ? 'var(--green)' : (isMin ? 'var(--red)' : 'var(--amber)');
-      return '<rect x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + w.toFixed(2) + '" height="' + Math.max(h,0.5).toFixed(2) + '" fill="' + color + '" rx="0.4"><title>Ngày ' + dayNum + ': ' + fmtVND(val) + '</title></rect>';
+      let rects = '<rect x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + subW.toFixed(2) + '" height="' + Math.max(h,0.5).toFixed(2) + '" fill="' + color + '" rx="0.4"><title>Ngày ' + dayNum + ' (tháng này): ' + fmtVND(val) + '</title></rect>';
+      if(hasPrev){
+        const pv = prevByDay[dayNum] || 0;
+        const ph = scaleMax > 0 ? (pv / scaleMax * 82) : 0;
+        const px = x + subW + barGap;
+        const py2 = 92 - ph;
+        rects += '<rect x="' + px.toFixed(2) + '" y="' + py2.toFixed(2) + '" width="' + subW.toFixed(2) + '" height="' + Math.max(ph,0.3).toFixed(2) + '" fill="var(--muted2)" opacity="0.55" rx="0.4"><title>Ngày ' + dayNum + ' (tháng trước): ' + fmtVND(pv) + '</title></rect>';
+      }
+      return rects;
     }).join('');
-    const maxDay = days.find(function(d){ return Number(d.total) === maxVal; });
-    const minDay = days.find(function(d){ return Number(d.total) === minVal; });
+    const maxDay = days.find(function(d){ return Number(d.total) === thisMax; }) || days[0];
+    const minDay = days.find(function(d){ return Number(d.total) === thisMin; }) || days[0];
+    const legend = hasPrev ?
+      '<div style="display:flex; gap:14px; margin-top:8px; font-size:11px; color:var(--muted);">' +
+        '<span><span style="display:inline-block; width:8px; height:8px; background:var(--amber); border-radius:2px; margin-right:4px;"></span>Tháng này</span>' +
+        '<span><span style="display:inline-block; width:8px; height:8px; background:var(--muted2); opacity:0.55; border-radius:2px; margin-right:4px;"></span>Tháng trước</span>' +
+      '</div>' : '';
     chartWrap.innerHTML =
       '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 10px 8px;">' +
         '<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%; height:120px; display:block;">' + bars + '</svg>' +
-        '<div style="margin-top:8px; font-size:12px; color:var(--muted);">🟢 Cao nhất ' + fmtDayLabel(maxDay.date) + ': ' + fmtVND(maxVal) + '</div>' +
-        '<div style="font-size:12px; color:var(--muted);">🔴 Thấp nhất ' + fmtDayLabel(minDay.date) + ': ' + fmtVND(minVal) + '</div>' +
+        legend +
+        '<div style="margin-top:8px; font-size:12px; color:var(--muted);">🟢 Cao nhất ' + fmtDayLabel(maxDay.date) + ': ' + fmtVND(thisMax) + '</div>' +
+        '<div style="font-size:12px; color:var(--muted);">🔴 Thấp nhất ' + fmtDayLabel(minDay.date) + ': ' + fmtVND(thisMin) + '</div>' +
       '</div>';
   }
 
@@ -729,7 +755,7 @@
     const days = (window.__revAll || []).filter(function(d){ return d.date.slice(0,7) === month; });
     days.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
     const monthTotal = days.reduce(function(s,d){ return s + Number(d.total); }, 0);
-    renderRevenueChart(days);
+    renderRevenueChart(days, month);
     const rows = days.map(function(d){
       const isDay = d.date.split('-').length === 3;
       const label = isDay ? 'Ngày ' + fmtDayLabel(d.date) : fmtDayLabel(d.date);
