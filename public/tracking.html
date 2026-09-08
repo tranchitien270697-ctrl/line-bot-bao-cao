@@ -457,9 +457,7 @@
         if(todayBill){
           if(elTodayBillSub) elTodayBillSub.textContent = todayBill.bills + ' bill · TB ' + fmtVND(todayBill.avg);
           if(elTodayBillCard) elTodayBillCard.textContent = todayBill.bills + ' bill';
-          const dt3 = new Date(todayStr2 + 'T00:00:00');
-          dt3.setDate(dt3.getDate() - 1);
-          const prevDateStr = dt3.toISOString().slice(0,10);
+          const prevDateStr = getPrevDateStr(todayStr2);
           const prevBill = rBill.data.find(function(b){ return b.date === prevDateStr; });
           const elCompare = document.getElementById('statTodayBillCompare');
           if(elCompare && prevBill && prevBill.bills > 0){
@@ -713,6 +711,16 @@
     return { dayLabel: dayLabels[dayIdx], mainName: mainName };
   }
 
+  function getPrevDateStr(dateStr){
+    const parts = dateStr.split('-').map(Number);
+    const d = new Date(Date.UTC(parts[0], parts[1]-1, parts[2]));
+    d.setUTCDate(d.getUTCDate() - 1);
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth()+1).padStart(2,'0');
+    const dd = String(d.getUTCDate()).padStart(2,'0');
+    return y + '-' + m + '-' + dd;
+  }
+
   function fmtDayLabel(dateStr){
     const parts = dateStr.split('-');
     if(parts.length !== 3) return 'Cả tháng';
@@ -881,9 +889,7 @@
       if(!r.ok || !r.data){ wrap.innerHTML = ''; return; }
       const dayRec = r.data.find(function(d){ return d.date === date; });
       if(!dayRec){ wrap.innerHTML = ''; return; }
-      const dt = new Date(date + 'T00:00:00');
-      dt.setDate(dt.getDate() - 1);
-      const prevDate = dt.toISOString().slice(0,10);
+      const prevDate = getPrevDateStr(date);
       const prevRec = r.data.find(function(d){ return d.date === prevDate; });
       let compareHtml = '';
       if(prevRec && prevRec.bills > 0){
