@@ -351,6 +351,7 @@
           <div class="stat-label" id="statTodayBillCompare" style="margin-top:4px;"></div>
         </div>
       </div>
+      <div id="monthInsightsHome" style="padding:0 20px 14px;"></div>
       <div class="role-list">
         <div class="role-card driver" id="go-vehicle">
           <div class="dot">🛵</div>
@@ -431,6 +432,7 @@
         const now = new Date();
         const todayStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
         const monthStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+        window.__revAll = r.data;
         const todayRec = r.data.find(function(d){ return d.date === todayStr; });
         const monthTotal = r.data.filter(function(d){ return d.date.slice(0,7) === monthStr; }).reduce(function(s,d){ return s+Number(d.total); },0);
         const elToday = document.getElementById('statToday');
@@ -448,6 +450,8 @@
     try {
       const rBill = await apiGet('/api/bills');
       if(rBill.ok && rBill.data){
+        window.__billsCache = {};
+        rBill.data.forEach(function(b){ window.__billsCache[b.date] = b; });
         const now2 = new Date();
         const vnNow2 = new Date(now2.getTime() + 7*60*60*1000);
         const todayStr2 = vnNow2.toISOString().slice(0,10);
@@ -471,6 +475,13 @@
           if(elTodayBillCard) elTodayBillCard.textContent = 'Chưa có';
         }
       }
+    } catch(e) {}
+    try {
+      const now2b = new Date();
+      const vnNow2b = new Date(now2b.getTime() + 7*60*60*1000);
+      const curMonthStr = vnNow2b.toISOString().slice(0,7);
+      const curMonthData = (window.__revAll || []).filter(function(d){ return d.date.slice(0,7) === curMonthStr; }).sort(function(a,b){ return a.date.localeCompare(b.date); });
+      renderMonthInsights(curMonthStr, curMonthData, 'monthInsightsHome');
     } catch(e) {}
     try {
       const elCleaning = document.getElementById('statCleaning');
@@ -842,8 +853,8 @@
     });
   }
 
-  async function renderMonthInsights(month, days){
-    const wrap = document.getElementById('monthInsights');
+  async function renderMonthInsights(month, days, targetId){
+    const wrap = document.getElementById(targetId || 'monthInsights');
     if(!wrap) return;
     const now = new Date();
     const vnNow = new Date(now.getTime() + 7*60*60*1000);
