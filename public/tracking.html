@@ -339,13 +339,12 @@
           <div class="stat-card">
             <div class="stat-label">Doanh thu tháng này</div>
             <div class="stat-value" id="statMonth">…</div>
+            <div class="stat-label" id="statYear" style="margin-top:6px; font-size:11px;"></div>
           </div>
         </div>
         <div class="stat-card" style="margin-top:10px;">
-          <div class="stat-label">🎯 Doanh thu năm 2026 (chỉ tiêu 36.1 tỷ)</div>
-          <div class="stat-value" id="statYear">…</div>
-          <div class="stat-label" id="statForecast" style="margin-top:6px;"></div>
-        </div>
+          <div class="stat-label">🎯 Dự kiến hết tháng (dựa trên ngày đã chốt)</div>
+          <div class="stat-value" id="statForecast" style="font-size:26px;">…</div>
         </div>
       <div id="monthInsightsHome" style="padding:0 20px 14px;"></div>
       <div class="role-list">
@@ -440,7 +439,7 @@
         const pct = (yearTotal / YEAR_TARGET * 100).toFixed(1);
         const elYear = document.getElementById('statYear');
         const yearTy = (yearTotal / 1e9).toFixed(1);
-        if(elYear) elYear.textContent = yearTy + ' tỷ — ' + pct + '%';
+        if(elYear) elYear.textContent = '🎯 Năm 2026: ' + yearTy + ' tỷ — ' + pct + '%';
       }
     } catch(e) {}
     try {
@@ -851,27 +850,29 @@
     const now = new Date();
     const vnNow = new Date(now.getTime() + 7*60*60*1000);
     const curMonthStr = vnNow.toISOString().slice(0,7);
+    const todayStrIns = vnNow.toISOString().slice(0,10);
     if(month !== curMonthStr || !days || !days.length){ wrap.innerHTML = ''; return; }
     wrap.innerHTML = '<p class="settings-note">Đang phân tích…</p>';
     try {
       const parts = month.split('-').map(Number);
       const daysInMonth = new Date(parts[0], parts[1], 0).getDate();
-      const vals = days.map(function(d){ return Number(d.total)||0; });
+      const completedDays = days.filter(function(d){ return d.date !== todayStrIns; });
+      const vals = completedDays.map(function(d){ return Number(d.total)||0; });
       const grandTotal = vals.reduce(function(s,v){ return s+v; }, 0);
-      const avgPerDay = days.length > 0 ? grandTotal / days.length : 0;
+      const avgPerDay = completedDays.length > 0 ? grandTotal / completedDays.length : 0;
       const forecast = avgPerDay * daysInMonth;
       let py = parts[0], pm = parts[1] - 1;
       if(pm < 1){ pm = 12; py -= 1; }
       const prevMonth = py + '-' + String(pm).padStart(2,'0');
       const allData = window.__revAll || [];
       const prevMonthDays = allData.filter(function(d){ return d.date.slice(0,7) === prevMonth; }).sort(function(a,b){ return a.date.localeCompare(b.date); });
-      const N = days.length;
+      const N = completedDays.length;
       const prevSamePeriod = prevMonthDays.slice(0, N);
       const prevSameTotal = prevSamePeriod.reduce(function(s,d){ return s + (Number(d.total)||0); }, 0);
       const pctVsPrev = prevSameTotal > 0 ? Math.round((grandTotal - prevSameTotal) / prevSameTotal * 100) : null;
       const billsCache = window.__billsCache || {};
       let curBillsTotal = 0, curBillsAmt = 0;
-      days.forEach(function(d){ const b = billsCache[d.date]; if(b){ curBillsTotal += b.bills; curBillsAmt += b.total; } });
+      completedDays.forEach(function(d){ const b = billsCache[d.date]; if(b){ curBillsTotal += b.bills; curBillsAmt += b.total; } });
       let prevBillsTotal = 0, prevBillsAmt = 0;
       prevSamePeriod.forEach(function(d){ const b = billsCache[d.date]; if(b){ prevBillsTotal += b.bills; prevBillsAmt += b.total; } });
       const curAvgBill = curBillsTotal > 0 ? curBillsAmt / curBillsTotal : 0;
@@ -887,10 +888,10 @@
         } catch(e){}
         return [];
       }
-      const allDatesToFetch = days.map(function(d){ return d.date; }).concat(prevSamePeriod.map(function(d){ return d.date; }));
+      const allDatesToFetch = completedDays.map(function(d){ return d.date; }).concat(prevSamePeriod.map(function(d){ return d.date; }));
       await Promise.all(allDatesToFetch.map(function(dt){ return getDetail(dt); }));
       const curIndTotals = {};
-      days.forEach(function(d){
+      completedDays.forEach(function(d){
         const inds = window.__revDetailCache[d.date] || [];
         inds.forEach(function(ind){ curIndTotals[ind.n] = (curIndTotals[ind.n]||0) + ind.t; });
       });
@@ -923,19 +924,24 @@
       }
       let billHtml = '';
       if(billPct !== null){
+        const diffBills = curBillsTotal - prevBillsTotal;
+        const diffAvgBill = curAvgBill - prevAvgBill;
         const billColor = billPct >= 0 ? 'var(--green)' : 'var(--red)';
         const billSign = billPct >= 0 ? '+' : '';
+        const diffBillSign = diffBills >= 0 ? '+' : '';
         const avgBillColor = (avgBillPct !== null && avgBillPct >= 0) ? 'var(--green)' : 'var(--red)';
         const avgBillSign = (avgBillPct !== null && avgBillPct >= 0) ? '+' : '';
+        const diffAvgBillSign = diffAvgBill >= 0 ? '+' : '';
         billHtml = '<div style="margin-bottom:10px; display:flex; gap:20px;">' +
-          '<div><div class="settings-note">🧾 Lượt bill (so cùng kỳ)</div><div style="font-size:16px; font-weight:700; color:' + billColor + ';">' + billSign + billPct + '%</div></div>' +
-          (avgBillPct !== null ? '<div><div class="settings-note">Giá trị TB/bill</div><div style="font-size:16px; font-weight:700; color:' + avgBillColor + ';">' + avgBillSign + avgBillPct + '%</div></div>' : '') +
+          '<div><div class="settings-note">🧾 Lượt bill (so cùng kỳ)</div><div style="font-size:16px; font-weight:700; color:' + billColor + ';">' + billSign + billPct + '% (' + diffBillSign + diffBills + ' bill)</div></div>' +
+          (avgBillPct !== null ? '<div><div class="settings-note">Giá trị TB/bill</div><div style="font-size:16px; font-weight:700; color:' + avgBillColor + ';">' + avgBillSign + avgBillPct + '% (' + diffAvgBillSign + fmtVND(Math.round(diffAvgBill)) + ')</div></div>' : '') +
         '</div>';
       }
       let quickHtml = '';
-      if(topGain && topGain.delta > 0){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(topGain.name) + ': +' + fmtVND(topGain.delta) + '</div>'; }
-      if(topLoss && topLoss.delta < 0){ quickHtml += '<div style="font-size:13px; color:var(--red);">▼ ' + esc(topLoss.name) + ': ' + fmtVND(topLoss.delta) + '</div>'; }
-      const quickBlock = quickHtml ? '<div><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div>' : '';
+      const gains = indDeltas.filter(function(x){ return x.delta > 0; }).slice(0, 3);
+      const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-2).reverse();
+      gains.forEach(function(g){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(g.name) + ': +' + fmtVND(g.delta) + '</div>'; });
+      losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
       wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + quickBlock + '</div>';
     } catch(e) {
       wrap.innerHTML = '';
