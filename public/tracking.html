@@ -344,13 +344,9 @@
         <div class="stat-card" style="margin-top:10px;">
           <div class="stat-label">🎯 Doanh thu năm 2026 (chỉ tiêu 36.1 tỷ)</div>
           <div class="stat-value" id="statYear">…</div>
+          <div class="stat-label" id="statForecast" style="margin-top:6px;"></div>
         </div>
-        <div class="stat-card" style="margin-top:10px;">
-          <div class="stat-label">🧾 Lượt bill hôm nay</div>
-          <div class="stat-value" id="statTodayBillCard">…</div>
-          <div class="stat-label" id="statTodayBillCompare" style="margin-top:4px;"></div>
         </div>
-      </div>
       <div id="monthInsightsHome" style="padding:0 20px 14px;"></div>
       <div class="role-list">
         <div class="role-card driver" id="go-vehicle">
@@ -457,22 +453,18 @@
         const todayStr2 = vnNow2.toISOString().slice(0,10);
         const todayBill = rBill.data.find(function(b){ return b.date === todayStr2; });
         const elTodayBillSub = document.getElementById('statTodayBill');
-        const elTodayBillCard = document.getElementById('statTodayBillCard');
         if(todayBill){
-          if(elTodayBillSub) elTodayBillSub.textContent = todayBill.bills + ' bill · TB ' + fmtVND(todayBill.avg);
-          if(elTodayBillCard) elTodayBillCard.textContent = todayBill.bills + ' bill';
           const prevDateStr = getPrevDateStr(todayStr2);
           const prevBill = rBill.data.find(function(b){ return b.date === prevDateStr; });
-          const elCompare = document.getElementById('statTodayBillCompare');
-          if(elCompare && prevBill && prevBill.bills > 0){
+          let cmpText = '';
+          if(prevBill && prevBill.bills > 0){
             const diffB = todayBill.bills - prevBill.bills;
             const pctB = Math.round(diffB / prevBill.bills * 100);
             const signB = diffB >= 0 ? '+' : '';
             const colorB = diffB >= 0 ? 'var(--green)' : 'var(--red)';
-            elCompare.innerHTML = '<span style="color:' + colorB + ';">' + signB + pctB + '% so hôm qua</span> (' + prevBill.bills + ' bill)';
+            cmpText = ' · <span style="color:' + colorB + ';">' + signB + pctB + '% hqua</span>';
           }
-        } else {
-          if(elTodayBillCard) elTodayBillCard.textContent = 'Chưa có';
+          if(elTodayBillSub) elTodayBillSub.innerHTML = todayBill.bills + ' bill · TB ' + fmtVND(todayBill.avg) + cmpText;
         }
       }
     } catch(e) {}
@@ -895,16 +887,18 @@
         } catch(e){}
         return [];
       }
+      const allDatesToFetch = days.map(function(d){ return d.date; }).concat(prevSamePeriod.map(function(d){ return d.date; }));
+      await Promise.all(allDatesToFetch.map(function(dt){ return getDetail(dt); }));
       const curIndTotals = {};
-      for(const d of days){
-        const inds = await getDetail(d.date);
+      days.forEach(function(d){
+        const inds = window.__revDetailCache[d.date] || [];
         inds.forEach(function(ind){ curIndTotals[ind.n] = (curIndTotals[ind.n]||0) + ind.t; });
-      }
+      });
       const prevIndTotals = {};
-      for(const d of prevSamePeriod){
-        const inds = await getDetail(d.date);
+      prevSamePeriod.forEach(function(d){
+        const inds = window.__revDetailCache[d.date] || [];
         inds.forEach(function(ind){ prevIndTotals[ind.n] = (prevIndTotals[ind.n]||0) + ind.t; });
-      }
+      });
       const allIndNames = Object.keys(Object.assign({}, curIndTotals, prevIndTotals));
       const indDeltas = allIndNames.map(function(name){
         const cur = curIndTotals[name] || 0;
@@ -914,7 +908,13 @@
       indDeltas.sort(function(a,b){ return b.delta - a.delta; });
       const topGain = indDeltas.length ? indDeltas[0] : null;
       const topLoss = indDeltas.length ? indDeltas[indDeltas.length-1] : null;
-      const forecastHtml = '<div style="margin-bottom:10px;"><div class="settings-note">🎯 Dự kiến hết tháng</div><div style="font-size:20px; font-weight:700; color:var(--text);">' + fmtVND(Math.round(forecast)) + '</div></div>';
+      const elForecast = document.getElementById('statForecast');
+      let forecastHtml = '';
+      if(elForecast){
+        elForecast.textContent = '🎯 Dự kiến hết tháng: ' + fmtVND(Math.round(forecast));
+      } else {
+        forecastHtml = '<div style="margin-bottom:10px;"><div class="settings-note">🎯 Dự kiến hết tháng</div><div style="font-size:20px; font-weight:700; color:var(--text);">' + fmtVND(Math.round(forecast)) + '</div></div>';
+      }
       let cmpHtml = '';
       if(pctVsPrev !== null){
         const cmpColor = pctVsPrev >= 0 ? 'var(--green)' : 'var(--red)';
