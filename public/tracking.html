@@ -907,15 +907,18 @@
         } catch(e){}
         return [];
       }
-      const allDatesToFetch = completedDays.map(function(d){ return d.date; }).concat(prevSamePeriod.map(function(d){ return d.date; }));
+      const allDatesToFetch = completedDays.map(function(d){ return d.date; }).concat(prevMonthDays.map(function(d){ return d.date; }));
       await Promise.all(allDatesToFetch.map(function(dt){ return getDetail(dt); }));
       const curIndTotals = {};
       completedDays.forEach(function(d){
         const inds = window.__revDetailCache[d.date] || [];
         inds.forEach(function(ind){ curIndTotals[ind.n] = (curIndTotals[ind.n]||0) + ind.t; });
       });
+      if(completedDays.length > 0){
+        Object.keys(curIndTotals).forEach(function(name){ curIndTotals[name] = curIndTotals[name] / completedDays.length * daysInMonth; });
+      }
       const prevIndTotals = {};
-      prevSamePeriod.forEach(function(d){
+      prevMonthDays.forEach(function(d){
         const inds = window.__revDetailCache[d.date] || [];
         inds.forEach(function(ind){ prevIndTotals[ind.n] = (prevIndTotals[ind.n]||0) + ind.t; });
       });
