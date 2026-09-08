@@ -891,9 +891,12 @@
       if(elBillForecast){
         const avgBillsPerDay = completedDays.length > 0 ? curBillsTotal / completedDays.length : 0;
         const billForecastVal = Math.round(avgBillsPerDay * daysInMonth);
-        const bfColor = billPct !== null && billPct >= 0 ? 'var(--green)' : (billPct !== null ? 'var(--red)' : 'var(--text)');
-        const bfSign = billPct !== null && billPct >= 0 ? '+' : '';
-        elBillForecast.innerHTML = '~' + billForecastVal + ' bill' + (billPct !== null ? ' <span style="color:' + bfColor + '; font-size:12px;">(' + bfSign + billPct + '%)</span>' : '');
+        let prevMonthFullBills = 0;
+        prevMonthDays.forEach(function(d){ const b = billsCache[d.date]; if(b) prevMonthFullBills += b.bills; });
+        const bfPct = prevMonthFullBills > 0 ? Math.round((billForecastVal - prevMonthFullBills) / prevMonthFullBills * 100) : null;
+        const bfColor = bfPct !== null && bfPct >= 0 ? 'var(--green)' : (bfPct !== null ? 'var(--red)' : 'var(--text)');
+        const bfSign = bfPct !== null && bfPct >= 0 ? '+' : '';
+        elBillForecast.innerHTML = '~' + billForecastVal + ' bill' + (bfPct !== null ? ' <span style="color:' + bfColor + '; font-size:12px;">(' + bfSign + bfPct + '% so T trước)</span>' : '');
       }
       if(!window.__revDetailCache) window.__revDetailCache = {};
       async function getDetail(dateStr){
@@ -928,7 +931,11 @@
       const elForecast = document.getElementById('statForecast');
       let forecastHtml = '';
       if(elForecast){
-        elForecast.textContent = fmtVND(Math.round(forecast));
+        const prevMonthFullRevenue = prevMonthDays.reduce(function(s,d){ return s + (Number(d.total)||0); }, 0);
+        const fcPct = prevMonthFullRevenue > 0 ? Math.round((forecast - prevMonthFullRevenue) / prevMonthFullRevenue * 100) : null;
+        const fcColor = fcPct !== null && fcPct >= 0 ? 'var(--green)' : (fcPct !== null ? 'var(--red)' : 'var(--text)');
+        const fcSign = fcPct !== null && fcPct >= 0 ? '+' : '';
+        elForecast.innerHTML = fmtVND(Math.round(forecast)) + (fcPct !== null ? ' <span style="font-size:12px; color:' + fcColor + ';">(' + fcSign + fcPct + '% so T trước)</span>' : '');
       } else {
         forecastHtml = '<div style="margin-bottom:10px;"><div class="settings-note">🎯 Dự kiến hết tháng</div><div style="font-size:20px; font-weight:700; color:var(--text);">' + fmtVND(Math.round(forecast)) + '</div></div>';
       }
