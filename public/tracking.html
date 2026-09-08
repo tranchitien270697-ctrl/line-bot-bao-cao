@@ -946,18 +946,10 @@
         cmpHtml = '<div style="margin-bottom:10px;"><div class="settings-note">📊 So ' + N + ' ngày đầu tháng trước</div><div style="font-size:16px; font-weight:700; color:' + cmpColor + ';">' + cmpSign + pctVsPrev + '% (' + fmtVND(prevSameTotal) + ')</div></div>';
       }
       let billHtml = '';
-      if(billPct !== null){
-        const diffBills = curBillsTotal - prevBillsTotal;
-        const diffAvgBill = curAvgBill - prevAvgBill;
-        const billColor = billPct >= 0 ? 'var(--green)' : 'var(--red)';
-        const billSign = billPct >= 0 ? '+' : '';
-        const diffBillSign = diffBills >= 0 ? '+' : '';
-        const avgBillColor = (avgBillPct !== null && avgBillPct >= 0) ? 'var(--green)' : 'var(--red)';
-        const avgBillSign = (avgBillPct !== null && avgBillPct >= 0) ? '+' : '';
-        const diffAvgBillSign = diffAvgBill >= 0 ? '+' : '';
-        billHtml = '<div style="margin-bottom:10px; display:flex; gap:20px;">' +
-          '<div><div class="settings-note">🧾 Lượt bill (so cùng kỳ)</div><div style="font-size:16px; font-weight:700; color:' + billColor + ';">' + billSign + billPct + '% (' + diffBillSign + diffBills + ' bill)</div></div>' +
-          (avgBillPct !== null ? '<div><div class="settings-note">Giá trị TB/bill</div><div style="font-size:16px; font-weight:700; color:' + avgBillColor + ';">' + avgBillSign + avgBillPct + '% (' + diffAvgBillSign + fmtVND(Math.round(diffAvgBill)) + ')</div></div>' : '') +
+      if(curBillsTotal > 0){
+        billHtml = '<div style="margin-bottom:10px;">' +
+          '<div class="settings-note">🧾 Lượt bill (tham khảo)</div>' +
+          '<div style="font-size:15px; font-weight:700; color:var(--text);">' + curBillsTotal + ' bill · TB ' + fmtVND(Math.round(curAvgBill)) + '</div>' +
         '</div>';
       }
       let quickHtml = '';
