@@ -592,11 +592,12 @@
     const products = day ? day.products.filter(inCat).slice().sort(function(a,b){ return b.qty-a.qty; }) : [];
     const total = products.reduce(function(s,p){ return s+p.qty; },0);
     const rows = products.map(function(p, i){
+      const amtHtml = p.amt ? '<div class="prow-sub" style="font-size:11px; color:var(--red);">' + fmtVND(p.amt) + '</div>' : '';
       return `
         <div class="prow">
           <div class="prow-bar"></div>
           <div class="prow-body">
-            <div class="prow-txt"><div class="prow-nm">${i+1}. ${esc(p.n)}</div></div>
+            <div class="prow-txt"><div class="prow-nm">${i+1}. ${esc(p.n)}</div>${amtHtml}</div>
             <div class="prow-val">${p.qty}</div>
           </div>
         </div>`;
