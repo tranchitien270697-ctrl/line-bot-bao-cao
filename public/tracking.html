@@ -944,7 +944,7 @@
       losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
       wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + quickBlock + '</div>';
     } catch(e) {
-      wrap.innerHTML = '';
+      wrap.innerHTML = '<p style="color:#f66; font-size:11px;">DEBUG: ' + e.message + '</p>';
     }
   }
 
