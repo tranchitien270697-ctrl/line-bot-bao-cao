@@ -912,7 +912,7 @@
       const elForecast = document.getElementById('statForecast');
       let forecastHtml = '';
       if(elForecast){
-        elForecast.textContent = '🎯 Dự kiến hết tháng: ' + fmtVND(Math.round(forecast));
+        elForecast.textContent = fmtVND(Math.round(forecast));
       } else {
         forecastHtml = '<div style="margin-bottom:10px;"><div class="settings-note">🎯 Dự kiến hết tháng</div><div style="font-size:20px; font-weight:700; color:var(--text);">' + fmtVND(Math.round(forecast)) + '</div></div>';
       }
