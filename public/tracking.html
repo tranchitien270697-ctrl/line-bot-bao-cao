@@ -342,9 +342,17 @@
             <div class="stat-label" id="statYear" style="margin-top:6px; font-size:11px;"></div>
           </div>
         </div>
-        <div class="stat-card" style="margin-top:10px;">
-          <div class="stat-label">🎯 Dự kiến hết tháng (dựa trên ngày đã chốt)</div>
-          <div class="stat-value" id="statForecast" style="font-size:26px;">…</div>
+        <div class="stat-card" style="margin-top:10px; padding:12px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+              <div class="stat-label">🎯 Dự kiến hết tháng</div>
+              <div class="stat-value" id="statForecast" style="font-size:19px;">…</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="stat-label">🧾 Lượt bill dự kiến</div>
+              <div class="stat-value" id="statBillForecast" style="font-size:16px;">…</div>
+            </div>
+          </div>
         </div>
       <div id="monthInsightsHome" style="padding:0 20px 14px;"></div>
       <div class="role-list">
@@ -879,6 +887,14 @@
       const prevAvgBill = prevBillsTotal > 0 ? prevBillsAmt / prevBillsTotal : 0;
       const billPct = prevBillsTotal > 0 ? Math.round((curBillsTotal - prevBillsTotal) / prevBillsTotal * 100) : null;
       const avgBillPct = prevAvgBill > 0 ? Math.round((curAvgBill - prevAvgBill) / prevAvgBill * 100) : null;
+      const elBillForecast = document.getElementById('statBillForecast');
+      if(elBillForecast){
+        const avgBillsPerDay = completedDays.length > 0 ? curBillsTotal / completedDays.length : 0;
+        const billForecastVal = Math.round(avgBillsPerDay * daysInMonth);
+        const bfColor = billPct !== null && billPct >= 0 ? 'var(--green)' : (billPct !== null ? 'var(--red)' : 'var(--text)');
+        const bfSign = billPct !== null && billPct >= 0 ? '+' : '';
+        elBillForecast.innerHTML = '~' + billForecastVal + ' bill' + (billPct !== null ? ' <span style="color:' + bfColor + '; font-size:12px;">(' + bfSign + billPct + '%)</span>' : '');
+      }
       if(!window.__revDetailCache) window.__revDetailCache = {};
       async function getDetail(dateStr){
         if(window.__revDetailCache[dateStr]) return window.__revDetailCache[dateStr];
