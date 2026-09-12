@@ -607,7 +607,13 @@
         return [];
       }
       const allDates = curDays.map(function(d){ return d.date; }).concat(prevDays.map(function(d){ return d.date; }));
-      await Promise.all(allDates.map(function(dt){ return getDetail(dt); }));
+      const needFetch = allDates.filter(function(dt){ return !window.__revDetailCache[dt]; });
+      const BATCH_SIZE = 5;
+      for(let i = 0; i < needFetch.length; i += BATCH_SIZE){
+        const batch = needFetch.slice(i, i + BATCH_SIZE);
+        await Promise.all(batch.map(function(dt){ return getDetail(dt); }));
+        await new Promise(function(resolve){ setTimeout(resolve, 0); });
+      }
       const N = curDays.length;
       const curTotals = {};
       curDays.forEach(function(d){
@@ -1071,7 +1077,12 @@
         return [];
       }
       const allDatesToFetch = completedDays.map(function(d){ return d.date; }).concat(prevMonthDays.map(function(d){ return d.date; }));
-      await Promise.all(allDatesToFetch.map(function(dt){ return getDetail(dt); }));
+      const needFetchM = allDatesToFetch.filter(function(dt){ return !window.__revDetailCache[dt]; });
+      for(let i = 0; i < needFetchM.length; i += 5){
+        const batch = needFetchM.slice(i, i + 5);
+        await Promise.all(batch.map(function(dt){ return getDetail(dt); }));
+        await new Promise(function(resolve){ setTimeout(resolve, 0); });
+      }
       const curIndTotals = {};
       completedDays.forEach(function(d){
         const inds = window.__revDetailCache[d.date] || [];
