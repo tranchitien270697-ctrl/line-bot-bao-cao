@@ -896,7 +896,9 @@
         const bfPct = prevMonthFullBills > 0 ? Math.round((billForecastVal - prevMonthFullBills) / prevMonthFullBills * 100) : null;
         const bfColor = bfPct !== null && bfPct >= 0 ? 'var(--green)' : (bfPct !== null ? 'var(--red)' : 'var(--text)');
         const bfSign = bfPct !== null && bfPct >= 0 ? '+' : '';
-        elBillForecast.innerHTML = '~' + billForecastVal + ' bill' + (bfPct !== null ? ' <span style="color:' + bfColor + '; font-size:12px;">(' + bfSign + bfPct + '% so T trước)</span>' : '');
+        const bfDiff = Math.round(billForecastVal - prevMonthFullBills);
+        const bfDiffSign = bfDiff >= 0 ? '+' : '';
+        elBillForecast.innerHTML = '~' + billForecastVal + ' bill' + (bfPct !== null ? ' <span style="color:' + bfColor + '; font-size:12px;">(' + bfSign + bfPct + '%, ' + bfDiffSign + bfDiff + ' bill)</span>' : '');
       }
       if(!window.__revDetailCache) window.__revDetailCache = {};
       async function getDetail(dateStr){
