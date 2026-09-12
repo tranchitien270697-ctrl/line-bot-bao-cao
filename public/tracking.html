@@ -509,11 +509,12 @@
     stopTimers();
     view = 'fresh-health';
     render(`
-      <div class="back-row"><button class="back-btn" onclick="screenHome()">← Trang chủ</button></div>
+      <div class="back-row"><button class="back-btn" id="backBtnFresh">← Trang chủ</button></div>
       <h2>Sức khỏe FRESH</h2>
       <p class="page-desc">Doanh thu & sản lượng dự kiến cả tháng, so với tháng trước chốt đủ.</p>
       <div id="freshHealthWrap" style="padding:0 20px 20px;"><p class="settings-note">Đang tải...</p></div>
     `);
+    document.getElementById('backBtnFresh').onclick = screenHome;
     const wrap = document.getElementById('freshHealthWrap');
     try {
       const r = await apiGet('/api/nhomhang-fresh');
@@ -576,11 +577,12 @@
     stopTimers();
     view = 'industry-health';
     render(`
-      <div class="back-row"><button class="back-btn" onclick="screenHome()">← Trang chủ</button></div>
+      <div class="back-row"><button class="back-btn" id="backBtnIndustry">← Trang chủ</button></div>
       <h2>Sức khỏe ngành hàng</h2>
       <p class="page-desc">Toàn bộ ngành hàng, dự kiến cả tháng, so với tháng trước chốt đủ.</p>
       <div id="industryHealthWrap" style="padding:0 20px 20px;"><p class="settings-note">Đang tải...</p></div>
     `);
+    document.getElementById('backBtnIndustry').onclick = screenHome;
     const wrap = document.getElementById('industryHealthWrap');
     try {
       const rAll = await apiGet('/api/revenue');
