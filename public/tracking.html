@@ -624,12 +624,12 @@
       const N = curDays.length;
       const curTotals = {};
       curDays.forEach(function(d){
-        const inds = window.__revDetailCache[d.date] || [];
+        const inds = window.__revIndustriesMap[d.date] || [];
         inds.forEach(function(ind){ curTotals[ind.n] = (curTotals[ind.n]||0) + ind.t; });
       });
       const prevTotals = {};
       prevDays.forEach(function(d){
-        const inds = window.__revDetailCache[d.date] || [];
+        const inds = window.__revIndustriesMap[d.date] || [];
         inds.forEach(function(ind){ prevTotals[ind.n] = (prevTotals[ind.n]||0) + ind.t; });
       });
       const names = Object.keys(Object.assign({}, curTotals, prevTotals));
@@ -1096,7 +1096,7 @@
       }
       const curIndTotals = {};
       completedDays.forEach(function(d){
-        const inds = window.__revDetailCache[d.date] || [];
+        const inds = window.__revIndustriesMap[d.date] || [];
         inds.forEach(function(ind){ curIndTotals[ind.n] = (curIndTotals[ind.n]||0) + ind.t; });
       });
       if(completedDays.length > 0){
@@ -1104,7 +1104,7 @@
       }
       const prevIndTotals = {};
       prevMonthDays.forEach(function(d){
-        const inds = window.__revDetailCache[d.date] || [];
+        const inds = window.__revIndustriesMap[d.date] || [];
         inds.forEach(function(ind){ prevIndTotals[ind.n] = (prevIndTotals[ind.n]||0) + ind.t; });
       });
       const allIndNames = Object.keys(Object.assign({}, curIndTotals, prevIndTotals));
