@@ -602,17 +602,16 @@
       if(curDays.length === 0){ wrap.innerHTML = '<p class="settings-note">Chưa có ngày nào hoàn tất trong tháng này.</p>'; return; }
       if(!window.__revDetailCache) window.__revDetailCache = {};
       async function getDetail(dateStr){
-        if(window.__revDetailCache[dateStr]) return window.__revDetailCache[dateStr];
-        const bulkRec = (window.__revAll || []).find(function(d){ return d.date === dateStr; });
-        if(bulkRec && bulkRec.industries && bulkRec.industries.length){
-          window.__revDetailCache[dateStr] = bulkRec.industries;
-          return bulkRec.industries;
+        if(!window.__revIndustriesMap){
+          window.__revIndustriesMap = {};
+          try {
+            const rr = await apiGet('/api/revenue-industries');
+            if(rr.ok && rr.data){
+              rr.data.forEach(function(d){ window.__revIndustriesMap[d.date] = d.industries || []; });
+            }
+          } catch(e){}
         }
-        try {
-          const rr = await apiGet('/api/revenue/' + dateStr);
-          if(rr.ok && rr.data && rr.data.industries){ window.__revDetailCache[dateStr] = rr.data.industries; return rr.data.industries; }
-        } catch(e){}
-        return [];
+        return window.__revIndustriesMap[dateStr] || [];
       }
       const allDates = curDays.map(function(d){ return d.date; }).concat(prevDays.map(function(d){ return d.date; }));
       const needFetch = allDates.filter(function(dt){ return !window.__revDetailCache[dt]; });
@@ -1077,17 +1076,16 @@
       }
       if(!window.__revDetailCache) window.__revDetailCache = {};
       async function getDetail(dateStr){
-        if(window.__revDetailCache[dateStr]) return window.__revDetailCache[dateStr];
-        const bulkRec = (window.__revAll || []).find(function(d){ return d.date === dateStr; });
-        if(bulkRec && bulkRec.industries && bulkRec.industries.length){
-          window.__revDetailCache[dateStr] = bulkRec.industries;
-          return bulkRec.industries;
+        if(!window.__revIndustriesMap){
+          window.__revIndustriesMap = {};
+          try {
+            const rr = await apiGet('/api/revenue-industries');
+            if(rr.ok && rr.data){
+              rr.data.forEach(function(d){ window.__revIndustriesMap[d.date] = d.industries || []; });
+            }
+          } catch(e){}
         }
-        try {
-          const rr = await apiGet('/api/revenue/' + dateStr);
-          if(rr.ok && rr.data && rr.data.industries){ window.__revDetailCache[dateStr] = rr.data.industries; return rr.data.industries; }
-        } catch(e){}
-        return [];
+        return window.__revIndustriesMap[dateStr] || [];
       }
       const allDatesToFetch = completedDays.map(function(d){ return d.date; }).concat(prevMonthDays.map(function(d){ return d.date; }));
       const needFetchM = allDatesToFetch.filter(function(dt){ return !window.__revDetailCache[dt]; });
