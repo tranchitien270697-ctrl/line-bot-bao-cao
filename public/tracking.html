@@ -587,6 +587,7 @@
     try {
       const rAll = await apiGet('/api/revenue');
       if(!rAll.ok || !rAll.data){ wrap.innerHTML = '<p class="settings-note">Chưa có dữ liệu.</p>'; return; }
+      window.__revAll = rAll.data;
       const now = new Date();
       const vnNow = new Date(now.getTime() + 7*60*60*1000);
       const curMonthStr = vnNow.toISOString().slice(0,7);
@@ -602,6 +603,11 @@
       if(!window.__revDetailCache) window.__revDetailCache = {};
       async function getDetail(dateStr){
         if(window.__revDetailCache[dateStr]) return window.__revDetailCache[dateStr];
+        const bulkRec = (window.__revAll || []).find(function(d){ return d.date === dateStr; });
+        if(bulkRec && bulkRec.industries && bulkRec.industries.length){
+          window.__revDetailCache[dateStr] = bulkRec.industries;
+          return bulkRec.industries;
+        }
         try {
           const rr = await apiGet('/api/revenue/' + dateStr);
           if(rr.ok && rr.data && rr.data.industries){ window.__revDetailCache[dateStr] = rr.data.industries; return rr.data.industries; }
@@ -1072,6 +1078,11 @@
       if(!window.__revDetailCache) window.__revDetailCache = {};
       async function getDetail(dateStr){
         if(window.__revDetailCache[dateStr]) return window.__revDetailCache[dateStr];
+        const bulkRec = (window.__revAll || []).find(function(d){ return d.date === dateStr; });
+        if(bulkRec && bulkRec.industries && bulkRec.industries.length){
+          window.__revDetailCache[dateStr] = bulkRec.industries;
+          return bulkRec.industries;
+        }
         try {
           const rr = await apiGet('/api/revenue/' + dateStr);
           if(rr.ok && rr.data && rr.data.industries){ window.__revDetailCache[dateStr] = rr.data.industries; return rr.data.industries; }
