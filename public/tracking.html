@@ -324,10 +324,10 @@
         <span style="font-weight:700; color:var(--text); font-size:12px;">Bách Hóa Xanh Kế Sách</span>
       </div>
       <div class="home-stats" style="margin-top:10px;">
-          <div class="stat-card" style="padding:24px 16px; text-align:center;">
-            <div class="stat-label" style="font-size:14px;">Doanh thu hôm nay</div>
-            <div class="stat-value" id="statToday" style="font-size:38px; margin-top:6px;">…</div>
-            <div class="stat-label" id="statTodayBill" style="margin-top:8px; font-size:13px;"></div>
+          <div class="stat-card" style="padding:16px; text-align:center;">
+            <div class="stat-label" style="font-size:13px;">Doanh thu hôm nay</div>
+            <div class="stat-value" id="statToday" style="font-size:30px; margin-top:4px;">…</div>
+            <div class="stat-label" id="statTodayBill" style="margin-top:5px; font-size:12px;"></div>
           </div>
         </div>
       <div class="stat-card" style="margin-top:14px; padding:14px 16px;">
@@ -487,6 +487,7 @@
       const curMonthData = (window.__revAll || []).filter(function(d){ return d.date.slice(0,7) === curMonthStr; }).sort(function(a,b){ return a.date.localeCompare(b.date); });
       renderMonthInsights(curMonthStr, curMonthData, 'monthInsightsHome');
     } catch(e) {}
+    try { await renderTopProductsHome(); } catch(e) {}
     try { await renderFreshHealthHome(); } catch(e) {}
     try { await renderIndustryHealthHome(); } catch(e) {}
     try {
@@ -630,6 +631,32 @@
       wrap.innerHTML = html;
       document.getElementById('goIndustryHealthLink').onclick = function(e){ e.preventDefault(); screenIndustryHealth(); };
     } catch(e) { wrap.innerHTML = ''; }
+  }
+
+  async function renderTopProductsHome(){
+    const col = document.getElementById('topProductsHomeCol');
+    if(!col) return;
+    try {
+      const now = new Date();
+      const vnNow = new Date(now.getTime() + 7*60*60*1000);
+      const todayStr = vnNow.toISOString().slice(0,10);
+      const r = await apiGet('/api/revenue/' + todayStr + '/products');
+      if(!r.ok || !r.data || !r.data.length){ col.innerHTML = ''; return; }
+      const FRESH_INDS = ['Thịt gia cầm gia súc các loại','Thủy Hải Sản Các Loại','Rau Củ Các Loại','Trái Cây Các Loại'];
+      const freshList = r.data.filter(function(p){ return FRESH_INDS.indexOf(p.ind) !== -1; }).slice(0,5);
+      const fmcgList = r.data.filter(function(p){ return FRESH_INDS.indexOf(p.ind) === -1; }).slice(0,5);
+      function fmt(n){ return Math.round(n/1000) + 'k'; }
+      let html = '<div class="settings-note" style="margin-bottom:4px;">🔥 Bán tốt hôm nay</div>';
+      html += '<div style="font-size:11px; color:var(--muted2); margin-bottom:2px;">FRESH</div>';
+      freshList.forEach(function(p){
+        html += '<div style="font-size:12px; display:flex; justify-content:space-between; gap:6px; margin-bottom:2px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+esc(p.n)+'</span><span style="color:var(--muted2); white-space:nowrap;">'+fmt(p.t)+'</span></div>';
+      });
+      html += '<div style="font-size:11px; color:var(--muted2); margin:6px 0 2px;">FMCG</div>';
+      fmcgList.forEach(function(p){
+        html += '<div style="font-size:12px; display:flex; justify-content:space-between; gap:6px; margin-bottom:2px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+esc(p.n)+'</span><span style="color:var(--muted2); white-space:nowrap;">'+fmt(p.t)+'</span></div>';
+      });
+      col.innerHTML = html;
+    } catch(e) { col.innerHTML = ''; }
   }
 
   async function screenFreshHealth(){
@@ -1272,7 +1299,7 @@
       const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-2).reverse();
       gains.forEach(function(g){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(g.name) + ': +' + fmtVND(g.delta) + '</div>'; });
       losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
-      const quickBlock = quickHtml ? '<div><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div>' : '';
+      const quickBlock = quickHtml ? '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;"><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>' : '';
       wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + quickBlock + '</div>';
     } catch(e) {
       wrap.innerHTML = '';
