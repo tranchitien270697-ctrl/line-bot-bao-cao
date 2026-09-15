@@ -489,7 +489,7 @@
       await renderMonthInsights(curMonthStr, curMonthData, 'monthInsightsHome');
     } catch(e) {}
     try { await renderTopProductsHome(); } catch(e) {}
-    renderMooncakeHome().catch(function(e){});
+    setTimeout(function(){ renderMooncakeHome().catch(function(e){}); }, 3000);
     try { await renderFreshHealthHome(); } catch(e) {}
     try { await renderIndustryHealthHome(); } catch(e) {}
     try {
