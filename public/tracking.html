@@ -684,13 +684,21 @@
         else if(d.date.startsWith('2026-09')){ sepQty += q; sepAmt += a; }
       });
       let stockTotal = 0;
-      if(stockRec){ stockRec.items.forEach(function(it){ stockTotal += it.qty; }); }
+      if(stockRec){
+        stockRec.items.forEach(function(it){ stockTotal += it.qty; });
+        const asOfDate = stockRec.asOf || stockRec.date;
+        let soldSinceStock = 0;
+        dayRecs.forEach(function(d){
+          if(d.date >= asOfDate){ d.items.forEach(function(it){ soldSinceStock += it.qty; }); }
+        });
+        stockTotal -= soldSinceStock;
+      }
       let html = '<div style="font-weight:700; margin-bottom:8px;">🥮 Bánh Trung Thu</div>';
       html += '<div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px;">';
       html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Hôm nay</div><div style="font-weight:700;">'+Math.round(todayQty)+' cái/hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round(todayAmt/1000)+'k đ</div></div>';
       html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T8</div><div style="font-weight:700;">'+Math.round(augQty)+' cái/hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round(augAmt/1000)+'k đ</div></div>';
       html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T9</div><div style="font-weight:700;">'+Math.round(sepQty)+' cái/hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round(sepAmt/1000)+'k đ</div></div>';
-      if(stockRec){ html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Tồn kho</div><div style="font-weight:700; color:var(--muted2);">'+Math.round(stockTotal)+' SP</div></div>'; }
+      if(stockRec){ html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Tồn kho (ước tính)</div><div style="font-weight:700; color:var(--muted2);">'+Math.round(stockTotal)+' SP</div></div>'; }
       html += '</div>';
       wrap.innerHTML = html;
     } catch(e) { wrap.innerHTML = '<div style="font-size:11px; color:var(--red);">MC ERR: ' + esc(String(e && e.message || e)) + '</div>'; }
