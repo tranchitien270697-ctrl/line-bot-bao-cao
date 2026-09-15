@@ -700,7 +700,7 @@
         html += '<div style="font-size:12px; display:flex; justify-content:space-between; gap:6px; margin-bottom:2px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+esc(p.n)+'</span><span style="color:var(--muted2); white-space:nowrap;">'+Math.round(p.qty)+' cái</span></div>';
       });
       wrap.innerHTML = html;
-    } catch(e) { wrap.innerHTML = ''; }
+    } catch(e) { wrap.innerHTML = '<div style="font-size:11px; color:var(--red);">MC ERR: ' + esc(String(e && e.message || e)) + '</div>'; }
   }
 
   async function screenFreshHealth(){
