@@ -348,9 +348,9 @@
         </div>
       </div>
       <div id="monthInsightsHome" style="padding:0 20px 14px;"></div>
+      <div id="mooncakeHomeWrap" style="padding:0 20px 14px;"></div>
       <div id="freshHealthHomeWrap" style="padding:0 20px 14px;"></div>
       <div id="industryHealthHomeWrap" style="padding:0 20px 14px;"></div>
-      <div id="mooncakeHomeWrap" style="padding:0 20px 14px;"></div>
       <div class="role-list">
         <div class="role-card driver" id="go-vehicle">
           <div class="dot">🛵</div>
@@ -685,9 +685,6 @@
       });
       let stockTotal = 0;
       if(stockRec){ stockRec.items.forEach(function(it){ stockTotal += it.qty; }); }
-      const productTotals = {};
-      dayRecs.forEach(function(d){ d.items.forEach(function(it){ if(!productTotals[it.n]) productTotals[it.n]={qty:0,amount:0}; productTotals[it.n].qty+=it.qty; productTotals[it.n].amount+=it.amount; }); });
-      const topProducts = Object.keys(productTotals).map(function(n){ return {n:n, qty:productTotals[n].qty, amount:productTotals[n].amount}; }).sort(function(a,b){ return b.amount-a.amount; }).slice(0,5);
       let html = '<div style="font-weight:700; margin-bottom:8px;">🥮 Bánh Trung Thu</div>';
       html += '<div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px;">';
       html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Hôm nay</div><div style="font-weight:700;">'+Math.round(todayQty)+' cái/hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round(todayAmt/1000)+'k đ</div></div>';
@@ -695,10 +692,6 @@
       html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T9</div><div style="font-weight:700;">'+Math.round(sepQty)+' cái/hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round(sepAmt/1000)+'k đ</div></div>';
       if(stockRec){ html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Tồn kho</div><div style="font-weight:700; color:var(--muted2);">'+Math.round(stockTotal)+' SP</div></div>'; }
       html += '</div>';
-      html += '<div style="font-size:11px; color:var(--muted2); margin-bottom:2px;">Bán chạy nhất (T8+T9)</div>';
-      topProducts.forEach(function(p){
-        html += '<div style="font-size:12px; display:flex; justify-content:space-between; gap:6px; margin-bottom:2px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+esc(p.n)+'</span><span style="color:var(--muted2); white-space:nowrap;">'+Math.round(p.qty)+' cái</span></div>';
-      });
       wrap.innerHTML = html;
     } catch(e) { wrap.innerHTML = '<div style="font-size:11px; color:var(--red);">MC ERR: ' + esc(String(e && e.message || e)) + '</div>'; }
   }
