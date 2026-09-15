@@ -671,8 +671,9 @@
       const now = new Date();
       const vnNow = new Date(now.getTime() + 7*60*60*1000);
       const todayStr = vnNow.toISOString().slice(0,10);
-      const stockRec = r.data.find(function(d){ return d.date === 'stock_snapshot'; });
-      const dayRecs = r.data.filter(function(d){ return d.date !== 'stock_snapshot'; });
+      const stockRecRaw = r.data.find(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0; });
+      const stockRec = stockRecRaw ? { asOf: stockRecRaw.date.slice(6), items: stockRecRaw.items } : null;
+      const dayRecs = r.data.filter(function(d){ return !(typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0); });
       const todayRec = dayRecs.find(function(d){ return d.date === todayStr; });
       let todayQty = 0, todayAmt = 0;
       if(todayRec){ todayRec.items.forEach(function(it){ todayQty += it.qty; todayAmt += it.amount; }); }
@@ -686,7 +687,7 @@
       let stockTotal = 0;
       if(stockRec){
         stockRec.items.forEach(function(it){ stockTotal += it.qty; });
-        const asOfDate = stockRec.asOf || stockRec.date;
+        const asOfDate = stockRec.asOf;
         let soldSinceStock = 0;
         dayRecs.forEach(function(d){
           if(d.date >= asOfDate){ d.items.forEach(function(it){ soldSinceStock += it.qty; }); }
