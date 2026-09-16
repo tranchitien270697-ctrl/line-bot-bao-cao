@@ -675,31 +675,35 @@
       const stockRec = stockRecRaw ? { asOf: stockRecRaw.date.slice(6), items: stockRecRaw.items } : null;
       const dayRecs = r.data.filter(function(d){ return !(typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0); });
       const todayRec = dayRecs.find(function(d){ return d.date === todayStr; });
-      let todayQty = 0, todayAmt = 0;
-      if(todayRec){ todayRec.items.forEach(function(it){ todayQty += it.qty; todayAmt += it.amount; }); }
-      let augQty = 0, augAmt = 0, sepQty = 0, sepAmt = 0;
+      let todayPieces=0, todayPiecesAmt=0, todayBoxes=0, todayBoxesAmt=0;
+      if(todayRec){ todayRec.items.forEach(function(it){ if(it.unit==='Hộp'){ todayBoxes+=it.qty; todayBoxesAmt+=it.amount; } else { todayPieces+=it.qty; todayPiecesAmt+=it.amount; } }); }
+      let augPieces=0,augPiecesAmt=0,augBoxes=0,augBoxesAmt=0,sepPieces=0,sepPiecesAmt=0,sepBoxes=0,sepBoxesAmt=0;
       dayRecs.forEach(function(d){
-        let q=0, a=0;
-        d.items.forEach(function(it){ q += it.qty; a += it.amount; });
-        if(d.date.startsWith('2026-08')){ augQty += q; augAmt += a; }
-        else if(d.date.startsWith('2026-09')){ sepQty += q; sepAmt += a; }
-      });
-      let stockTotal = 0;
-      if(stockRec){
-        stockRec.items.forEach(function(it){ stockTotal += it.qty; });
-        const asOfDate = stockRec.asOf;
-        let soldSinceStock = 0;
-        dayRecs.forEach(function(d){
-          if(d.date >= asOfDate){ d.items.forEach(function(it){ soldSinceStock += it.qty; }); }
+        d.items.forEach(function(it){
+          const isBox = it.unit === 'Hộp';
+          if(d.date.startsWith('2026-08')){
+            if(isBox){ augBoxes+=it.qty; augBoxesAmt+=it.amount; } else { augPieces+=it.qty; augPiecesAmt+=it.amount; }
+          } else if(d.date.startsWith('2026-09')){
+            if(isBox){ sepBoxes+=it.qty; sepBoxesAmt+=it.amount; } else { sepPieces+=it.qty; sepPiecesAmt+=it.amount; }
+          }
         });
-        stockTotal -= soldSinceStock;
+      });
+      let stockPieces=0, stockBoxes=0;
+      if(stockRec){
+        stockRec.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes+=it.qty; } else { stockPieces+=it.qty; } });
+        const asOfDate = stockRec.asOf;
+        dayRecs.forEach(function(d){
+          if(d.date >= asOfDate){
+            d.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes-=it.qty; } else { stockPieces-=it.qty; } });
+          }
+        });
       }
       let html = '<div style="font-weight:700; margin-bottom:8px;">🥮 Bánh Trung Thu</div>';
       html += '<div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px;">';
-      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Hôm nay</div><div style="font-weight:700;">'+Math.round(todayQty)+' cái/hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round(todayAmt/1000)+'k đ</div></div>';
-      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T8</div><div style="font-weight:700;">'+Math.round(augQty)+' cái/hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round(augAmt/1000)+'k đ</div></div>';
-      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T9</div><div style="font-weight:700;">'+Math.round(sepQty)+' cái/hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round(sepAmt/1000)+'k đ</div></div>';
-      if(stockRec){ html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Tồn kho (ước tính)</div><div style="font-weight:700; color:var(--muted2);">'+Math.round(stockTotal)+' SP</div></div>'; }
+      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Hôm nay</div><div style="font-weight:700;">'+Math.round(todayPieces)+' cái, '+Math.round(todayBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((todayPiecesAmt+todayBoxesAmt)/1000)+'k đ</div></div>';
+      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T8</div><div style="font-weight:700;">'+Math.round(augPieces)+' cái, '+Math.round(augBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((augPiecesAmt+augBoxesAmt)/1000)+'k đ</div></div>';
+      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T9</div><div style="font-weight:700;">'+Math.round(sepPieces)+' cái, '+Math.round(sepBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((sepPiecesAmt+sepBoxesAmt)/1000)+'k đ</div></div>';
+      if(stockRec){ html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Tồn kho (ước tính)</div><div style="font-weight:700; color:var(--muted2);">'+Math.round(stockPieces)+' cái, '+Math.round(stockBoxes)+' hộp</div></div>'; }
       html += '</div>';
       wrap.innerHTML = html;
     } catch(e) { wrap.innerHTML = '<div style="font-size:11px; color:var(--red);">MC ERR: ' + esc(String(e && e.message || e)) + '</div>'; }
