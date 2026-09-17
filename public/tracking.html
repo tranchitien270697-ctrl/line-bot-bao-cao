@@ -673,7 +673,8 @@
       const todayStr = vnNow.toISOString().slice(0,10);
       const stockRecRaw = r.data.find(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0; });
       const stockRec = stockRecRaw ? { asOf: stockRecRaw.date.slice(6), items: stockRecRaw.items } : null;
-      const dayRecs = r.data.filter(function(d){ return !(typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0); });
+      const dayRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') !== 0 && d.date.indexOf('LOSS:') !== 0; });
+      const lossRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('LOSS:') === 0; }).map(function(d){ return { date: d.date.slice(5), items: d.items }; });
       const todayRec = dayRecs.find(function(d){ return d.date === todayStr; });
       let todayPieces=0, todayPiecesAmt=0, todayBoxes=0, todayBoxesAmt=0;
       if(todayRec){ todayRec.items.forEach(function(it){ if(it.unit==='Hộp'){ todayBoxes+=it.qty; todayBoxesAmt+=it.amount; } else { todayPieces+=it.qty; todayPiecesAmt+=it.amount; } }); }
@@ -693,6 +694,11 @@
         stockRec.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes+=it.qty; } else { stockPieces+=it.qty; } });
         const asOfDate = stockRec.asOf;
         dayRecs.forEach(function(d){
+          if(d.date >= asOfDate){
+            d.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes-=it.qty; } else { stockPieces-=it.qty; } });
+          }
+        });
+        lossRecs.forEach(function(d){
           if(d.date >= asOfDate){
             d.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes-=it.qty; } else { stockPieces-=it.qty; } });
           }
