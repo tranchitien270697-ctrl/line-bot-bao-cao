@@ -348,7 +348,6 @@
         </div>
       </div>
       <div id="monthInsightsHome" style="padding:0 20px 14px;"></div>
-      <div id="mooncakeHomeWrap" style="padding:0 20px 14px;"></div>
       <div id="freshHealthHomeWrap" style="padding:0 20px 14px;"></div>
       <div id="industryHealthHomeWrap" style="padding:0 20px 14px;"></div>
       <div class="role-list">
@@ -662,32 +661,27 @@
   }
 
   async function renderMooncakeHome(){
-    const wrap = document.getElementById('mooncakeHomeWrap');
-    if(!wrap) return;
-    wrap.innerHTML = '<div style="font-weight:700; margin-bottom:6px;">🥮 Bánh Trung Thu</div><p class="settings-note">Đang tải...</p>';
+    const col = document.getElementById('mooncakeQuickCol');
+    if(!col) return;
     try {
       const r = await apiGet('/api/mooncake');
-      if(!r.ok || !r.data || !r.data.length){ wrap.innerHTML = ''; return; }
+      if(!r.ok || !r.data || !r.data.length){ col.innerHTML = ''; return; }
       const now = new Date();
       const vnNow = new Date(now.getTime() + 7*60*60*1000);
       const todayStr = vnNow.toISOString().slice(0,10);
+      const curMonthStr = vnNow.toISOString().slice(0,7);
       const stockRecRaw = r.data.find(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0; });
       const stockRec = stockRecRaw ? { asOf: stockRecRaw.date.slice(6), items: stockRecRaw.items } : null;
       const dayRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') !== 0 && d.date.indexOf('LOSS:') !== 0; });
       const lossRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('LOSS:') === 0; }).map(function(d){ return { date: d.date.slice(5), items: d.items }; });
       const todayRec = dayRecs.find(function(d){ return d.date === todayStr; });
-      let todayPieces=0, todayPiecesAmt=0, todayBoxes=0, todayBoxesAmt=0;
-      if(todayRec){ todayRec.items.forEach(function(it){ if(it.unit==='Hộp'){ todayBoxes+=it.qty; todayBoxesAmt+=it.amount; } else { todayPieces+=it.qty; todayPiecesAmt+=it.amount; } }); }
-      let augPieces=0,augPiecesAmt=0,augBoxes=0,augBoxesAmt=0,sepPieces=0,sepPiecesAmt=0,sepBoxes=0,sepBoxesAmt=0;
+      let todayPieces=0, todayBoxes=0;
+      if(todayRec){ todayRec.items.forEach(function(it){ if(it.unit==='Hộp'){ todayBoxes+=it.qty; } else { todayPieces+=it.qty; } }); }
+      let curPieces=0, curBoxes=0;
       dayRecs.forEach(function(d){
-        d.items.forEach(function(it){
-          const isBox = it.unit === 'Hộp';
-          if(d.date.startsWith('2026-08')){
-            if(isBox){ augBoxes+=it.qty; augBoxesAmt+=it.amount; } else { augPieces+=it.qty; augPiecesAmt+=it.amount; }
-          } else if(d.date.startsWith('2026-09')){
-            if(isBox){ sepBoxes+=it.qty; sepBoxesAmt+=it.amount; } else { sepPieces+=it.qty; sepPiecesAmt+=it.amount; }
-          }
-        });
+        if(d.date.startsWith(curMonthStr)){
+          d.items.forEach(function(it){ if(it.unit==='Hộp'){ curBoxes+=it.qty; } else { curPieces+=it.qty; } });
+        }
       });
       let stockPieces=0, stockBoxes=0;
       if(stockRec){
@@ -704,15 +698,13 @@
           }
         });
       }
-      let html = '<div style="font-weight:700; margin-bottom:8px;">🥮 Bánh Trung Thu</div>';
-      html += '<div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px;">';
-      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Hôm nay</div><div style="font-weight:700;">'+Math.round(todayPieces)+' cái, '+Math.round(todayBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((todayPiecesAmt+todayBoxesAmt)/1000)+'k đ</div></div>';
-      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T8</div><div style="font-weight:700;">'+Math.round(augPieces)+' cái, '+Math.round(augBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((augPiecesAmt+augBoxesAmt)/1000)+'k đ</div></div>';
-      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T9</div><div style="font-weight:700;">'+Math.round(sepPieces)+' cái, '+Math.round(sepBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((sepPiecesAmt+sepBoxesAmt)/1000)+'k đ</div></div>';
-      if(stockRec){ html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Tồn kho (ước tính)</div><div style="font-weight:700; color:var(--muted2);">'+Math.round(stockPieces)+' cái, '+Math.round(stockBoxes)+' hộp</div></div>'; }
-      html += '</div>';
-      wrap.innerHTML = html;
-    } catch(e) { wrap.innerHTML = '<div style="font-size:11px; color:var(--red);">MC ERR: ' + esc(String(e && e.message || e)) + '</div>'; }
+      const monthLabel = 'T' + Number(curMonthStr.slice(5,7));
+      let html = '<div class="settings-note" style="margin-bottom:4px;">🥮 Bánh Trung Thu</div>';
+      html += '<div style="font-size:12.5px; margin-bottom:2px;">Hôm nay: <strong>' + Math.round(todayPieces) + ' cái · ' + Math.round(todayBoxes) + ' hộp</strong></div>';
+      html += '<div style="font-size:12.5px; margin-bottom:2px;">Lũy kế ' + monthLabel + ': <strong>' + Math.round(curPieces) + ' cái · ' + Math.round(curBoxes) + ' hộp</strong></div>';
+      if(stockRec){ html += '<div style="font-size:12.5px; color:var(--muted2);">Tồn kho: <strong>' + Math.round(stockPieces) + ' cái · ' + Math.round(stockBoxes) + ' hộp</strong></div>'; }
+      col.innerHTML = html;
+    } catch(e) { col.innerHTML = ''; }
   }
 
   async function screenFreshHealth(){
@@ -1355,7 +1347,8 @@
       const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-2).reverse();
       gains.forEach(function(g){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(g.name) + ': +' + fmtVND(g.delta) + '</div>'; });
       losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
-      const quickBlock = quickHtml ? '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;"><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>' : '';
+      const quickLeftHtml = (quickHtml ? '<div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml : '') + '<div id="mooncakeQuickCol" style="margin-top:8px;"></div>';
+      const quickBlock = '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;">' + quickLeftHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>';
       wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + quickBlock + '</div>';
     } catch(e) {
       wrap.innerHTML = '';
