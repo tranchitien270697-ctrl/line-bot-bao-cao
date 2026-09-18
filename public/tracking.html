@@ -670,10 +670,7 @@
       const vnNow = new Date(now.getTime() + 7*60*60*1000);
       const todayStr = vnNow.toISOString().slice(0,10);
       const curMonthStr = vnNow.toISOString().slice(0,7);
-      const stockRecRaw = r.data.find(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0; });
-      const stockRec = stockRecRaw ? { asOf: stockRecRaw.date.slice(6), items: stockRecRaw.items } : null;
       const dayRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') !== 0 && d.date.indexOf('LOSS:') !== 0; });
-      const lossRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('LOSS:') === 0; }).map(function(d){ return { date: d.date.slice(5), items: d.items }; });
       const todayRec = dayRecs.find(function(d){ return d.date === todayStr; });
       let todayPieces=0, todayBoxes=0;
       if(todayRec){ todayRec.items.forEach(function(it){ if(it.unit==='Hộp'){ todayBoxes+=it.qty; } else { todayPieces+=it.qty; } }); }
@@ -683,26 +680,10 @@
           d.items.forEach(function(it){ if(it.unit==='Hộp'){ curBoxes+=it.qty; } else { curPieces+=it.qty; } });
         }
       });
-      let stockPieces=0, stockBoxes=0;
-      if(stockRec){
-        stockRec.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes+=it.qty; } else { stockPieces+=it.qty; } });
-        const asOfDate = stockRec.asOf;
-        dayRecs.forEach(function(d){
-          if(d.date >= asOfDate){
-            d.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes-=it.qty; } else { stockPieces-=it.qty; } });
-          }
-        });
-        lossRecs.forEach(function(d){
-          if(d.date >= asOfDate){
-            d.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes-=it.qty; } else { stockPieces-=it.qty; } });
-          }
-        });
-      }
       const monthLabel = 'T' + Number(curMonthStr.slice(5,7));
       let html = '<div class="settings-note" style="margin-bottom:4px;">🥮 Bánh Trung Thu</div>';
-      html += '<div style="font-size:12.5px; margin-bottom:2px;">Hôm nay: <strong>' + Math.round(todayPieces) + ' cái · ' + Math.round(todayBoxes) + ' hộp</strong></div>';
-      html += '<div style="font-size:12.5px; margin-bottom:2px;">Lũy kế ' + monthLabel + ': <strong>' + Math.round(curPieces) + ' cái · ' + Math.round(curBoxes) + ' hộp</strong></div>';
-      if(stockRec){ html += '<div style="font-size:12.5px; color:var(--muted2);">Tồn kho: <strong>' + Math.round(stockPieces) + ' cái · ' + Math.round(stockBoxes) + ' hộp</strong></div>'; }
+      html += '<div style="font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:2px;">Bán: ' + Math.round(todayPieces) + ' cái · ' + Math.round(todayBoxes) + ' hộp</div>';
+      html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">Lũy kế ' + monthLabel + ': ' + Math.round(curPieces) + ' cái · ' + Math.round(curBoxes) + ' hộp</div>';
       col.innerHTML = html;
     } catch(e) { col.innerHTML = ''; }
   }
