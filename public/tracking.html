@@ -1335,20 +1335,19 @@
         const cmpSign = pctVsPrev >= 0 ? '+' : '';
         cmpHtml = '<div style="margin-bottom:10px;"><div class="settings-note">📊 So ' + N + ' ngày đầu tháng trước</div><div style="font-size:16px; font-weight:700; color:' + cmpColor + ';">' + cmpSign + pctVsPrev + '% (' + fmtVND(prevSameTotal) + ')</div></div>';
       }
-      let billHtml = '';
-      if(curBillsTotal > 0){
-        billHtml = '<div style="margin-bottom:10px;">' +
+      const billLeftHtml = curBillsTotal > 0 ? (
+        '<div>' +
           '<div class="settings-note">🧾 Lượt bill (tham khảo)</div>' +
           '<div style="font-size:15px; font-weight:700; color:var(--text);">' + curBillsTotal + ' bill · TB ' + fmtVND(Math.round(curAvgBill)) + '</div>' +
-        '</div>';
-      }
+        '</div>'
+      ) : '<div></div>';
+      const billHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + billLeftHtml + '<div id="mooncakeQuickCol" style="text-align:right; min-width:120px;"></div></div>';
       let quickHtml = '';
       const gains = indDeltas.filter(function(x){ return x.delta > 0; }).slice(0, 3);
       const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-2).reverse();
       gains.forEach(function(g){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(g.name) + ': +' + fmtVND(g.delta) + '</div>'; });
       losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
-      const quickLeftHtml = (quickHtml ? '<div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml : '') + '<div id="mooncakeQuickCol" style="margin-top:8px;"></div>';
-      const quickBlock = '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;">' + quickLeftHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>';
+      const quickBlock = quickHtml ? '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;"><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>' : '';
       wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + quickBlock + '</div>';
     } catch(e) {
       wrap.innerHTML = '';
