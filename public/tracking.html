@@ -489,7 +489,6 @@
     } catch(e) {}
     renderTopProductsHome().catch(function(e){});
     renderMooncakeHome().catch(function(e){});
-    renderMooncakeStockLine().catch(function(e){});
     renderProduct888Home().catch(function(e){});
     renderFreshHealthHome().catch(function(e){});
     renderIndustryHealthHome().catch(function(e){});
@@ -713,22 +712,32 @@ async function renderMooncakeHome(){
       let html = '<div class="settings-note" style="margin-bottom:4px;">🥮 Bánh Trung Thu</div>';
       html += '<div style="font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:2px;">Bán: ' + Math.round(todayPieces) + ' cái · ' + Math.round(todayBoxes) + ' hộp</div>';
       html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">Lũy kế ' + monthLabel + ': ' + Math.round(curPieces) + ' cái · ' + Math.round(curBoxes) + ' hộp</div>';
+      const stockRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0; });
+      if(stockRecs.length){
+        stockRecs.sort(function(a,b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+        const latestStock = stockRecs[stockRecs.length-1];
+        const baseDateStr = latestStock.date.slice(6);
+        let basePieces=0, baseBoxes=0;
+        latestStock.items.forEach(function(it){ if(it.unit==='Hộp'){ baseBoxes+=it.qty; } else { basePieces+=it.qty; } });
+        let soldPieces=0, soldBoxes=0;
+        dayRecs.forEach(function(d){
+          if(d.date > baseDateStr){
+            d.items.forEach(function(it){ if(it.unit==='Hộp'){ soldBoxes+=it.qty; } else { soldPieces+=it.qty; } });
+          }
+        });
+        let lossPieces=0, lossBoxes=0;
+        r.data.forEach(function(d){
+          if(typeof d.date === 'string' && d.date.indexOf('LOSS:') === 0 && d.date.slice(5) > baseDateStr){
+            d.items.forEach(function(it){ if(it.unit==='Hộp'){ lossBoxes+=it.qty; } else { lossPieces+=it.qty; } });
+          }
+        });
+        const stockPieces = Math.round(basePieces - soldPieces - lossPieces);
+        const stockBoxes = Math.round(baseBoxes - soldBoxes - lossBoxes);
+        html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">Tồn: ' + stockPieces + ' cái · ' + stockBoxes + ' hộp</div>';
+      }
       col.innerHTML = html;
     } catch(e) { col.innerHTML = ''; }
   }
-
-    async function renderMooncakeStockLine(){
-      const col = document.getElementById('mooncakeQuickCol');
-      if(!col) return;
-      try {
-        const r = await apiGet('/api/mooncake-stock');
-        if(!r.ok || !r.data || !r.data.length) return;
-        const sorted = r.data.slice().sort(function(a,b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
-        const latest = sorted[sorted.length-1];
-        const line = '<div style="font-size:13.5px; font-weight:700; color:var(--text); margin-top:2px;">Tồn: ' + Math.round(latest.pieces) + ' cái · ' + Math.round(latest.boxes) + ' hộp</div>';
-        col.innerHTML += line;
-      } catch(e) {}
-    }
 
   async function screenFreshHealth(){
     stopTimers();
@@ -1352,22 +1361,23 @@ async function renderMooncakeHome(){
       } else {
         forecastHtml = '<div style="margin-bottom:10px;"><div class="settings-note">🎯 Dự kiến hết tháng</div><div style="font-size:20px; font-weight:700; color:var(--text);">' + fmtVND(Math.round(forecast)) + '</div></div>';
       }
-      let cmpHtml = '';
+      let cmpInner = '';
       if(pctVsPrev !== null){
         const cmpColor = pctVsPrev >= 0 ? 'var(--green)' : 'var(--red)';
         const cmpSign = pctVsPrev >= 0 ? '+' : '';
-        cmpHtml = '<div style="margin-bottom:10px;"><div class="settings-note">📊 So ' + N + ' ngày đầu tháng trước</div><div style="font-size:16px; font-weight:700; color:' + cmpColor + ';">' + cmpSign + pctVsPrev + '% (' + fmtVND(prevSameTotal) + ')</div></div>';
+        cmpInner = '<div><div class="settings-note">📊 So ' + N + ' ngày đầu tháng trước</div><div style="font-size:20px; font-weight:700; color:' + cmpColor + ';">' + cmpSign + pctVsPrev + '% (' + fmtVND(prevSameTotal) + ')</div></div>';
       }
+      const cmpHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + cmpInner + '<div style="text-align:right; min-width:120px;"><div id="product888QuickCol"></div></div></div>';
       const billLeftHtml = curBillsTotal > 0 ? (
         '<div>' +
           '<div class="settings-note">🧾 Lượt bill (tham khảo)</div>' +
           '<div style="font-size:15px; font-weight:700; color:var(--text);">' + curBillsTotal + ' bill · TB ' + fmtVND(Math.round(curAvgBill)) + '</div>' +
         '</div>'
       ) : '<div></div>';
-      const billHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + billLeftHtml + '<div style="text-align:right; min-width:120px;"><div id="mooncakeQuickCol"></div><div id="product888QuickCol" style="margin-top:8px;"></div></div></div>';
+      const billHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + billLeftHtml + '<div style="text-align:right; min-width:120px;"><div id="mooncakeQuickCol"></div></div></div>';
       let quickHtml = '';
-      const gains = indDeltas.filter(function(x){ return x.delta > 0; }).slice(0, 3);
-      const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-2).reverse();
+      const gains = indDeltas.filter(function(x){ return x.delta > 0; }).slice(0, 4);
+      const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-3).reverse();
       gains.forEach(function(g){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(g.name) + ': +' + fmtVND(g.delta) + '</div>'; });
       losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
       const quickBlock = quickHtml ? '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;"><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>' : '';
