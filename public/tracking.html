@@ -489,6 +489,7 @@
     } catch(e) {}
     renderTopProductsHome().catch(function(e){});
     renderMooncakeHome().catch(function(e){});
+    renderMooncakeStockLine().catch(function(e){});
     renderProduct888Home().catch(function(e){});
     renderFreshHealthHome().catch(function(e){});
     renderIndustryHealthHome().catch(function(e){});
@@ -715,6 +716,19 @@ async function renderMooncakeHome(){
       col.innerHTML = html;
     } catch(e) { col.innerHTML = ''; }
   }
+
+    async function renderMooncakeStockLine(){
+      const col = document.getElementById('mooncakeQuickCol');
+      if(!col) return;
+      try {
+        const r = await apiGet('/api/mooncake-stock');
+        if(!r.ok || !r.data || !r.data.length) return;
+        const sorted = r.data.slice().sort(function(a,b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+        const latest = sorted[sorted.length-1];
+        const line = '<div style="font-size:13.5px; font-weight:700; color:var(--text); margin-top:2px;">Tồn: ' + Math.round(latest.pieces) + ' cái · ' + Math.round(latest.boxes) + ' hộp</div>';
+        col.innerHTML += line;
+      } catch(e) {}
+    }
 
   async function screenFreshHealth(){
     stopTimers();
