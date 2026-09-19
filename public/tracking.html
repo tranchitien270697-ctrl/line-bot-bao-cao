@@ -489,6 +489,7 @@
     } catch(e) {}
     renderTopProductsHome().catch(function(e){});
     renderMooncakeHome().catch(function(e){});
+    renderProduct888Home().catch(function(e){});
     renderFreshHealthHome().catch(function(e){});
     renderIndustryHealthHome().catch(function(e){});
     try {
@@ -660,7 +661,34 @@
     } catch(e) { col.innerHTML = ''; }
   }
 
-  async function renderMooncakeHome(){
+    async function renderProduct888Home(){
+    const col = document.getElementById('product888QuickCol');
+    if(!col) return;
+    try {
+      const r = await apiGet('/api/product888');
+      if(!r.ok || !r.data || !r.data.length){ col.innerHTML = ''; return; }
+      const now = new Date();
+      const vnNow = new Date(now.getTime() + 7*60*60*1000);
+      const todayStr = vnNow.toISOString().slice(0,10);
+      const curMonthStr = vnNow.toISOString().slice(0,7);
+      const todayRec = r.data.find(function(d){ return d.date === todayStr; });
+      let todayQty = 0;
+      if(todayRec){ todayRec.items.forEach(function(it){ todayQty += it.qty; }); }
+      let curQty = 0;
+      r.data.forEach(function(d){
+        if(d.date.startsWith(curMonthStr)){
+          d.items.forEach(function(it){ curQty += it.qty; });
+        }
+      });
+      const monthLabel = 'T' + Number(curMonthStr.slice(5,7));
+      let html = '<div class="settings-note" style="margin-bottom:4px;">🧼 Nước giặt 888</div>';
+      html += '<div style="font-size:13.5px; margin-bottom:2px;">Bán hôm nay: <strong>' + Math.round(todayQty) + '</strong></div>';
+      html += '<div style="font-size:13.5px;">Lũy kế ' + monthLabel + ': <strong>' + Math.round(curQty) + '</strong></div>';
+      col.innerHTML = html;
+    } catch(e) { col.innerHTML = ''; }
+  }
+
+async function renderMooncakeHome(){
     const col = document.getElementById('mooncakeQuickCol');
     if(!col) return;
     try {
@@ -1329,7 +1357,8 @@
       gains.forEach(function(g){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(g.name) + ': +' + fmtVND(g.delta) + '</div>'; });
       losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
       const quickBlock = quickHtml ? '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;"><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>' : '';
-      wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + quickBlock + '</div>';
+      const product888Html = '<div id="product888QuickCol" style="margin-top:6px;"></div>';
+      wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + product888Html + quickBlock + '</div>';
     } catch(e) {
       wrap.innerHTML = '';
     }
