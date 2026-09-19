@@ -1377,7 +1377,7 @@ async function renderMooncakeHome(){
       const billHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + billLeftHtml + '<div style="text-align:right; min-width:120px;"><div id="mooncakeQuickCol"></div></div></div>';
       let quickHtml = '';
       const gains = indDeltas.filter(function(x){ return x.delta > 0; }).slice(0, 4);
-      const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-3).reverse();
+      const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-4).reverse();
       gains.forEach(function(g){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(g.name) + ': +' + fmtVND(g.delta) + '</div>'; });
       losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
       const quickBlock = quickHtml ? '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;"><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>' : '';
