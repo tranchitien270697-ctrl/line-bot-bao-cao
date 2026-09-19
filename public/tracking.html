@@ -1367,14 +1367,14 @@ async function renderMooncakeHome(){
         const cmpSign = pctVsPrev >= 0 ? '+' : '';
         cmpInner = '<div><div class="settings-note">📊 So ' + N + ' ngày đầu tháng trước</div><div style="font-size:20px; font-weight:700; color:' + cmpColor + ';">' + cmpSign + pctVsPrev + '% (' + fmtVND(prevSameTotal) + ')</div></div>';
       }
-      const cmpHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + cmpInner + '<div style="text-align:right; min-width:120px;"><div id="product888QuickCol"></div></div></div>';
+      const cmpHtml = '<div style="margin-bottom:10px; display:flex; align-items:flex-start; gap:10px; flex-wrap:nowrap;"><div style="flex:1; min-width:0;">' + cmpInner + '</div><div style="text-align:right; flex-shrink:0; min-width:110px;"><div id="product888QuickCol"></div></div></div>';
       const billLeftHtml = curBillsTotal > 0 ? (
         '<div>' +
           '<div class="settings-note">🧾 Lượt bill (tham khảo)</div>' +
           '<div style="font-size:15px; font-weight:700; color:var(--text);">' + curBillsTotal + ' bill · TB ' + fmtVND(Math.round(curAvgBill)) + '</div>' +
         '</div>'
       ) : '<div></div>';
-      const billHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + billLeftHtml + '<div style="text-align:right; min-width:120px;"><div id="mooncakeQuickCol"></div></div></div>';
+      const billHtml = '<div style="margin-bottom:10px; display:flex; align-items:flex-start; gap:10px; flex-wrap:nowrap;"><div style="flex:1; min-width:0;">' + billLeftHtml + '</div><div style="text-align:right; flex-shrink:0; min-width:110px;"><div id="mooncakeQuickCol"></div></div></div>';
       let quickHtml = '';
       const gains = indDeltas.filter(function(x){ return x.delta > 0; }).slice(0, 4);
       const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-4).reverse();
