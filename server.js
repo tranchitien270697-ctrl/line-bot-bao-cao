@@ -217,6 +217,18 @@ app.get('/api/mooncake', async (req, res) => {
   }
 });
 
+app.get('/api/product888', async (req, res) => {
+  try {
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=product888_list';
+    const r = await fetch(url);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('product888 list fetch error', e);
+    res.status(500).json({ error: 'fetch failed' });
+  }
+});
+
 app.get('/api/revenue-industries', async (req, res) => {
   try {
     const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=revenue_industries_list';
