@@ -682,8 +682,8 @@
       });
       const monthLabel = 'T' + Number(curMonthStr.slice(5,7));
       let html = '<div class="settings-note" style="margin-bottom:4px;">🧼 Nước giặt 888</div>';
-      html += '<div style="font-size:13.5px; margin-bottom:2px;">Bán hôm nay: <strong>' + Math.round(todayQty) + '</strong></div>';
-      html += '<div style="font-size:13.5px;">Lũy kế ' + monthLabel + ': <strong>' + Math.round(curQty) + '</strong></div>';
+      html += '<div style="font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:2px;">Bán: ' + Math.round(todayQty) + '</div>';
+      html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">Lũy kế ' + monthLabel + ': ' + Math.round(curQty) + '</div>';
       col.innerHTML = html;
     } catch(e) { col.innerHTML = ''; }
   }
@@ -1350,15 +1350,14 @@ async function renderMooncakeHome(){
           '<div style="font-size:15px; font-weight:700; color:var(--text);">' + curBillsTotal + ' bill · TB ' + fmtVND(Math.round(curAvgBill)) + '</div>' +
         '</div>'
       ) : '<div></div>';
-      const billHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + billLeftHtml + '<div id="mooncakeQuickCol" style="text-align:right; min-width:120px;"></div></div>';
+      const billHtml = '<div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' + billLeftHtml + '<div style="text-align:right; min-width:120px;"><div id="mooncakeQuickCol"></div><div id="product888QuickCol" style="margin-top:8px;"></div></div></div>';
       let quickHtml = '';
       const gains = indDeltas.filter(function(x){ return x.delta > 0; }).slice(0, 3);
       const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-2).reverse();
       gains.forEach(function(g){ quickHtml += '<div style="font-size:13px; color:var(--green); margin-bottom:2px;">▲ ' + esc(g.name) + ': +' + fmtVND(g.delta) + '</div>'; });
       losses.forEach(function(l){ quickHtml += '<div style="font-size:13px; color:var(--red); margin-bottom:2px;">▼ ' + esc(l.name) + ': ' + fmtVND(l.delta) + '</div>'; });
       const quickBlock = quickHtml ? '<div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;"><div style="flex:1; min-width:140px;"><div class="settings-note" style="margin-bottom:4px;">⚡ Đọc nhanh</div>' + quickHtml + '</div><div id="topProductsHomeCol" style="flex:1; min-width:140px;"><p class="settings-note">Đang tải...</p></div></div>' : '';
-      const product888Html = '<div id="product888QuickCol" style="margin-top:6px;"></div>';
-      wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + product888Html + quickBlock + '</div>';
+      wrap.innerHTML = '<div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;">' + forecastHtml + cmpHtml + billHtml + quickBlock + '</div>';
     } catch(e) {
       wrap.innerHTML = '';
     }
