@@ -690,54 +690,57 @@
   }
 
 async function renderMooncakeHome(){
-    const col = document.getElementById('mooncakeQuickCol');
-    if(!col) return;
+    const wrap = document.getElementById('mooncakeHomeWrap');
+    if(!wrap) return;
+    wrap.innerHTML = '<div style="font-weight:700; margin-bottom:6px;">🥮 Bánh Trung Thu</div><p class="settings-note">Đang tải...</p>';
     try {
       const r = await apiGet('/api/mooncake');
-      if(!r.ok || !r.data || !r.data.length){ col.innerHTML = ''; return; }
+      if(!r.ok || !r.data || !r.data.length){ wrap.innerHTML = ''; return; }
       const now = new Date();
       const vnNow = new Date(now.getTime() + 7*60*60*1000);
       const todayStr = vnNow.toISOString().slice(0,10);
-      const curMonthStr = vnNow.toISOString().slice(0,7);
+      const stockRecRaw = r.data.find(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0; });
+      const stockRec = stockRecRaw ? { asOf: stockRecRaw.date.slice(6), items: stockRecRaw.items } : null;
       const dayRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') !== 0 && d.date.indexOf('LOSS:') !== 0; });
+      const lossRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('LOSS:') === 0; }).map(function(d){ return { date: d.date.slice(5), items: d.items }; });
       const todayRec = dayRecs.find(function(d){ return d.date === todayStr; });
-      let todayPieces=0, todayBoxes=0;
-      if(todayRec){ todayRec.items.forEach(function(it){ if(it.unit==='Hộp'){ todayBoxes+=it.qty; } else { todayPieces+=it.qty; } }); }
-      let curPieces=0, curBoxes=0;
+      let todayPieces=0, todayPiecesAmt=0, todayBoxes=0, todayBoxesAmt=0;
+      if(todayRec){ todayRec.items.forEach(function(it){ if(it.unit==='Hộp'){ todayBoxes+=it.qty; todayBoxesAmt+=it.amount; } else { todayPieces+=it.qty; todayPiecesAmt+=it.amount; } }); }
+      let augPieces=0,augPiecesAmt=0,augBoxes=0,augBoxesAmt=0,sepPieces=0,sepPiecesAmt=0,sepBoxes=0,sepBoxesAmt=0;
       dayRecs.forEach(function(d){
-        if(d.date.startsWith(curMonthStr)){
-          d.items.forEach(function(it){ if(it.unit==='Hộp'){ curBoxes+=it.qty; } else { curPieces+=it.qty; } });
-        }
+        d.items.forEach(function(it){
+          const isBox = it.unit === 'Hộp';
+          if(d.date.startsWith('2026-08')){
+            if(isBox){ augBoxes+=it.qty; augBoxesAmt+=it.amount; } else { augPieces+=it.qty; augPiecesAmt+=it.amount; }
+          } else if(d.date.startsWith('2026-09')){
+            if(isBox){ sepBoxes+=it.qty; sepBoxesAmt+=it.amount; } else { sepPieces+=it.qty; sepPiecesAmt+=it.amount; }
+          }
+        });
       });
-      const monthLabel = 'T' + Number(curMonthStr.slice(5,7));
-      let html = '<div class="settings-note" style="margin-bottom:4px;">🥮 Bánh Trung Thu</div>';
-      html += '<div style="font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:2px;">Bán: ' + Math.round(todayPieces) + ' cái · ' + Math.round(todayBoxes) + ' hộp</div>';
-      html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">Lũy kế ' + monthLabel + ': ' + Math.round(curPieces) + ' cái · ' + Math.round(curBoxes) + ' hộp</div>';
-      const stockRecs = r.data.filter(function(d){ return typeof d.date === 'string' && d.date.indexOf('STOCK:') === 0; });
-      if(stockRecs.length){
-        stockRecs.sort(function(a,b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
-        const latestStock = stockRecs[stockRecs.length-1];
-        const baseDateStr = latestStock.date.slice(6);
-        let basePieces=0, baseBoxes=0;
-        latestStock.items.forEach(function(it){ if(it.unit==='Hộp'){ baseBoxes+=it.qty; } else { basePieces+=it.qty; } });
-        let soldPieces=0, soldBoxes=0;
+      let stockPieces=0, stockBoxes=0;
+      if(stockRec){
+        stockRec.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes+=it.qty; } else { stockPieces+=it.qty; } });
+        const asOfDate = stockRec.asOf;
         dayRecs.forEach(function(d){
-          if(d.date > baseDateStr){
-            d.items.forEach(function(it){ if(it.unit==='Hộp'){ soldBoxes+=it.qty; } else { soldPieces+=it.qty; } });
+          if(d.date >= asOfDate){
+            d.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes-=it.qty; } else { stockPieces-=it.qty; } });
           }
         });
-        let lossPieces=0, lossBoxes=0;
-        r.data.forEach(function(d){
-          if(typeof d.date === 'string' && d.date.indexOf('LOSS:') === 0 && d.date.slice(5) > baseDateStr){
-            d.items.forEach(function(it){ if(it.unit==='Hộp'){ lossBoxes+=it.qty; } else { lossPieces+=it.qty; } });
+        lossRecs.forEach(function(d){
+          if(d.date >= asOfDate){
+            d.items.forEach(function(it){ if(it.unit==='Hộp'){ stockBoxes-=it.qty; } else { stockPieces-=it.qty; } });
           }
         });
-        const stockPieces = Math.round(basePieces - soldPieces - lossPieces);
-        const stockBoxes = Math.round(baseBoxes - soldBoxes - lossBoxes);
-        html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">Tồn: ' + stockPieces + ' cái · ' + stockBoxes + ' hộp</div>';
       }
-      col.innerHTML = html;
-    } catch(e) { col.innerHTML = ''; }
+      let html = '<div style="font-weight:700; margin-bottom:8px;">🥮 Bánh Trung Thu</div>';
+      html += '<div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px;">';
+      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Hôm nay</div><div style="font-weight:700;">'+Math.round(todayPieces)+' cái, '+Math.round(todayBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((todayPiecesAmt+todayBoxesAmt)/1000)+'k đ</div></div>';
+      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T8</div><div style="font-weight:700;">'+Math.round(augPieces)+' cái, '+Math.round(augBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((augPiecesAmt+augBoxesAmt)/1000)+'k đ</div></div>';
+      html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Lũy kế T9</div><div style="font-weight:700;">'+Math.round(sepPieces)+' cái, '+Math.round(sepBoxes)+' hộp</div><div style="font-size:11px; color:var(--muted2);">'+Math.round((sepPiecesAmt+sepBoxesAmt)/1000)+'k đ</div></div>';
+      if(stockRec){ html += '<div style="flex:1; min-width:100px;"><div class="settings-note">Tồn kho (ước tính)</div><div style="font-weight:700; color:var(--muted2);">'+Math.round(stockPieces)+' cái, '+Math.round(stockBoxes)+' hộp</div></div>'; }
+      html += '</div>';
+      wrap.innerHTML = html;
+    } catch(e) { wrap.innerHTML = ''; }
   }
 
   async function screenFreshHealth(){
