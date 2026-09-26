@@ -229,6 +229,18 @@ app.get('/api/product888', async (req, res) => {
   }
 });
 
+app.get('/api/product-natafood', async (req, res) => {
+  try {
+    const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=product_natafood_list';
+    const r = await fetch(url);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('product natafood list fetch error', e);
+    res.status(500).json({ error: 'fetch failed' });
+  }
+});
+
 app.get('/api/mooncake-stock', async (req, res) => {
   try {
     const url = CUSTOMER_SHEET_URL + '?key=' + CUSTOMER_SHEET_KEY + '&action=mooncake_stock_list';
