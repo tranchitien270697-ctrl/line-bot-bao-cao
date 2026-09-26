@@ -491,6 +491,7 @@
     renderTopProductsHome().catch(function(e){});
     
     renderProduct888Home().catch(function(e){});
+    renderNatafoodHome().catch(function(e){});
     renderFreshHealthHome().catch(function(e){});
     renderIndustryHealthHome().catch(function(e){});
     try {
@@ -688,6 +689,33 @@
       col.innerHTML = html;
     } catch(e) { col.innerHTML = ''; }
   }
+
+    async function renderNatafoodHome(){
+      const col = document.getElementById('natafoodQuickCol');
+      if(!col) return;
+      try {
+        const r = await apiGet('/api/product-natafood');
+        if(!r.ok || !r.data || !r.data.length){ col.innerHTML = ''; return; }
+        const now = new Date();
+        const vnNow = new Date(now.getTime() + 7*60*60*1000);
+        const todayStr = vnNow.toISOString().slice(0,10);
+        const curMonthStr = vnNow.toISOString().slice(0,7);
+        const todayRec = r.data.find(function(d){ return d.date === todayStr; });
+        let todayQty = 0;
+        if(todayRec){ todayRec.items.forEach(function(it){ todayQty += it.qty; }); }
+        let curQty = 0;
+        r.data.forEach(function(d){
+          if(d.date.startsWith(curMonthStr)){
+            d.items.forEach(function(it){ curQty += it.qty; });
+          }
+        });
+        const monthLabel = 'T' + Number(curMonthStr.slice(5,7));
+        let html = '<div class="settings-note" style="margin-bottom:4px;">🧂 Hạt Nêm Natafood</div>';
+        html += '<div style="font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:2px;">Bán: ' + Math.round(todayQty) + '</div>';
+        html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">Lũy kế ' + monthLabel + ': ' + Math.round(curQty) + '</div>';
+        col.innerHTML = html;
+      } catch(e) { col.innerHTML = ''; }
+    }
 
 async function renderMooncakeHome(){
     const wrap = document.getElementById('mooncakeHomeWrap');
@@ -1378,7 +1406,7 @@ async function renderMooncakeHome(){
           '<div style="font-size:15px; font-weight:700; color:var(--text);">' + curBillsTotal + ' bill · TB ' + fmtVND(Math.round(curAvgBill)) + '</div>' +
         '</div>'
       ) : '<div></div>';
-      const billHtml = '<div style="margin-bottom:10px; display:flex; align-items:flex-start; gap:10px; flex-wrap:nowrap;"><div style="flex:1; min-width:0;">' + billLeftHtml + '</div><div style="text-align:right; flex-shrink:0; min-width:110px;"><div id="mooncakeQuickCol"></div></div></div>';
+      const billHtml = '<div style="margin-bottom:10px; display:flex; align-items:flex-start; gap:10px; flex-wrap:nowrap;"><div style="flex:1; min-width:0;">' + billLeftHtml + '</div><div style="text-align:right; flex-shrink:0; min-width:110px;"><div id="natafoodQuickCol"></div></div></div>';
       let quickHtml = '';
       const gains = indDeltas.filter(function(x){ return x.delta > 0; }).slice(0, 4);
       const losses = indDeltas.filter(function(x){ return x.delta < 0; }).slice(-4).reverse();
