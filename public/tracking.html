@@ -673,24 +673,45 @@
       const vnNow = new Date(now.getTime() + 7*60*60*1000);
       const todayStr = vnNow.toISOString().slice(0,10);
       const curMonthStr = vnNow.toISOString().slice(0,7);
+      const sumQty = function(d){ let q = 0; d.items.forEach(function(it){ q += (it.qty || 0); }); return q; };
       const todayRec = r.data.find(function(d){ return d.date === todayStr; });
-      let todayQty = 0;
-      if(todayRec){ todayRec.items.forEach(function(it){ todayQty += it.qty; }); }
-      let curQty = 0;
+      const todayQty = todayRec ? sumQty(todayRec) : 0;
+      const cStart = '2026-10-05', cEnd = '2026-10-25';
+      let curQty = 0, sepQty = 0, contestQty = 0;
       r.data.forEach(function(d){
-        if(d.date.startsWith(curMonthStr)){
-          d.items.forEach(function(it){ curQty += it.qty; });
-        }
+        const q = sumQty(d);
+        if(d.date.startsWith(curMonthStr)) curQty += q;
+        if(d.date.startsWith('2026-09')) sepQty += q;
+        if(d.date >= cStart && d.date <= cEnd) contestQty += q;
       });
       const monthLabel = 'T' + Number(curMonthStr.slice(5,7));
+      const target = Math.round(sepQty * 1.10);
+      const need = Math.max(0, target - contestQty);
+      const pct = target > 0 ? Math.min(100, Math.round(contestQty * 100 / target)) : 0;
       let html = '<div class="settings-note" style="margin-bottom:4px;">🧼 Nước giặt 888</div>';
       html += '<div style="font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:2px;">Bán: ' + Math.round(todayQty) + '</div>';
       html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">Lũy kế ' + monthLabel + ': ' + Math.round(curQty) + '</div>';
+      if(target > 0){
+        html += '<div style="margin-top:8px; padding-top:6px; border-top:1px solid var(--line);">';
+        html += '<div class="settings-note" style="margin-bottom:3px;">🏆 Thi đua 05–25/10 (+10% so T9)</div>';
+        html += '<div style="font-size:13.5px; font-weight:700; color:var(--text);">' + Math.round(contestQty) + ' / ' + target + ' túi</div>';
+        html += '<div style="height:5px; border-radius:3px; background:var(--line); margin:4px 0;"><div style="height:5px; border-radius:3px; background:#34d399; width:' + pct + '%;"></div></div>';
+        if(todayStr < cStart){
+          html += '<div class="settings-note">Bắt đầu 05/10 · cần ~' + Math.ceil(target / 21) + ' túi/ngày</div>';
+        } else if(todayStr > cEnd){
+          html += '<div class="settings-note">' + (need === 0 ? 'Đã đạt mục tiêu ✅' : 'Kết thúc · thiếu ' + need + ' túi') + '</div>';
+        } else {
+          const daysLeft = Math.round((Date.parse(cEnd) - Date.parse(todayStr)) / 86400000) + 1;
+          html += need === 0 ? '<div class="settings-note">Đã đạt mục tiêu ✅</div>' : '<div class="settings-note">Còn cần ' + need + ' túi · ~' + Math.ceil(need / daysLeft) + ' túi/ngày (còn ' + daysLeft + ' ngày)</div>';
+        }
+        html += '<div class="settings-note">Thưởng 5.000đ/combo 2</div>';
+        html += '</div>';
+      }
       col.innerHTML = html;
     } catch(e) { col.innerHTML = ''; }
   }
 
-    async function renderNatafoodHome(){
+  async function renderNatafoodHome(){
       const col = document.getElementById('natafoodQuickCol');
       if(!col) return;
       try {
