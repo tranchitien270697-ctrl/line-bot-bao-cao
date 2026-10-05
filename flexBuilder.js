@@ -211,7 +211,8 @@ function buildGoodnightFlexMessage(weatherText, tip) {
       };
 }
 
-function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal) {
+function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal, extraLines) {
+  const extraRows = (Array.isArray(extraLines) ? extraLines : []).filter(function(x){ return x; }).map(function(line){ return { type: 'text', margin: 'sm', size: 'xs', color: '#555555', wrap: true, text: String(line) }; });
       const BLUE = '#1565C0';
       const totalDelta = todayTotal - yesterdayTotal;
       const totalPct = yesterdayTotal ? (totalDelta / yesterdayTotal) * 100 : null;
@@ -276,17 +277,18 @@ function buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industri
                             { type: 'box', layout: 'vertical', margin: 'sm', contents: freshRows },
                             { type: 'text', text: 'FMCG (' + fmcgPct.toFixed(1) + '%)', size: 'sm', color: '#6FA8DC', weight: 'bold', margin: 'md' },
                             { type: 'box', layout: 'vertical', margin: 'sm', contents: fmcgRows },
-                            { type: 'text', margin: 'md', size: 'xxs', color: GREY, text: timeStr },
+                            ...extraRows,
+        { type: 'text', margin: 'md', size: 'xxs', color: GREY, text: timeStr },
                                   ],
               },
       };
 }
 
-function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal) {
+function buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal, extraLines) {
       return {
               type: 'flex',
               altText: 'Doanh thu hôm nay - ' + storeLabel + ': ' + formatVND(todayTotal),
-              contents: buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal),
+              contents: buildRevenueDetailCard(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal, extraLines),
       };
 }
 
