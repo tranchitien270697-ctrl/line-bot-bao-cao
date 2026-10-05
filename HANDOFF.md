@@ -50,9 +50,9 @@ Quy trình cũ (tham khảo nếu mùa sau cần làm lại):
 - Tồn kho tự trừ theo bán ra: mốc gốc lưu `date: "STOCK:YYYY-MM-DD"` kèm `asOf`; mất mát lưu riêng `date: "LOSS:YYYY-MM-DD"`.
 - Dead code không dùng: sheet "MooncakeStock" + action mooncake_stock_save_bulk/mooncake_stock_list + route /api/mooncake-stock (đã bỏ, đừng dùng lại).
 
-### B2. Thẻ "Nước giặt 888" và "Hạt Nêm Natafood" (card theo dõi SP cụ thể, dùng quanh năm)
+### B2. Thẻ "Nước giặt 888" và thẻ "Nấm" (card trên trang chủ web, dùng quanh năm)
 - **Nước giặt 888**: bộ lọc cứng "NƯỚC GIẶT"+"888" trong tên — **LOẠI TRỪ combo/bộ** (tên bắt đầu "BỘ" hoặc chứa "BỘ 3"/"BỘ3", ví dụ "BỘ 3:NƯỚC GIẶT + LAU SÀN + RỬA CHÉN 888" KHÔNG tính). **Đơn vị tính là "túi"** (không phải "cái" — Tiền đã sửa lại khi phát hiện báo cáo tháng 9 ghi nhầm). Có SP mới/đổi bao bì thì phải hỏi Tiền để cập nhật bộ lọc, không tự đoán.
-- **Hạt Nêm Natafood** (thêm 26/09/2026): bộ lọc cứng "HẠT NÊM"+"NATAFOOD" trong tên (cố ý loại "BỘT CANH NATAFOODS" — chỉ tính hạt nêm). Action: product_natafood_save_bulk/product_natafood_list, sheet "ProductNatafood", route /api/product-natafood. Card này dùng lại đúng slot UI cũ của thẻ Bánh Trung Thu đã gỡ (id mooncakeQuickCol → natafoodQuickCol, hàm renderNatafoodHome()).
+- **Thẻ Nấm** (thay thẻ Hạt Nêm Natafood từ 05/10/2026, theo yêu cầu Tiền): hiện doanh thu nhóm hàng "Nấm Các Loại" (nằm trong ngành Rau Củ) — hôm nay + lũy kế tháng. KHÔNG cần nạp riêng: dữ liệu lấy từ số Fresh `nhomhang_save_bulk` đã nạp hằng ngày (route /api/nhomhang-fresh, tìm item có tên bắt đầu "Nấm"). **Từ 05/10/2026 KHÔNG còn nạp Natafood** (product_natafood_save_bulk không dùng nữa, bỏ qua hạt nêm khi xử lý file). Hàm renderMushroomHome(), id mushroomQuickCol (đúng slot cũ của thẻ Natafood/Bánh Trung Thu).
 
 ### C. File "Báo cáo lượt bill" (.xlsx)
 - Cột: `row[2]`=số bill, `row[4]`=ngày (dd/mm/yyyy). Cột tổng tiền (VAT) KHÔNG DÙNG — xem mục D.
@@ -83,7 +83,7 @@ Quy trình cũ (tham khảo nếu mùa sau cần làm lại):
 - `hours_save_bulk` (POST) / `hours_list` (GET, filter theo `month`)
 - `loss_save_bulk`, `mooncake_save_bulk` (hết mùa, xem mục B) / `mooncake_list` (GET)
 - `product_888_save_bulk` / `product_888_list` (GET) — Nước giặt 888
-- `product_natafood_save_bulk` / `product_natafood_list` (GET) — Hạt Nêm Natafood
+- `product_natafood_save_bulk` / `product_natafood_list` (GET) — Hạt Nêm Natafood (KHÔNG còn dùng từ 05/10/2026)
 - `revenue_industries_list` (GET) — nhiều ngày gần nhất, lọc đúng theo ngày thật (không dựa vị trí dòng)
 - `revenue_products` (GET, cần `date`) — top sản phẩm 1 ngày
 
