@@ -394,7 +394,9 @@ app.get('/push/revenue', async (req, res) => {
                   } catch (parseErr) {
                               console.error('Industries parse error:', parseErr);
                   }
-                  const revenueMsg = flexBuilder.buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal);
+                  let extraLines = [];
+      try { extraLines = JSON.parse(req.query.extra || '[]'); } catch (extraErr) { extraLines = []; }
+      const revenueMsg = flexBuilder.buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal, extraLines);
                   await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(revenueMsg));
                   res.send('Sent revenue detail card');
         } catch (err) {
