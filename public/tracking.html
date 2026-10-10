@@ -650,14 +650,15 @@
       const freshList = r.data.filter(function(p){ return FRESH_INDS.indexOf(p.ind) !== -1; }).slice(0,5);
       const fmcgList = r.data.filter(function(p){ return FRESH_INDS.indexOf(p.ind) === -1; }).slice(0,5);
       function fmt(n){ return Math.round(n/1000) + 'k'; }
+      function qtyTxt(p){ return (p.qty!=null && p.qty!=='') ? (Math.round(Number(p.qty)*100)/100).toLocaleString('vi-VN') + (p.unit ? ' ' + esc(p.unit) : '') + ' · ' : ''; }
       let html = '<div class="settings-note" style="margin-bottom:4px;">🔥 Bán tốt hôm nay</div>';
       html += '<div style="font-size:11px; color:var(--muted2); margin-bottom:2px;">FRESH</div>';
       freshList.forEach(function(p){
-        html += '<div style="font-size:12px; display:flex; justify-content:space-between; gap:6px; margin-bottom:2px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+esc(p.n)+'</span><span style="color:var(--muted2); white-space:nowrap;">'+fmt(p.t)+'</span></div>';
+        html += '<div style="font-size:12px; display:flex; justify-content:space-between; gap:6px; margin-bottom:2px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+esc(p.n)+'</span><span style="color:var(--muted2); white-space:nowrap;">'+qtyTxt(p)+fmt(p.t)+'</span></div>';
       });
       html += '<div style="font-size:11px; color:var(--muted2); margin:6px 0 2px;">FMCG</div>';
       fmcgList.forEach(function(p){
-        html += '<div style="font-size:12px; display:flex; justify-content:space-between; gap:6px; margin-bottom:2px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+esc(p.n)+'</span><span style="color:var(--muted2); white-space:nowrap;">'+fmt(p.t)+'</span></div>';
+        html += '<div style="font-size:12px; display:flex; justify-content:space-between; gap:6px; margin-bottom:2px;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+esc(p.n)+'</span><span style="color:var(--muted2); white-space:nowrap;">'+qtyTxt(p)+fmt(p.t)+'</span></div>';
       });
       col.innerHTML = html;
     } catch(e) { col.innerHTML = ''; }
@@ -1600,7 +1601,7 @@ async function renderMooncakeHome(){
           <div class="prow-body">
             <div class="prow-txt">
               <div class="prow-nm">${i+1}. ${esc(p.n)}</div>
-              <div class="prow-sub">${esc(p.ind)} · SL: ${p.qty}</div>
+              <div class="prow-sub">${esc(p.ind)}${(p.qty!=null && p.qty!=='') ? ' · ' + (Math.round(Number(p.qty)*100)/100).toLocaleString('vi-VN') + (p.unit ? ' ' + esc(p.unit) : '') : ''}</div>
             </div>
             <div class="prow-val">${fmtVND(p.t)}</div>
           </div>
