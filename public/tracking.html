@@ -380,10 +380,6 @@
           <div class="dot">🕐</div>
           <div class="txt"><strong>Giờ Công Nhân Viên</strong><span>Danh sách nhân viên siêu thị</span></div>
         </div>
-        <div class="role-card lookup">
-          <div class="dot">🧹</div>
-          <div class="txt"><strong>Vệ sinh hôm nay</strong><span id="statCleaning">…</span></div>
-        </div>
       </div>
     `);
     document.getElementById('go-vehicle').onclick = () => screenVehicleHub();
@@ -492,13 +488,6 @@
     
     renderFreshHealthHome().catch(function(e){});
     renderIndustryHealthHome().catch(function(e){});
-    try {
-      const elCleaning = document.getElementById('statCleaning');
-      if(elCleaning){
-        const info = getTodayCleaningText();
-        elCleaning.textContent = info.mainName;
-      }
-    } catch(e) {}
   }
 
   let lossDataCache = null;
