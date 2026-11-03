@@ -379,23 +379,27 @@ app.get('/api/employees', async (req, res) => {
 
 app.get('/', (req, res) => res.send('LINE report bot is running'));
 
-app.get('/push/revenue', async (req, res) => {
+app.all('/push/revenue', express.json(), async (req, res) => {
+  // POST: nhan key + du lieu trong body JSON (khong dat khoa tren URL). GET van dung duoc nhu cu.
+  const q = Object.assign({}, req.method === 'POST' ? (req.body || {}) : req.query);
+  ['industries', 'extra'].forEach(function (k) { if (q[k] !== undefined && typeof q[k] !== 'string') q[k] = JSON.stringify(q[k]); });
+  if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).send('Method Not Allowed');
         try {
-                  if (req.query.key !== config.CRON_SECRET) {
+                  if (q.key !== config.CRON_SECRET) {
                               return res.status(403).send('Forbidden');
                   }
-                  const storeLabel = req.query.store || '5152-Kế Sách';
-                  const todayTotal = parseFloat(req.query.todayTotal) || 0;
-                  const yesterdayTotal = parseFloat(req.query.yesterdayTotal) || 0;
-                  const monthTotal = req.query.monthTotal !== undefined ? parseFloat(req.query.monthTotal) : undefined;
+                  const storeLabel = q.store || '5152-Kế Sách';
+                  const todayTotal = parseFloat(q.todayTotal) || 0;
+                  const yesterdayTotal = parseFloat(q.yesterdayTotal) || 0;
+                  const monthTotal = q.monthTotal !== undefined ? parseFloat(q.monthTotal) : undefined;
                   let industries = [];
                   try {
-                              industries = JSON.parse(req.query.industries || '[]');
+                              industries = JSON.parse(q.industries || '[]');
                   } catch (parseErr) {
                               console.error('Industries parse error:', parseErr);
                   }
                   let extraLines = [];
-      try { extraLines = JSON.parse(req.query.extra || '[]'); } catch (extraErr) { extraLines = []; }
+      try { extraLines = JSON.parse(q.extra || '[]'); } catch (extraErr) { extraLines = []; }
       const revenueMsg = flexBuilder.buildRevenueDetailFlexMessage(storeLabel, todayTotal, yesterdayTotal, industries, monthTotal, extraLines);
                   await client.pushMessage(config.TARGET_GROUP_ID, flexBuilder.wrapWithPromo(revenueMsg));
                   res.send('Sent revenue detail card');
